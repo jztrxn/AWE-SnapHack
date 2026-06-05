@@ -26,7 +26,10 @@
   ExportUid: 00000000-0000-0000-0000-000000000000
   PackagePolicy: CanBeUnpacked
   ScriptInputsHidden:
-    {}
+    debugIndicator: false
+    debugPrint: false
+    debugVisual: false
+    deviceTracking: false
   ScriptTypesHidden:
     {}
   ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
@@ -36,10 +39,15 @@
   Attachments:
     []
   DefaultScriptInputs:
-    -
-      {}
+    - deviceTracking: !<reference.DeviceTracking> 00000000-0000-0000-0000-000000000000
+      debugIndicator: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      debugVisual: false
+      debugPrint: false
   ScriptTypes:
     -
       {}
   InputLines:
-    []
+    - // @input Component.DeviceTracking deviceTracking
+    - // @input SceneObject debugIndicator
+    - // @input bool debugVisual
+    - // @input bool debugPrint

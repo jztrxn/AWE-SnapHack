@@ -4,6 +4,7 @@
     - !<own> 00000000-0000-0065-0000-000000000064
     - !<own> 0005641c-028d-459a-0000-000000014b4d
     - !<own> 5aa0f98b-e799-448c-a2dc-cae5d04fa2a4
+    - !<own> fb121540-6c15-4fcc-bae8-7f2377a8f73b
     - !<own> 1903aa4d-76ba-47d4-bce6-815557103630
     - !<own> 9e304d8c-881a-4d93-b60a-8f95792c57a9
   layers: !<Layers/267ee9a7-aff2-4f9d-9a49-f71214747d03>
@@ -375,7 +376,7 @@
   Enabled: true
   Layers: 1
   LocalTransform: !<TransformEntity>
-    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Position: {x: 0.000000, y: 0.000000, z: -67.349953}
     Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
     Scale: {x: 10.000000, y: 10.000000, z: 10.000000}
     HasSegmentScaleCompensation: false
@@ -721,6 +722,26 @@
     - !<own> 1fbad860-d2cc-4f57-a307-5ac38abfa448
   Components:
     []
+- !<RenderMeshVisual/39292a3e-38d5-4e5e-ac05-cc9693d010cd>
+  PrefabRemaps:
+    []
+  Name: Render Mesh Visual
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Stretch
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> ebbcd415-a277-4f0e-bd23-4473d0accae8
+  Mesh: !<reference> 2e5e428e-9a20-4c3f-ad4a-4451f07df611
+  Skin: !<reference> 00000000-0000-0000-0000-000000000000
+  BlendShapesEnabled: true
+  BlendNormals: false
+  BlendShapes:
+    {}
 - !<SceneObject/3a4261f4-2931-43c1-9fdf-cceacb788e80>
   PrefabRemaps:
     []
@@ -1922,12 +1943,15 @@
   Enabled: true
   ScriptAsset: !<reference> 750d7e64-8d35-43ba-ab03-cdbe2bb2336d
   ScriptInputsDefault:
-    {}
+    debugPrint: true
   ScriptTypesDefault:
     {}
   ScriptInputs:
     "":
-      {}
+      deviceTracking: !<reference.DeviceTracking> e5553c8a-0b7e-4ef4-92d9-3e1318fb82c1
+      debugIndicator: !<reference.SceneObject> 1903aa4d-76ba-47d4-bce6-815557103630
+      debugVisual: true
+      debugPrint: false
   ScriptTypes:
     "":
       {}
@@ -2832,6 +2856,21 @@
     - !<own> 6dc5dd7a-4726-4cb6-b42f-a12f4b6416c3
   Components:
     []
+- !<SceneObject/fb121540-6c15-4fcc-bae8-7f2377a8f73b>
+  PrefabRemaps:
+    []
+  Name: Mesh using DebugMaterial
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 10.000000, y: 10.000000, z: 10.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 39292a3e-38d5-4e5e-ac05-cc9693d010cd
 - !<SceneObject/fc530e67-51dc-4b55-8306-a92acdd025f6>
   PrefabRemaps:
     []

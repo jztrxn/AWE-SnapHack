@@ -1,33 +1,98 @@
 @component
 export class GetGaze extends BaseScriptComponent {
-    // Optional SceneObject to visualize gaze hits; assign in the editor
-    @property({ type: 'SceneObject' })
-    debugIndicator: SceneObject = null;
+  @input()
+  deviceTracking: DeviceTracking;
 
-    private screenCenter: vec2 = new vec2(0.5, 0.5);
-    private lastHit: any = null;
+  @input()
+  debugIndicator: SceneObject;
 
-    onAwake() {
-        Diagnostics.log("GetGaze initialized.");
+  private gazeScreenPos: vec2 = new vec2(0.5, 0.5);
+
+  // Toggle visual debug (sphere/ray) in the scene
+  @input()
+  debugVisual: boolean = false;
+
+  // Toggle printed values for gaze hit position and normal
+  @input()
+  debugPrint: boolean = false;
+
+  //private debugIndicator: SceneObject | null = null;
+
+  /*private findRootObjectByName(name: string): SceneObject | null {
+    const count = global.scene.getRootObjectsCount();
+    for (let i = 0; i < count; i++) {
+      const obj = global.scene.getRootObject(i);
+      if (obj && obj.name === name) {
+        return obj;
+      }
     }
+    return null;
+  }*/
 
-    onUpdate() {
-        DeviceTracking.hitTestWorldMesh(this.screenCenter, (hit) => {
-            if (!hit) return;
-            const p = hit.position;
-            const n = hit.normal;
-            Diagnostics.log('Gaze hit position: ' + p.x + ', ' + p.y + ', ' + p.z);
-            Diagnostics.log('Gaze hit normal: ' + n.x + ', ' + n.y + ', ' + n.z);
-            this.lastHit = hit;
+  onAwake() {
+    this.createEvent("OnStartEvent").bind(() => {
+      if (!this.deviceTracking) {
+        print("Missing DeviceTracking input");
+        return;
+      }
 
-            if (this.debugIndicator) {
-                this.debugIndicator.getTransform().setWorldPosition(p);
-            }
+      this.deviceTracking.requestDeviceTrackingMode(DeviceTrackingMode.World);
+      this.deviceTracking.worldOptions.enableWorldMeshesTracking = true;
 
-            // Optional global callback other scripts can set
-            if (global.getGazeHitCallback && typeof global.getGazeHitCallback === 'function') {
-                global.getGazeHitCallback(hit);
-            }
-        });
-    }
+      // Prepare debug indicator if visual debugging is enabled.
+      if (this.debugVisual) {
+        //const found = this.findRootObjectByName("Debug Gaze Indicator");
+        const found = this.debugIndicator;
+        if (found) {
+          this.debugIndicator = found;
+        } else {
+          // Create a placeholder SceneObject which can be given visuals in the editor if desired
+          this.debugIndicator = global.scene.createSceneObject("Debug Gaze Indicator");
+        }
+        if (this.debugIndicator) {
+          this.debugIndicator.enabled = this.debugVisual;
+        }
+      }
+    });
+
+    this.createEvent("UpdateEvent").bind(() => {
+      if (!this.deviceTracking) {
+        return;
+      }
+
+      const results = this.deviceTracking.hitTestWorldMesh(this.gazeScreenPos);
+
+      if (results.length > 0) {
+        const hit = results[0];
+        const p = hit.position;
+        const n = hit.normal;
+
+        if (this.debugPrint) {
+          print(
+            "Gaze hit position: " + p.x.toFixed(3) + ", " + p.y.toFixed(3) + ", " + p.z.toFixed(3)
+          );
+          print(
+            "Hit normal: " + n.x.toFixed(3) + ", " + n.y.toFixed(3) + ", " + n.z.toFixed(3)
+          );
+        }
+
+        if (this.debugVisual && this.debugIndicator) {
+          const t = this.debugIndicator.getTransform();
+          // Place the indicator at the hit point
+          t.setLocalPosition(p);
+          // Try to orient the indicator to face along the hit normal
+          try {
+            t.setLocalRotation(quat.lookAt(n, vec3.up()));
+          } catch (e) {
+            // ignore if quat.lookAt isn't available
+          }
+          this.debugIndicator.enabled = true;
+        }
+      } else {
+        if (this.debugVisual && this.debugIndicator) {
+          this.debugIndicator.enabled = false;
+        }
+      }
+    });
+  }
 }
