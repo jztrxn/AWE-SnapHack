@@ -1,0 +1,41 @@
+- !<ObjectPrefab/414739e5-3b70-4169-9c6c-2dda4d508bac>
+  PackagePath: ""
+  objects:
+    - !<own> b89dc541-5862-45b4-bb52-5a3ce454b4df
+  LazyLoading: false
+  RetainAssets: true
+- !<Image/90a84249-2732-4557-9216-f2854ba933e6>
+  PrefabRemaps:
+    []
+  Name: Image
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Fit
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 3ee69cfb-49ff-4986-9e8a-86ed3a141df8
+  FlipX: false
+  FlipY: false
+  RotationAngle: 0
+  Pivot: {x: 0.000000, y: 0.000000}
+  ExtentsTarget: !<reference> 00000000-0000-0000-0000-000000000000
+- !<SceneObject/b89dc541-5862-45b4-bb52-5a3ce454b4df>
+  PrefabRemaps:
+    - 90a84249-2732-4557-9216-f2854ba933e6: 90a84249-2732-4557-6de9-0d7ab456cc19
+    - b89dc541-5862-45b4-bb52-5a3ce454b4df: b89dc541-5862-45b4-44ad-a5c31bab4b20
+  Name: Berry Background 2
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 90a84249-2732-4557-9216-f2854ba933e6

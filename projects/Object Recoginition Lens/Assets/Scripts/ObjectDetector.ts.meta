@@ -1,0 +1,72 @@
+- !<AssetImportMetadata/3f69d1d1-d5f2-4246-b209-4b3f0ec4e182>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> b7048d82-6fd5-477c-8764-86b55fae7bde
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> b7048d82-6fd5-477c-8764-86b55fae7bde
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> a444c9d1-3b14-48cd-97cb-33b90cd31d25
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/a444c9d1-3b14-48cd-97cb-33b90cd31d25>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  ComponentUid: 973918a2-d219-4387-8961-09ec9abb1008
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    cameraTexture: false
+    classNames: false
+    confidenceThreshold: false
+    detectionIntervalMs: false
+    deviceTracking: false
+    enable3DMarker: false
+    maxGazeRadius: false
+    mlComponent: false
+    modelInputSize: false
+    showDebugBBoxes: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - mlComponent: !<reference.MLComponent> 00000000-0000-0000-0000-000000000000
+      cameraTexture: !<reference.Texture> 00000000-0000-0000-0000-000000000000
+      deviceTracking: !<reference.DeviceTracking> 00000000-0000-0000-0000-000000000000
+      modelInputSize: !<float> 320.000000
+      detectionIntervalMs: !<float> 100.000000
+      confidenceThreshold: 0.400000
+      maxGazeRadius: 0.150000
+      showDebugBBoxes: false
+      enable3DMarker: true
+      classNames: !<string[]>
+        []
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - // @input Component.MLComponent mlComponent
+    - // @input Asset.Texture cameraTexture
+    - // @input Component.DeviceTracking deviceTracking
+    - // @input float modelInputSize = 320
+    - // @input float detectionIntervalMs = 100
+    - // @input float confidenceThreshold = 0.4
+    - // @input float maxGazeRadius = 0.15
+    - // @input bool showDebugBBoxes
+    - // @input bool enable3DMarker = true
+    - "// @input string[] classNames = {}"

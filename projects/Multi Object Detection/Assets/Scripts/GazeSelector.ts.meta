@@ -1,0 +1,68 @@
+- !<AssetImportMetadata/f2170543-eb3a-4336-8ac5-328e68aa666d>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 5137b306-6762-438d-a5a9-e73638e27ba3
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 5137b306-6762-438d-a5a9-e73638e27ba3
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 461a2330-aced-419e-8f59-216a39e89b10
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/461a2330-aced-419e-8f59-216a39e89b10>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  ComponentUid: 19ae15cd-cb6b-432f-911b-9a92711a6768
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    debugPrint: false
+    epsilonSquared: false
+    getGazeScript: false
+    highlightObject: false
+    holdMs: false
+    mlController: false
+    remoteLookupScript: false
+    selectionRate: false
+    settleMs: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - mlController: !<reference.ScriptComponent> 00000000-0000-0000-0000-000000000000
+      getGazeScript: !<reference.ScriptComponent> 00000000-0000-0000-0000-000000000000
+      highlightObject: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      selectionRate: !<float> 30.000000
+      epsilonSquared: 0.000400
+      holdMs: !<float> 5000.000000
+      debugPrint: false
+      remoteLookupScript: !<reference.ScriptComponent> 00000000-0000-0000-0000-000000000000
+      settleMs: !<float> 200.000000
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - // @input Component.ScriptComponent mlController
+    - // @input Component.ScriptComponent getGazeScript
+    - // @input SceneObject highlightObject
+    - // @input float selectionRate = 30
+    - // @input float epsilonSquared = 0.0004
+    - // @input float holdMs = 5000
+    - // @input bool debugPrint
+    - // @input Component.ScriptComponent remoteLookupScript
+    - // @input float settleMs = 200

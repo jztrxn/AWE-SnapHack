@@ -1,0 +1,53 @@
+- !<AssetImportMetadata/8d8ea6b0-01df-481f-bbdf-dd9e83ee271c>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> 1d858349-2b21-4427-9ea3-8b285a66eddb
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> 1d858349-2b21-4427-9ea3-8b285a66eddb
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> e03bcfda-0cf0-4650-b6e1-0ecefc59d1a5
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/e03bcfda-0cf0-4650-b6e1-0ecefc59d1a5>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  ComponentUid: 11a1f2bf-5ebc-43cd-abd5-ad82a0563c12
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    debugIndicator: false
+    debugPrint: false
+    debugVisual: false
+    deviceTracking: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - deviceTracking: !<reference.DeviceTracking> 00000000-0000-0000-0000-000000000000
+      debugIndicator: !<reference.SceneObject> 00000000-0000-0000-0000-000000000000
+      debugVisual: false
+      debugPrint: false
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - // @input Component.DeviceTracking deviceTracking
+    - // @input SceneObject debugIndicator
+    - // @input bool debugVisual
+    - // @input bool debugPrint

@@ -1,0 +1,45 @@
+- !<AssetImportMetadata/546a5ca9-901d-eb75-3fbf-ffa0a4d53734>
+  ImportedAssetIds:
+    JavaScriptAsset: !<reference> 79095f5d-4d31-483a-a0a2-783ab81fdfce
+  ImporterName: JavaScriptAssetImporter
+  PrimaryAsset: !<reference> 79095f5d-4d31-483a-a0a2-783ab81fdfce
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    AssetLibraryId: 1JNPpJRbx61qxto1vvdAHD
+  AssetDataMap:
+    JavaScriptAsset: !<own> f6f9fefa-f614-4144-8113-3e226019b317
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<ScriptAssetData/f6f9fefa-f614-4144-8113-3e226019b317>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  ComponentUid: eaf67b51-d05a-4f1b-9f7e-fb76fbfca68e
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    counterText: false
+    mlController: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - mlController: !<reference.ScriptComponent> 00000000-0000-0000-0000-000000000000
+      counterText: !<reference.Text[]>
+        []
+  ScriptTypes:
+    -
+      {}

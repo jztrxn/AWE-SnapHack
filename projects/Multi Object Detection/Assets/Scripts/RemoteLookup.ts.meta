@@ -1,0 +1,71 @@
+- !<AssetImportMetadata/f1e01b44-ac8e-47af-a5d9-4c289f586516>
+  ImportedAssetIds:
+    TypeScriptAsset: !<reference> d5db6708-d584-4a7e-960d-a4ca872549fa
+  ImporterName: TypeScriptAssetImporter
+  PrimaryAsset: !<reference> d5db6708-d584-4a7e-960d-a4ca872549fa
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    TypeScriptAsset: !<own> 38dd88fc-3e0a-4386-b500-5bd1938faa73
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<TypeScriptAssetData/38dd88fc-3e0a-4386-b500-5bd1938faa73>
+  SvgIcon: ""
+  SetupScript:
+    code: ""
+  Description: ""
+  VersionMajor: 0
+  VersionMinor: 0
+  VersionPatch: 0
+  ComponentUid: 203e3b12-e9ca-4dd4-8e87-44388eddfeae
+  ExportUid: 00000000-0000-0000-0000-000000000000
+  PackagePolicy: CanBeUnpacked
+  ScriptInputsHidden:
+    cacheTtlMs: false
+    enableDebug: false
+    model: false
+    promptTemplate: false
+    provider: false
+    requestType: false
+    retries: false
+    systemPrompt: false
+    temperature: false
+    timeoutMs: false
+  ScriptTypesHidden:
+    {}
+  ReadMe: !<reference> 00000000-0000-0000-0000-000000000000
+  DeclarationFile: !<reference> 00000000-0000-0000-0000-000000000000
+  Tags:
+    []
+  Attachments:
+    []
+  DefaultScriptInputs:
+    - provider: Gemini
+      model: gemini-2.5-flash-lite
+      requestType: generateContent
+      systemPrompt: You are a witty assistant that answers in one sentence.
+      promptTemplate: "Give a witty one-sentence description of '{label}'."
+      temperature: 0.700000
+      timeoutMs: !<float> 8000.000000
+      retries: !<float> 1.000000
+      cacheTtlMs: !<float> 0.000000
+      enableDebug: true
+  ScriptTypes:
+    -
+      {}
+  InputLines:
+    - '// @input string provider = "Gemini"'
+    - '// @input string model = "gemini-2.5-flash-lite"'
+    - '// @input string requestType = "generateContent"'
+    - '// @input string systemPrompt = "You are a witty assistant that answers in one sentence."'
+    - "// @input string promptTemplate = \"Give a witty one-sentence description of '{label}'.\""
+    - // @input float temperature = 0.7
+    - // @input float timeoutMs = 8000
+    - // @input float retries = 1
+    - // @input float cacheTtlMs
+    - // @input bool enableDebug = true

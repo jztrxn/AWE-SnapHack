@@ -1,0 +1,55 @@
+- !<AssetImportMetadata/a19c71b8-327e-4655-9e08-5cffb156d480>
+  ImportedAssetIds:
+    ObjectPrefab: !<reference> 64e135b3-da0d-4c5b-9f6d-134de3fbf6d3
+  ImporterName: ObjectPrefabImporter
+  PrimaryAsset: !<reference> 64e135b3-da0d-4c5b-9f6d-134de3fbf6d3
+  PackageType: NotAPackage
+  LegacyPackagePolicy: ~
+  ExtraData:
+    {}
+  AssetDataMap:
+    ObjectPrefab: !<own> ccff5d28-65a8-4b5f-a025-57e1b5f3857a
+  DependentFiles:
+    []
+  ImporterSettings: !<AssetImporterSettings>
+    {}
+  CompressionSettings: !<own> 00000000-0000-0000-0000-000000000000
+- !<Image/12375e04-d8a3-4b91-4715-b09cfd307b8e>
+  PrefabRemaps:
+    []
+  Name: Image
+  Enabled: true
+  RenderOrder: 0
+  StretchMode: Fit
+  VerticalAlignment: Center
+  HorizontalAlignment: Center
+  MeshShadowMode: None
+  ShadowColor: {x: 1.000000, y: 1.000000, z: 1.000000, w: 1.000000}
+  ShadowDensity: 1.000000
+  Materials:
+    - !<reference> 1cd1d29a-e75f-419d-8d38-20d198414672
+  FlipX: false
+  FlipY: false
+  RotationAngle: 0
+  Pivot: {x: 0.000000, y: 0.000000}
+  ExtentsTarget: !<reference> 00000000-0000-0000-0000-000000000000
+- !<SceneObject/415e24e3-a4cf-4b57-522b-447023cba58c>
+  PrefabRemaps:
+    []
+  Name: Berry Background 1
+  Enabled: true
+  Layers: 1
+  LocalTransform: !<TransformEntity>
+    Position: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Rotation: {x: 0.000000, y: 0.000000, z: 0.000000}
+    Scale: {x: 1.000000, y: 1.000000, z: 1.000000}
+    HasSegmentScaleCompensation: false
+  Children:
+    []
+  Components:
+    - !<own> 12375e04-d8a3-4b91-4715-b09cfd307b8e
+- !<ObjectPrefabAssetData/ccff5d28-65a8-4b5f-a025-57e1b5f3857a>
+  Prototype: !<ObjectOwner/c047adea-1f53-49b7-a7b8-aabb984c8901>
+    PackagePath: ""
+    objects:
+      - !<own> 415e24e3-a4cf-4b57-522b-447023cba58c
