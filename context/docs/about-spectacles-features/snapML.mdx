@@ -1,0 +1,1983 @@
+---
+sidebar_position: 5
+description: 'Run custom machine learning models on Spectacles using SnapML with support for classification, object detection, and segmentation.'
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import StepBlock from '@site/src/components/StepBlock';
+import CollapsibleStepBlock from '@site/src/components/CollapsibleStepBlock';
+
+# SnapML on Spectacles
+
+<p className="lead">
+  SnapML brings powerful machine learning capabilities to Spectacles, enabling
+  computer vision, object detection, and more in your AR experiences. This guide
+  walks you through a simplified generalized workflow to train and deploy a
+  custom SnapML model using Paperspace and Roboflow.
+</p>
+
+:::note
+Snap ML for Spectacles builds upon the [established workflow](https://developers.snap.com/lens-studio/features/snap-ml/ml-overview) used in the Snapchat App. While we recommend [Paperspace](https://www.paperspace.com/) and [Roboflow](https://app.roboflow.com/) for educational purposes in this tutorial, Snap does not endorse these services and they are mentioned solely for instructional purposes. You may use any alternative services that provide similar functionality.
+
+For additional resources:
+
+- **[Sample Projects](https://github.com/specs-devs/samples)**: Complete examples including Python notebooks and Lens Studio projects
+  {/* will add this when approved - **[Video Tutorial](https://www.youtube.com/watch?v=kr3rvqWLEFE)**: Step-by-step walkthrough of the entire process */}
+  :::
+
+## Overview
+
+SnapML allows you to incorporate machine learning models into your Spectacles applications. This workflow demonstrates how to adapt the Multi-Object Detection template from the [SnapML templates repository](https://github.com/Snapchat/snapml-templates/tree/main) using cloud-based development environments and specialized tools for dataset management and training.
+
+The complete workflow consists of these major phases:
+
+1. **Setup**: Prepare your development environment in Paperspace
+2. **Data Preparation**: Manage and export your dataset with Roboflow
+3. **Training**: Train a custom YOLOv7 model using your dataset
+4. **Export**: Convert your trained model to ONNX format for SnapML
+5. **Deployment**: Import your model into Lens Studio for use on Spectacles
+
+## Model Training Workflow
+
+<div
+  style={{
+    background: '#f8f9fa',
+    padding: '20px',
+    borderRadius: '8px',
+    marginBottom: '2rem',
+    border: '1px solid #ddd',
+    overflowX: 'auto',
+  }}
+>
+  <div
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      width: 'fit-content',
+      minWidth: '100%',
+    }}
+  >
+    <div
+      style={{
+        minWidth: '150px',
+        textAlign: 'center',
+        padding: '10px',
+        borderRadius: '8px',
+        background: '#EAEAF2',
+        fontWeight: 'bold',
+        margin: '0 5px',
+      }}
+    >
+      <div style={{ fontSize: '14px', marginBottom: '5px', color: '#666' }}>
+        STEP 1
+      </div>
+      Setup Paperspace
+    </div>
+    <div style={{ color: '#999', fontSize: '24px' }}>→</div>
+    <div
+      style={{
+        minWidth: '150px',
+        textAlign: 'center',
+        padding: '10px',
+        borderRadius: '8px',
+        background: '#E5F1E3',
+        fontWeight: 'bold',
+        margin: '0 5px',
+      }}
+    >
+      <div style={{ fontSize: '14px', marginBottom: '5px', color: '#666' }}>
+        STEP 2
+      </div>
+      Prepare Dataset
+    </div>
+    <div style={{ color: '#999', fontSize: '24px' }}>→</div>
+    <div
+      style={{
+        minWidth: '150px',
+        textAlign: 'center',
+        padding: '10px',
+        borderRadius: '8px',
+        background: '#F2EADC',
+        fontWeight: 'bold',
+        margin: '0 5px',
+      }}
+    >
+      <div style={{ fontSize: '14px', marginBottom: '5px', color: '#666' }}>
+        STEP 3
+      </div>
+      Setup YOLOv7
+    </div>
+    <div style={{ color: '#999', fontSize: '24px' }}>→</div>
+    <div
+      style={{
+        minWidth: '150px',
+        textAlign: 'center',
+        padding: '10px',
+        borderRadius: '8px',
+        background: '#F2E3E3',
+        fontWeight: 'bold',
+        margin: '0 5px',
+      }}
+    >
+      <div style={{ fontSize: '14px', marginBottom: '5px', color: '#666' }}>
+        STEP 4
+      </div>
+      Train Model
+    </div>
+    <div style={{ color: '#999', fontSize: '24px' }}>→</div>
+    <div
+      style={{
+        minWidth: '150px',
+        textAlign: 'center',
+        padding: '10px',
+        borderRadius: '8px',
+        background: '#E1EEF5',
+        fontWeight: 'bold',
+        margin: '0 5px',
+      }}
+    >
+      <div style={{ fontSize: '14px', marginBottom: '5px', color: '#666' }}>
+        STEP 5
+      </div>
+      Export to ONNX
+    </div>
+    <div style={{ color: '#999', fontSize: '24px' }}>→</div>
+    <div
+      style={{
+        minWidth: '150px',
+        textAlign: 'center',
+        padding: '10px',
+        borderRadius: '8px',
+        background: '#E8E3F3',
+        fontWeight: 'bold',
+        margin: '0 5px',
+      }}
+    >
+      <div style={{ fontSize: '14px', marginBottom: '5px', color: '#666' }}>
+        STEP 6
+      </div>
+      Import to Lens Studio
+    </div>
+  </div>
+</div>
+
+### Quick Start Guide
+
+For those familiar with machine learning workflows, here's a condensed version of the steps:
+
+**Quick Start Workflow**
+
+```bash
+# 1. Set up environment in Paperspace with PyTorch template
+git clone https://github.com/Snapchat/snapml-templates.git
+git clone https://github.com/hartwoolery/yolov7
+cd yolov7
+git checkout export-snapml
+pip install -r requirements.txt
+
+# 2. Download dataset from Roboflow in YOLOv7 format
+pip install --upgrade roboflow
+# Use Roboflow API to download your dataset
+
+# 3. Download pre-trained weights
+wget https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-tiny.pt
+
+# 4. Train model
+python train.py --data your-dataset/data.yaml --cfg cfg/training/yolov7-tiny.yaml \
+  --weights yolov7-tiny.pt --img 224 224 --batch-size 64 --epochs 200 \
+  --name detection --device 0 --hyp data/hyp.scratch.tiny.yaml
+
+# 5. Export to ONNX for SnapML
+python export.py --weights runs/train/detection/weights/best.pt --grid \
+  --simplify --export-snapml --img-size 224 224 --max-wh 224
+
+# 6. Import ONNX model to Lens Studio and set up class mappings
+# See detailed steps below
+```
+
+This guide will walk through each of these steps in detail, explaining the concepts and providing troubleshooting tips along the way.
+
+### Prerequisites
+
+Before you begin, you'll need:
+
+- A [Paperspace](https://www.paperspace.com/) account (or any alternative cloud-based development environment)
+- A [Roboflow](https://roboflow.com/) account for dataset management and annotation (or any alternative dataset management tool)
+
+#### Why This Workflow?
+
+<div className="table-wrapper">
+  <table>
+    <thead>
+      <tr>
+        <th>Traditional ML Workflow</th>
+        <th>SnapML Workflow</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Complex environment setup on local machine</td>
+        <td>Cloud-based development with pre-configured templates</td>
+      </tr>
+      <tr>
+        <td>Manual dataset preparation and augmentation</td>
+        <td>Automated dataset management with Roboflow</td>
+      </tr>
+      <tr>
+        <td>Full model training from scratch</td>
+        <td>Transfer learning with pre-trained weights</td>
+      </tr>
+      <tr>
+        <td>Additional conversion steps for mobile deployment</td>
+        <td>Direct export to SnapML-compatible ONNX format</td>
+      </tr>
+      <tr>
+        <td>Custom integration with AR platforms</td>
+        <td>Seamless integration with Lens Studio templates</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+### Workflow Steps
+
+<CollapsibleStepBlock number={1} title="Setting Up Paperspace Environment">
+
+[Paperspace](https://www.paperspace.com/) provides a cloud-based environment with powerful GPUs necessary for training machine learning models. Follow these steps to set up your environment:
+
+1. **Sign up for an account**
+   - When signing up, select "**Gradient**" as your product (not Core)
+   - This provides a fully-managed JupyterLab/Notebook interface with GitHub integration
+
+2. **Select a template**
+   - For YOLOv7 PyTorch notebooks, choose the "**PyTorch 1.12**" template
+   - This template includes most dependencies you'll need for machine learning
+3. **Choose hardware specifications**
+   - Select a **GPU option** for faster training (Free CPU options are available but "first come, first serve")
+   - For faster training, the P4000 or higher GPU options are recommended
+4. **Clone the SnapML templates repository**
+
+   ```bash
+   git clone https://github.com/Snapchat/snapml-templates.git
+   ```
+
+5. **Navigate to the Multi-Object Detection folder**
+   - Open the notebook file (.ipynb) in the cloned repository
+   - The notebook contains all necessary code for the entire workflow
+
+<div className="admonition admonition-caution alert alert--warning">
+  <div className="admonition-heading">
+    <h5>Persistence Warning</h5>
+  </div>
+  <div className="admonition-content">
+    When your Paperspace machine is stopped, your work environment is wiped.
+    You'll need to re-run all notebook steps when you restart. Make sure to save
+    important outputs like trained models and ONNX files to persistent storage
+    or download them to your local machine.
+  </div>
+</div>
+
+<div style={{ marginBottom: '2rem' }}></div>
+
+<details>
+  <summary>
+    <b>Kernel vs. Space Restarts</b>
+  </summary>
+  <div>
+    <ul>
+      <li>
+        <strong>Restart kernel</strong>: Refreshes only your Python environment
+        without losing installed packages or files
+      </li>
+      <li>
+        <strong>Restart space</strong>: Completely resets your environment to
+        its default state
+      </li>
+    </ul>
+    <p>
+      After doing a <code>%pip install</code> in your notebook, typically you
+      only need to restart the kernel using the JupyterLab interface.
+    </p>
+  </div>
+</details>
+
+</CollapsibleStepBlock>
+
+<CollapsibleStepBlock number={2} title="Preparing Your Dataset with Roboflow">
+
+[Roboflow](https://roboflow.com/) simplifies the process of preparing, annotating, and exporting datasets for machine learning models. The platform provides tools to label, augment, and export your dataset in the format required by your machine learning framework.
+
+1. **Create or sign in to your Roboflow account**
+   - Go to [Roboflow.com](https://roboflow.com/) and create a free account
+   - You can sign up using GitHub, Google, or email
+
+2. **Prepare your dataset**
+   - **Option A**: Create your own dataset
+     - Upload your images to Roboflow
+     - Use Roboflow's annotation tools to label objects
+     - Apply augmentation techniques to expand your dataset
+   - **Option B**: Use existing datasets
+     - Browse [Roboflow Universe](https://universe.roboflow.com/) for public datasets
+     - Search for relevant datasets based on your detection needs
+     - Fork existing projects to your workspace
+
+   <div style={{ marginBottom: '1rem', marginTop: '1rem' }}>
+     <iframe
+       width="560"
+       height="315"
+       src="https://www.youtube.com/embed/kr3rvqWLEFE"
+       title="Roboflow Labeling Tutorial"
+       frameBorder="0"
+       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+       allowFullScreen
+       style={{ maxWidth: '100%', borderRadius: '8px' }}
+     ></iframe>
+   </div>
+
+3. **Export your dataset in YOLOv7 format**
+   - Navigate to your project in Roboflow
+   - Click "**Download this Dataset**" on your project page
+   - Select "**YOLO v7 PyTorch**" format
+   - Copy the provided code snippet for downloading in your notebook
+
+**Dataset Download**
+
+```python
+# Install Roboflow package
+pip install --upgrade roboflow
+
+from roboflow import Roboflow
+rf = Roboflow(api_key="YOUR_API_KEY_HERE")
+
+# Point at your workspace
+project = rf.workspace("workspace-name").project("project-name")
+
+# Pick the version
+version = project.version(1)
+
+# Download in the format you need
+dataset = version.download("yolov7")
+
+# Save the dataset location
+DATASET_DIR = dataset.location
+print(DATASET_DIR)
+```
+
+<div className="admonition admonition-info alert alert--info">
+  <div className="admonition-heading">
+    <h5>Working with Private Datasets</h5>
+  </div>
+  <div className="admonition-content">
+    <p>If the dataset is not public, you'll need to:</p>
+    <ol>
+      <li>Go to Roboflow web app → Universe → find your dataset</li>
+      <li>Click the Fork button to create a copy in your workspace</li>
+      <li>Create a Version (follow the guided steps)</li>
+      <li>Obtain your API key from Settings > Private Key</li>
+    </ol>
+  </div>
+</div>
+
+<div style={{ marginBottom: '2rem' }}></div>
+
+<details>
+  <summary>
+    <b>Dataset Best Practices</b>
+  </summary>
+  <div>
+    <p>For optimal results when training object detection models:</p>
+    <ul>
+      <li>
+        Include <strong>at least 100 images</strong> per class for basic
+        detection
+      </li>
+      <li>
+        Ensure <strong>diversity</strong> in lighting conditions, angles, and
+        backgrounds
+      </li>
+      <li>
+        Include images with <strong>multiple objects</strong> and partial
+        occlusions
+      </li>
+      <li>
+        Use Roboflow's <strong>augmentation features</strong> to expand your
+        dataset:
+        <ul>
+          <li>Rotation</li>
+          <li>Brightness adjustments</li>
+          <li>Noise addition</li>
+          <li>Mosaic (combining images)</li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+</details>
+
+</CollapsibleStepBlock>
+
+<CollapsibleStepBlock number={3} title="Setting Up YOLOv7 for Training">
+
+[YOLOv7](https://github.com/WongKinYiu/yolov7) is a state-of-the-art object detection algorithm known for its speed and accuracy, making it ideal for mobile and wearable devices like Spectacles. For SnapML compatibility, we'll use a modified version that supports the specific export format required.
+
+1. **Clone the modified YOLOv7 repository**
+
+   We'll use a fork of YOLOv7 that includes the `export-snapml` option:
+
+   **Clone Modified YOLOv7**
+
+   ```bash
+   cd ~
+   git clone https://github.com/hartwoolery/yolov7
+   cd yolov7
+   git checkout export-snapml
+   pip install -r requirements.txt
+   ```
+
+   <div className="admonition admonition-note alert alert--secondary">
+     <div className="admonition-heading">
+       <h5>Fork Differences</h5>
+     </div>
+     <div className="admonition-content">
+       This modified fork of YOLOv7 includes changes that make it compatible
+       with the SnapML platform, particularly in how the model is exported. The
+       main difference is in the export process, which excludes the NMS layer to
+       allow for custom implementation in Lens Studio.
+     </div>
+   </div>
+
+2. **Set your dataset path**
+
+   Configure the path to your dataset directory:
+
+   **Set Dataset Path**
+
+   ```python
+   # Set the version number to match your downloaded dataset
+   VERSION_NUMBER = 1
+
+   # Build the path to your dataset
+   DATASET_DIR = f"/root/yolov7/your-dataset-name-{VERSION_NUMBER}"
+   print("Loading from", DATASET_DIR)
+   ```
+
+   This step ensures that your training script can locate the dataset downloaded from Roboflow.
+
+3. **Download pre-trained weights**
+
+   Download the pre-trained weights to accelerate training through transfer learning:
+
+   **Download Pre-trained Weights**
+
+   ```bash
+   cd ~/yolov7
+   wget https://github.com/WongKinYiu/yolov7/releases/download/v0.1/yolov7-tiny.pt
+   ```
+
+   <div
+     style={{
+       display: 'flex',
+       justifyContent: 'space-between',
+       marginTop: '1rem',
+       marginBottom: '1rem',
+     }}
+   >
+     <div
+       style={{
+         width: '48%',
+         border: '1px solid var(--ifm-color-emphasis-300)',
+         borderRadius: '8px',
+         padding: '16px',
+         backgroundColor: 'var(--ifm-color-emphasis-100)',
+         color: 'var(--ifm-color-content)',
+       }}
+     >
+       <h3
+         style={{
+           margin: '0 0 12px 0',
+           fontSize: '1.1rem',
+           color: 'var(--ifm-color-content)',
+         }}
+       >
+         YOLOv7-tiny Benefits
+       </h3>
+       <ul style={{ margin: '0', paddingLeft: '16px' }}>
+         <li>Smaller model size (~5-6MB)</li>
+         <li>Faster inference speed</li>
+         <li>Lower memory requirements</li>
+         <li>Optimal for mobile & wearable devices</li>
+       </ul>
+     </div>
+     <div
+       style={{
+         width: '48%',
+         border: '1px solid var(--ifm-color-emphasis-300)',
+         borderRadius: '8px',
+         padding: '16px',
+         backgroundColor: 'var(--ifm-color-emphasis-100)',
+         color: 'var(--ifm-color-content)',
+       }}
+     >
+       <h3
+         style={{
+           margin: '0 0 12px 0',
+           fontSize: '1.1rem',
+           color: 'var(--ifm-color-content)',
+         }}
+       >
+         Full YOLOv7 Benefits
+       </h3>
+       <ul style={{ margin: '0', paddingLeft: '16px' }}>
+         <li>Higher detection accuracy</li>
+         <li>Better performance with small objects</li>
+         <li>More robust in challenging environments</li>
+         <li>Better for complex scenes</li>
+       </ul>
+     </div>
+   </div>
+
+<details>
+<summary><b>About Pre-trained Weights & Transfer Learning</b></summary>
+
+Pre-trained weights are parameter values saved after a model has been trained on a large dataset like COCO (Common Objects in Context), which contains over 330,000 images with 80 object categories. Using these weights for transfer learning offers several advantages:
+
+- **Faster convergence**: Training starts from an optimized state rather than random initialization
+- **Better performance**: The model leverages patterns and features already learned from a larger dataset
+- **Less data needed**: You can achieve good results with a smaller custom dataset
+- **Reduced overfitting**: The model has already learned generalizable features
+
+Transfer learning works by:
+
+1. Starting with weights pre-trained on a large dataset
+2. Replacing the final classification layer with your custom classes
+3. Fine-tuning the entire network or just later layers with your data
+
+For mobile devices like Spectacles, the smaller `yolov7-tiny` variant is recommended for real-time inference.
+
+</details>
+
+<details>
+<summary><b>YOLOv7 vs. Other Architectures</b></summary>
+
+YOLOv7 offers several advantages for Spectacles deployment:
+
+| Feature              | YOLOv7 | Older YOLO Versions | Other Models (SSD, R-CNN) |
+| -------------------- | ------ | ------------------- | ------------------------- |
+| Speed                | ★★★★★  | ★★★★☆               | ★★★☆☆                     |
+| Accuracy             | ★★★★☆  | ★★★☆☆               | ★★★★★                     |
+| Size                 | ★★★★☆  | ★★★★★               | ★★☆☆☆                     |
+| SnapML Compatibility | ★★★★★  | ★★★☆☆               | ★★★☆☆                     |
+
+YOLOv7 strikes an optimal balance between accuracy and performance for AR applications.
+
+</details>
+
+</CollapsibleStepBlock>
+
+<CollapsibleStepBlock number={4} title="Training Your Model">
+
+Now it's time to train your custom model using the pre-trained weights and your dataset. Model training is the most computationally intensive part of the process and can take from minutes to hours depending on your dataset size and hardware.
+
+1. **(Optional) Set up TensorBoard for monitoring**
+
+   TensorBoard provides real-time visualization of training metrics, allowing you to monitor progress and identify issues early.
+
+   **TensorBoard Setup**
+
+   ```python
+   # In a notebook environment:
+   # %reload_ext tensorboard
+   # %tensorboard --logdir runs/train
+
+   # In a terminal:
+   tensorboard --logdir runs/train
+   ```
+
+2. **Configure and start training**
+
+   Below is the core training command with key parameters explained:
+
+   **Model Training Configuration**
+
+   ```python
+   import os
+   os.environ['WANDB_MODE'] = 'disabled'  # Disable Weights & Biases logging
+
+   # Key training parameters
+   EPOCH      = 200        # Total number of training epochs
+   BATCH_SIZE = 64         # Number of images processed at once
+   IMG_SIZE   = 224        # Input image resolution (height, width)
+   JOB_NAME   = 'detection'  # Name for this training run
+
+   # Change directory to yolov7 folder
+   # In terminal: cd ~/yolov7
+
+   # Run the training command
+   python train.py \
+     --data    your-dataset-name-1/data.yaml \  # Path to dataset configuration
+     --cfg     cfg/training/yolov7-tiny.yaml \  # Model architecture
+     --weights yolov7-tiny.pt \                 # Pre-trained weights
+     --img     224 224 \                        # Input resolution
+     --batch-size 64 \                          # Batch size
+     --epochs 200 \                             # Number of epochs
+     --name    detection \                      # Run name
+     --device  0 \                              # GPU device (0 = first GPU)
+     --hyp     data/hyp.scratch.tiny.yaml       # Hyperparameters
+   ```
+
+<div className="admonition admonition-tip alert alert--success">
+  <div className="admonition-heading">
+    <h5>Training Tips</h5>
+  </div>
+  <div className="admonition-content">
+    <ul>
+      <li>
+        <strong>Start small</strong>: Begin with fewer epochs (e.g., 50) to test
+        your setup
+      </li>
+      <li>
+        <strong>Adjust batch size</strong>: Reduce it if you encounter memory
+        errors
+      </li>
+      <li>
+        <strong>Image size</strong>: 224×224 is a good balance for mobile
+        deployment
+      </li>
+      <li>
+        <strong>Monitor early</strong>: Check TensorBoard after ~10 epochs to
+        ensure training is progressing
+      </li>
+    </ul>
+  </div>
+</div>
+
+3.  **Understanding Training Output**
+
+    During training, you'll see lines like this in your console:
+
+    ```
+    Epoch   gpu_mem       box       obj       cls     total    labels  img_size
+    0/199    0.367G   0.07126    0.3772         0    0.4485       188       224
+    ```
+
+    <details>
+      <summary>
+        <b>Training Metrics Explained</b>
+      </summary>
+      <div>
+        <ul>
+          <li>
+            <strong>Epoch</strong>: Current training epoch / total epochs
+          </li>
+          <li>
+            <strong>gpu_mem</strong>: GPU memory usage
+          </li>
+          <li>
+            <strong>box</strong>: Bounding box regression loss (lower = better
+            localization)
+          </li>
+          <li>
+            <strong>obj</strong>: Objectness loss (detecting if there's any
+            object)
+          </li>
+          <li>
+            <strong>cls</strong>: Classification loss (which class the object
+            belongs to)
+          </li>
+          <li>
+            <strong>total</strong>: Sum of all losses (main training metric to
+            reduce)
+          </li>
+          <li>
+            <strong>labels</strong>: Number of ground truth objects in the batch
+          </li>
+          <li>
+            <strong>img_size</strong>: Input image resolution
+          </li>
+        </ul>
+        <p>
+          Look for decreasing loss values as training progresses. Plateauing
+          loss indicates the model may have converged.
+        </p>
+      </div>
+    </details>
+
+4.  **Test your trained model**
+
+    Once training is complete, you can test your model on sample images:
+
+    **Testing the Trained Model**
+
+    ```python
+    # Run detection on test images
+    python detect.py \
+      --img-size $IMG_SIZE \
+      --weights runs/train/detection/weights/best.pt \
+      --conf 0.5 \                                    # Confidence threshold
+      --source your-dataset-name-1/test/images         # Test images
+    ```
+
+5.  **Visualize results**
+
+        Display the detection results to evaluate your model's performance:
+
+        **Visualizing Detection Results**
+
+        ```python
+        # In notebook environments: %matplotlib inline
+
+        from glob import glob
+        from PIL import Image
+        from IPython.display import display
+
+        # Find your latest detect output folder
+        exp_dirs = sorted(glob('runs/detect/exp*'))
+        latest = exp_dirs[-1]
+
+        # Display detection results
+        paths = glob(f'{latest}/*.*')
+        img = Image.open(paths[0])
+        display(img)
+        ```
+
+{' '}
+
+<details>
+  <summary>
+    <b>Evaluating Model Performance</b>
+  </summary>
+  <div>
+    <p>When reviewing your model results, consider:</p>
+    <ul>
+      <li>
+        <strong>False Positives</strong>: Detections where no object exists
+      </li>
+      <li>
+        <strong>False Negatives</strong>: Missed objects that should be detected
+      </li>
+      <li>
+        <strong>Localization Accuracy</strong>: How precisely the bounding boxes
+        fit around objects
+      </li>
+      <li>
+        <strong>Classification Accuracy</strong>: Whether objects are assigned
+        the correct class
+      </li>
+    </ul>
+    <p>If performance is poor, consider:</p>
+    <ul>
+      <li>Adding more training data</li>
+      <li>Increasing training epochs</li>
+      <li>Adjusting model hyperparameters</li>
+      <li>Using data augmentation to increase dataset diversity</li>
+    </ul>
+  </div>
+</details>
+
+</CollapsibleStepBlock>
+
+<CollapsibleStepBlock number={5} title="Exporting for SnapML">
+
+To make the model compatible with Spectacles, you need to export it to the ONNX format that SnapML can use. ONNX (Open Neural Network Exchange) is an open standard for representing machine learning models, allowing for interoperability between different frameworks.
+
+1.  **Install required packages**
+
+    First, install the necessary dependencies for ONNX export:
+
+    **ONNX Export Dependencies**
+
+    ```python
+    # Install dependencies for ONNX export
+    pip install "protobuf<4.21.3"
+    pip install "onnx>=1.9.0"
+    pip install onnx-graphsurgeon
+    pip install --user "onnx-simplifier>=0.3.6"
+    ```
+
+2.  **Export to ONNX format**
+
+            Run the export script with the appropriate flags:
+
+            **ONNX Export Command**
+
+            ```python
+            # Run export script for SnapML compatibility
+            python export.py \
+              --weights ./runs/train/detection/weights/best.pt \  # Path to trained weights
+              --grid \                                            # Export detection grid
+              --simplify \                                        # Simplify ONNX graph
+              --export-snapml \                                   # Special flag for SnapML compatibility
+              --img-size 224 224 \                                # Input dimensions (use your IMG_SIZE)
+              --max-wh 224                                         # Maximum width/height (use your IMG_SIZE)
+            ```
+
+<div className="admonition admonition-important alert alert--warning">
+  <div className="admonition-heading">
+    <h5>SnapML Compatibility</h5>
+  </div>
+  <div className="admonition-content">
+    The `--export-snapml` flag is crucial as it excludes box decoding and NMS
+    (Non-Maximum Suppression) from the ONNX graph. These operations will be
+    implemented in Lens Studio using JavaScript, ensuring compatibility with the
+    Spectacles platform.
+  </div>
+</div>
+
+3.  **Download the exported model**
+
+    Generate download links for your exported model:
+
+    **Download ONNX Model**
+
+    ```python
+    from IPython.display import FileLink, FileLinks
+
+    # Link to the ONNX file
+    display(FileLink('runs/train/detection/weights/best.onnx'))
+
+    # Or browse the entire weights folder
+    display(FileLinks('runs/train/detection/weights'))
+    ```
+
+4.  **Generate class label mapping**
+
+    Create the class mapping that will be used in Lens Studio:
+
+    **Generate Class Mapping**
+
+    ```python
+    import yaml
+
+    with open("your-dataset-name-1/data.yaml", "r") as stream:
+        data = yaml.safe_load(stream)
+
+    for i, label in enumerate(data["names"].values() if isinstance(data["names"], dict) else data["names"]):
+        print(f'"{i}":"{label}",')
+    ```
+
+    Example output:
+
+    ```
+    "0":"chair",
+    "1":"monitor",
+    "2":"tv",
+    ```
+
+    Copy this output to use in your Lens Studio script for class mapping.
+
+<details>
+  <summary>
+    <b>Understanding the ONNX Export</b>
+  </summary>
+  <div>
+    <p>
+      The exported ONNX model has several key attributes that make it suitable
+      for SnapML:
+    </p>
+    <ol>
+      <li>
+        <strong>Simplified Graph</strong>: The <code>--simplify</code> flag
+        optimizes the model by removing redundant operations
+      </li>
+      <li>
+        <strong>Fixed Input Size</strong>: The input dimensions are fixed during
+        export, matching what you'll use in Lens Studio
+      </li>
+      <li>
+        <strong>No NMS</strong>: Non-Maximum Suppression is excluded, allowing
+        it to be implemented in JavaScript for better control
+      </li>
+      <li>
+        <strong>Quantization</strong>: While not applied in this example,
+        quantization could further optimize the model size and performance
+      </li>
+    </ol>
+  </div>
+</details>
+
+</CollapsibleStepBlock>
+
+<CollapsibleStepBlock number={6} title="Using Your Model in Lens Studio">
+
+The exported ONNX model is now ready to be imported into Lens Studio for use in your Spectacles Lens. This final step bridges the gap between machine learning and augmented reality.
+
+1. **Import your model into Lens Studio**
+
+   📌 **Importing Model**
+
+   Open the Multi-Object Detection template from the Lens Studio home screen or create a new Lens Studio project.
+
+   ⚠️ **Important: Input Range Configuration**
+
+   When bringing your model into Lens Studio, please consider the input range your model accepts. Exported models typically expect inputs in the range [0, 1], while the Texture input of the ML Component in Lens Studio takes values from 0 to 255.
+
+   Drag and drop the exported .ONNX file into the Asset Browser panel and configure the input channel Scale to be:
+
+   ```
+   0.0039215
+   ```
+
+   This is equivalent to:
+
+   ```
+   1 / 255
+   ```
+
+   ✅ **Channel Configuration Example:**
+
+   | Channel   | Scale     | Bias |
+   | --------- | --------- | ---- |
+   | Channel 0 | 0.0039215 | 0.00 |
+   | Channel 1 | 0.0039215 | 0.00 |
+   | Channel 2 | 0.0039215 | 0.00 |
+
+   For more detailed information on model importing, see the [Multi-Object Detection template guide](https://developers.snap.com/lens-studio/features/snap-ml/snap-ml-templates/multi-object-detection#importing-model).
+
+2. **Replace the default model**
+   - In the Resources panel, locate the default ML model
+   - Right-click and select "Replace From File..."
+   - Navigate to and select your downloaded ONNX model
+
+3. **Update class mappings**
+   - Open the `scripts/ClassMapping.js` file
+   - Replace the default `LABEL_MAPPING` with your generated mapping:
+
+   **Class Mapping in Lens Studio**
+
+   ```javascript
+   // In scripts/ClassMapping.js
+   const LABEL_MAPPING = {
+     0: 'chair',
+     1: 'monitor',
+     2: 'tv',
+     // Add all your classes here
+   };
+   ```
+
+4. **Configure model parameters**
+   - Adjust input dimensions to match your training settings
+   - Configure confidence thresholds based on your model's performance
+   - Test with different NMS threshold values
+
+5. **Test on Spectacles**
+   - Send your Lens to Spectacles for testing
+   - Evaluate real-world performance and make adjustments as needed
+   - Optimize for performance if detection speed is too slow
+
+<div className="admonition admonition-info alert alert--info">
+  <div className="admonition-heading">
+    <h5>Further Resources</h5>
+  </div>
+  <div className="admonition-content">
+    For more detailed information on importing and using your model in Lens
+    Studio, refer to the [Multi-Object Detection Template
+    guide](https://docs.snap.com/lens-studio/references/templates/ml/multi-object-detection).
+  </div>
+</div>
+
+<details>
+  <summary>
+    <b>Performance Optimization in Lens Studio</b>
+  </summary>
+  <div>
+    <p>To optimize your ML model's performance on Spectacles:</p>
+    <ol>
+      <li>
+        <strong>Reduce inference frequency</strong> if full frame rate isn't
+        necessary
+      </li>
+      <li>
+        <strong>Apply region of interest</strong> (ROI) to limit processing to
+        specific areas
+      </li>
+      <li>
+        <strong>Implement caching</strong> for stable detections
+      </li>
+      <li>
+        <strong>Limit tracking</strong> to a reasonable number of objects (e.g.,
+        3-5 most confident detections)
+      </li>
+      <li>
+        <strong>Apply temporal smoothing</strong> to reduce jitter in detections
+      </li>
+    </ol>
+  </div>
+</details>
+
+</CollapsibleStepBlock>
+
+### Advanced Topics
+
+#### Understanding Non-Maximum Suppression (NMS)
+
+When exporting models for SnapML, you may notice the `--export-snapml` flag which affects how Non-Maximum Suppression (NMS) is handled:
+
+<details>
+  <summary><b>What is Non-Maximum Suppression?</b></summary>
+
+NMS is not a trainable convolutional layer but a deterministic post-processing step applied to raw box predictions during inference. Its purpose is to:
+
+1. **Collect all predicted boxes** whose confidence (objectness × class score) exceeds your threshold
+2. **Sort** those boxes by confidence (highest to lowest)
+3. **Keep only the best boxes** by removing highly overlapping detections of the same object
+
+When exporting a YOLO model to ONNX for SnapML, we exclude NMS from the graph and re-implement it in Lens Studio using JavaScript. This approach provides more control over the detection process and ensures compatibility with Spectacles.
+
+</details>
+
+#### Model Optimization Tips
+
+When creating models for Spectacles, consider these optimization strategies:
+
+- **Use smaller variants** like YOLOv7-tiny for real-time performance
+- **Reduce input image size** to balance detection quality and speed
+- **Limit the number of classes** to improve model efficiency
+- **Use quantization** when exporting if possible
+- **Test thoroughly on-device** to ensure real-time performance
+
+### Troubleshooting
+
+#### Common Issues and Solutions
+
+<details>
+  <summary>
+    <b>Kernel vs. Space Restarting in Paperspace</b>
+  </summary>
+  <div>
+    <ul>
+      <li>
+        <strong>Restarting the kernel</strong>: Clears Python state without
+        affecting installed packages or data files. Use after installing
+        libraries with <code>%pip install</code>.
+      </li>
+      <li>
+        <strong>Restarting the space</strong>: Performs a full reset of your
+        environment, including all files and installations. Only use when
+        something at the system level has gone wrong.
+      </li>
+    </ul>
+  </div>
+</details>
+
+<details>
+  <summary>
+    <b>GPU Out of Memory Errors</b>
+  </summary>
+  <div>
+    <p>If you encounter GPU memory errors during training:</p>
+    <ul>
+      <li>Reduce the batch size</li>
+      <li>Use a smaller model variant</li>
+      <li>Reduce image resolution</li>
+      <li>
+        Free up memory between operations with{' '}
+        <code>torch.cuda.empty_cache()</code>
+      </li>
+    </ul>
+  </div>
+</details>
+
+<details>
+  <summary>
+    <b>Export Errors</b>
+  </summary>
+  <div>
+    <p>Common export issues:</p>
+    <ul>
+      <li>
+        Ensure all required packages are installed at the correct versions
+      </li>
+      <li>
+        When using <code>--simplify</code>, ensure you have{' '}
+        <code>onnx-simplifier</code> installed
+      </li>
+      <li>
+        For protobuf-related errors, try installing a specific version with{' '}
+        <code>pip install protobuf==3.20.3</code>
+      </li>
+    </ul>
+  </div>
+</details>
+
+### Frequently Asked Questions
+
+<details>
+  <summary>
+    <b>Which types of models work best on Spectacles?</b>
+  </summary>
+  <div>
+    <p>For optimal performance on Spectacles, prioritize models with:</p>
+    <ul>
+      <li>
+        <strong>Small size</strong>: Under 10MB for better loading times and
+        memory usage
+      </li>
+      <li>
+        <strong>Low computational requirements</strong>: Models with fewer
+        operations per inference
+      </li>
+      <li>
+        <strong>Quantized weights</strong>: 8-bit or 16-bit quantization reduces
+        memory footprint
+      </li>
+      <li>
+        <strong>Simple architectures</strong>: Fewer layers and simpler
+        operations are more efficient
+      </li>
+    </ul>
+    <p>
+      YOLOv7-tiny and MobileNet-based architectures are particularly well-suited
+      for Spectacles.
+    </p>
+  </div>
+</details>
+
+<details>
+  <summary>
+    <b>How many objects can SnapML detect simultaneously?</b>
+  </summary>
+  <div>
+    <p>
+      SnapML can technically detect as many objects as are present in the frame,
+      but for performance reasons on Spectacles:
+    </p>
+    <ul>
+      <li>
+        <strong>Recommended</strong>: Limit detection to 3-5 objects
+        simultaneously
+      </li>
+      <li>
+        <strong>Maximum</strong>: Up to 10 objects can be detected with adequate
+        performance
+      </li>
+      <li>
+        <strong>Performance impact</strong>: More tracked objects require more
+        processing power
+      </li>
+    </ul>
+    <p>
+      You can control this by adjusting the NMS threshold and maximum objects
+      parameters in your Lens Studio implementation.
+    </p>
+  </div>
+</details>
+
+<details>
+  <summary>
+    <b>How can I improve detection accuracy?</b>
+  </summary>
+  <div>
+    <p>To improve detection accuracy:</p>
+    <ol>
+      <li>
+        <strong>Increase training data</strong>: More diverse images of your
+        target objects
+      </li>
+      <li>
+        <strong>Better annotations</strong>: More precise bounding boxes
+      </li>
+      <li>
+        <strong>Data augmentation</strong>: Apply transforms to increase dataset
+        variability
+      </li>
+      <li>
+        <strong>Longer training</strong>: Try increasing the number of epochs
+      </li>
+      <li>
+        <strong>Model fine-tuning</strong>: Adjust hyperparameters like learning
+        rate
+      </li>
+      <li>
+        <strong>Post-processing</strong>: Implement temporal smoothing and
+        confidence thresholds
+      </li>
+    </ol>
+  </div>
+</details>
+
+<details>
+  <summary>
+    <b>Can I train other types of ML models for Spectacles?</b>
+  </summary>
+  <div>
+    <p>
+      Yes! While this guide focuses on object detection, SnapML supports various
+      model types:
+    </p>
+    <ul>
+      <li>
+        <strong>Image classification</strong>: Identify what's in an image
+      </li>
+      <li>
+        <strong>Semantic segmentation</strong>: Identify each pixel's category
+      </li>
+      <li>
+        <strong>Style transfer</strong>: Apply artistic styles to images
+      </li>
+      <li>
+        <strong>Pose estimation</strong>: Track human body positions
+      </li>
+    </ul>
+    <p>
+      The export process will differ slightly, but Paperspace and Lens Studio
+      workflow remains similar.
+    </p>
+  </div>
+</details>
+
+### Resources
+
+- [SnapML Templates GitHub Repository](https://github.com/Snapchat/snapml-templates)
+- [YOLOv7 GitHub Repository](https://github.com/WongKinYiu/yolov7)
+- [Roboflow Documentation](https://docs.roboflow.com/)
+- [Lens Studio ML Documentation](https://docs.snap.com/lens-studio/references/guides/lens-features/machine-learning/ml-overview)
+
+### Conclusion
+
+Incorporating machine learning into Spectacles experiences opens up powerful new possibilities for AR interaction. By following this workflow, you've learned how to train custom object detection models and deploy them to Spectacles using SnapML.
+
+The combination of cloud-based training environments like Paperspace, dataset management tools like Roboflow, and the streamlined export process for SnapML makes it possible to create sophisticated machine learning features without requiring extensive ML expertise.
+
+As you continue developing for Spectacles, experiment with different model architectures, datasets, and detection parameters to create increasingly engaging and responsive AR experiences.
+
+## Lens Studio Implementation
+
+After you've exported your trained model to ONNX format, the next step is to implement it in Lens Studio for use on Spectacles. This section covers the complete workflow from importing your model into Lens Studio to creating custom logic for your AR experience.
+We have a sample you can follow along with in the [SnapML Multi-Object Detection Template](https://github.com/specs-devs/samples).
+
+### Script Architecture Overview
+
+<img
+  src="/img/spectacles/misc/snapml-script-architecture.png"
+  style={{ maxWidth: '700px', width: '100%', borderRadius: '8px' }}
+/>
+
+The SnapML framework for Spectacles consists of several specialized scripts that work together:
+
+1. **Core Detection Components**
+   - `MLSpatializer`: Main entry point that connects ML detection with 3D space
+   - `YOLODetectionProcessor`: Processes raw model outputs into usable detections
+   - `DetectionVisualizer`: Visualizes detections in 3D space
+
+2. **Camera and Spatial Awareness**
+   - `PinholeCapture`: Interfaces with the device camera
+   - `PinholeCameraModel`: Mathematical model for 2D to 3D conversions
+3. **Positioning and Transformation**
+   - `MatchTransform` & `MatchTransformLocal`: Position objects relative to others
+   - `InBetween`: Calculate positions between two objects
+   - `SmartTether`: Intelligent object positioning based on user movement
+
+Let's explore how these components work together in Lens Studio.
+
+<CollapsibleStepBlock number={1} title="Importing and Testing Your Model in Lens Studio">
+
+After exporting your trained ONNX model, the next step is to import it into Lens Studio and set up the proper configuration:
+
+1. **Import your model**
+   - Open Lens Studio and create a new project from the **Multi-Object Detection Template**
+   - In the Resources panel, right-click and select "Import Files..."
+   - Select your exported ONNX model
+   - Replace the default model in the project with your imported one
+
+   <div className="admonition admonition-tip alert alert--success">
+     <div className="admonition-heading">
+       <h5>Importing Models</h5>
+     </div>
+     <div className="admonition-content">
+       When importing your model, ensure the file extension is `.onnx`. If your
+       model exceeds the Lens size limit, consider techniques like quantization
+       during the export process to reduce file size.
+     </div>
+   </div>
+
+2. **Configure the ML component**
+
+   Find and select the ML component in your scene hierarchy and update these settings in the Inspector panel:
+
+   ```javascript
+   // ML Component configuration
+   script.model = yourImportedModel; // Set to your imported ONNX model
+   script.inputTexture = deviceCameraTexture; // Set to the camera texture
+   script.scoreThreshold = 0.4; // Adjust based on your model's confidence level
+   script.iouThreshold = 0.5; // Non-Maximum Suppression threshold
+   ```
+
+3. **Test your model's detection**
+
+   Before implementing spatial features, test that your model is correctly detecting objects:
+
+   ```javascript
+   // Simple detection test code for MLController.js
+   const ml = script.getSceneObject().getComponent('MLComponent');
+
+   ml.onDetectionsUpdated = function (detections) {
+     print('Detected ' + detections.length + ' objects');
+
+     for (let i = 0; i < detections.length; i++) {
+       const detection = detections[i];
+       print(
+         'Class: ' +
+           detection.className +
+           ', Score: ' +
+           detection.score.toFixed(2) +
+           ', Box: [' +
+           detection.bbox.join(', ') +
+           ']'
+       );
+     }
+   };
+   ```
+
+4. **Validate your class mapping**
+
+   Ensure your classes are correctly mapped in the `ClassMapping.js` file:
+
+   ```javascript
+   // In scripts/ClassMapping.js
+   const LABEL_MAPPING = {
+     0: 'chair',
+     1: 'monitor',
+     2: 'tv',
+     // Add all your classes here
+   };
+   ```
+
+<details>
+  <summary>
+    <b>Troubleshooting Model Import Issues</b>
+  </summary>
+  <div>
+    <p>Common issues when importing models and their solutions:</p>
+    <ul>
+      <li>
+        <strong>Model Not Loading</strong>: Verify the ONNX format is correct
+        and that you used the <code>--export-snapml</code> flag during export
+      </li>
+      <li>
+        <strong>Detection Failures</strong>: Check that your input image size
+        matches what the model expects
+      </li>
+      <li>
+        <strong>Poor Accuracy</strong>: Adjust the <code>scoreThreshold</code>{' '}
+        to better match your model's confidence output
+      </li>
+      <li>
+        <strong>Memory Issues</strong>: If experiencing crashes, try using a
+        smaller model like YOLOv7-tiny
+      </li>
+    </ul>
+  </div>
+</details>
+
+</CollapsibleStepBlock>
+
+<CollapsibleStepBlock number={2} title="Understanding Spatialization with MLSpatializer">
+
+Spatialization is the process of mapping 2D image detections to 3D world space, enabling AR content to interact with real-world objects.
+
+1. **The Role of MLSpatializer**
+
+   `MLSpatializer` is the central script that orchestrates the entire detection and spatialization pipeline:
+
+   ```typescript
+   // Key components in MLSpatializer
+   @component
+   export class MLSpatializer extends BaseScriptComponent {
+     @input
+     model: MLAsset; // Your ONNX model
+
+     @input
+     inputTexture: Texture; // Camera feed
+
+     @input
+     detectionPrefab: ObjectPrefab; // Object to place at detected locations
+
+     // Process model outputs and convert to detections
+     private processModelOutput(outputs: Record<string, MLTensor>): void {
+       // YOLODetectionProcessor handles box decoding and NMS
+       const detections = this.detectionProcessor.processOutput(outputs);
+
+       // Convert 2D detections to 3D positions
+       this.visualizer.updateDetections(detections);
+     }
+   }
+   ```
+
+2. **From 2D to 3D: Understanding PinholeCapture and PinholeCameraModel**
+
+   These components are essential for translating 2D image coordinates to 3D world space:
+
+   ```typescript
+   // Example of 2D to 3D conversion
+   // PinholeCameraModel provides helpers for this conversion
+   const imagePoint = new vec2(
+     detection.bbox[0] + detection.bbox[2] / 2,
+     detection.bbox[1] + detection.bbox[3] / 2
+   );
+
+   // Project point from 2D image space to 3D world space
+   const worldRay = this.pinholeCapture.cameraModel.screenPointToWorldRay(
+     imagePoint,
+     viewToWorld
+   );
+   ```
+
+3. **YOLODetectionProcessor: Making Sense of Model Outputs**
+
+   This specialized processor converts the raw output tensors from the ML model into structured detections:
+
+   ```typescript
+   // Example from YOLODetectionProcessor
+   processOutput(outputs: Record<string, MLTensor>): Detection[] {
+     // Parse the model outputs
+     this.parseModelOutputs(outputs);
+
+     // Apply Non-Maximum Suppression
+     return this.applyNMS();
+   }
+   ```
+
+4. **DetectionVisualizer: Placing Objects in 3D Space**
+
+   Once detections are processed, this component handles the placement of 3D objects:
+
+   ```typescript
+   // From DetectionVisualizer
+   updateDetections(detections: Detection[]): void {
+     // For each detection, calculate 3D position
+     for (let i = 0; i < detections.length; i++) {
+       const detection = detections[i];
+
+       // Calculate center point in image space
+       const centerPoint = this.getCenterPoint(detection.bbox);
+
+       // Project to 3D world space
+       const worldPosition = this.projectToWorld(centerPoint);
+
+       // Update or create 3D object at this position
+       this.placeObjectAt(i, worldPosition, detection);
+     }
+   }
+   ```
+
+<div className="admonition admonition-note alert alert--secondary">
+  <div className="admonition-heading">
+    <h5>Coordinate Systems</h5>
+  </div>
+  <div className="admonition-content">
+    <p>Understanding coordinate systems is crucial:</p>
+    <ul>
+      <li>
+        <strong>Image Space</strong>: 2D coordinates (x,y) where (0,0) is the
+        top-left of the image
+      </li>
+      <li>
+        <strong>Screen Space</strong>: 2D normalized coordinates where (0,0) is
+        bottom-left and (1,1) is top-right
+      </li>
+      <li>
+        <strong>World Space</strong>: 3D coordinates (x,y,z) in the AR scene
+      </li>
+    </ul>
+  </div>
+</div>
+
+<details>
+<summary><b>Spatialization Mathematics</b></summary>
+
+The conversion from 2D to 3D relies on these key mathematical concepts:
+
+1. **Pinhole Camera Model**: Represents how 3D points are projected onto a 2D image plane
+2. **Ray Casting**: Projects a ray from the camera through the 2D detection point
+3. **Intersection Testing**: Determines where this ray intersects with surfaces in the real world
+4. **Transformation Matrices**: Converts between different coordinate systems
+
+The `PinholeCameraModel` class encapsulates these complex calculations, making them accessible through helper methods.
+
+</details>
+
+</CollapsibleStepBlock>
+
+<CollapsibleStepBlock number={3} title="Adding Smoothing for Better User Experience">
+
+Raw ML detections can be jittery and unstable. Proper smoothing techniques create more natural AR experiences by stabilizing object placement.
+
+1. **Motion Smoothing with MatchTransform**
+
+   `MatchTransform` provides interpolation between positions, rotations, and scales:
+
+   ```typescript
+   // Example usage of MatchTransform
+   @component
+   export class MatchTransformTS extends BaseScriptComponent {
+     @input
+     target!: SceneObject; // Object to match
+
+     @input
+     usePositionLerp: boolean = true; // Enable smooth transitions
+
+     @input
+     positionLerpSpeed: number = 1.0; // Lower = smoother but slower
+
+     // Implementation
+     update() {
+       if (this.usePositionLerp) {
+         // Smooth position transition with lerp
+         const currentPos = this.getSceneObject()
+           .getTransform()
+           .getLocalPosition();
+         const targetPos = this.target.getTransform().getLocalPosition();
+
+         // Calculate interpolated position
+         const newPos = vec3.lerp(
+           currentPos,
+           targetPos,
+           Math.min(1.0, this.positionLerpSpeed * getDeltaTime())
+         );
+
+         this.getSceneObject().getTransform().setLocalPosition(newPos);
+       }
+     }
+   }
+   ```
+
+2. **Temporal Filtering in DetectionVisualizer**
+
+   Implementing temporal filtering helps reduce jitter:
+
+   ```typescript
+   // Excerpt from temporal filtering implementation
+   updateObjectPosition(index: number, newPosition: vec3, detection: Detection): void {
+     // If we have a previous position, apply temporal smoothing
+     if (this.previousPositions[index]) {
+       // Calculate how much change is acceptable
+       const moveThreshold = this.calculateMoveThreshold(detection);
+
+       // If movement is small enough, apply smoothing
+       if (this.getDistance(newPosition, this.previousPositions[index]) < moveThreshold) {
+         // Apply heavier smoothing when movement is small
+         newPosition = vec3.lerp(
+           this.previousPositions[index],
+           newPosition,
+           0.3 // Lower value = more smoothing
+         );
+       } else {
+         // Less smoothing for large movements
+         newPosition = vec3.lerp(
+           this.previousPositions[index],
+           newPosition,
+           0.7
+         );
+       }
+     }
+
+     // Update the position and store for next frame
+     this.setObjectPosition(index, newPosition);
+     this.previousPositions[index] = newPosition;
+   }
+   ```
+
+3. **Position Stabilization with InBetween**
+
+   `InBetween` calculates intermediate positions between objects:
+
+   ```typescript
+   // Using InBetween for stable positioning
+   @component
+   export class InBetween extends BaseScriptComponent {
+     @input
+     target1!: SceneObject; // First reference object
+
+     @input
+     target2!: SceneObject; // Second reference object
+
+     @input
+     positionBlend: number = 0.5; // Weight between targets (0.5 = halfway)
+
+     update() {
+       if (!this.target1 || !this.target2) return;
+
+       // Get positions
+       const pos1 = this.target1.getTransform().getWorldPosition();
+       const pos2 = this.target2.getTransform().getWorldPosition();
+
+       // Calculate weighted position
+       const blendedPosition = vec3.lerp(pos1, pos2, this.positionBlend);
+
+       // Apply position
+       this.getSceneObject().getTransform().setWorldPosition(blendedPosition);
+     }
+   }
+   ```
+
+<div className="admonition admonition-tip alert alert--success">
+<div className="admonition-heading">
+<h5>Smoothing Optimization Tips</h5>
+</div>
+<div className="admonition-content">
+
+- **Adaptive Smoothing**: Apply stronger smoothing for small movements, less for large ones
+- **Confidence-Based Smoothing**: Higher detection confidence = less smoothing needed
+- **Distance-Based Parameters**: Adjust smoothing based on object distance from camera
+- **Frame History**: Use multiple previous frames, not just the most recent one
+
+</div>
+</div>
+
+<details>
+<summary><b>When to Use Each Smoothing Component</b></summary>
+<div>
+  <ul>
+    <li><strong>MatchTransform</strong>: Best for general-purpose movement smoothing</li>
+    <li><strong>MatchTransformLocal</strong>: When you need smoothing in local space rather than world space</li>
+    <li><strong>InBetween</strong>: For positioning objects relative to two reference points</li>
+    <li><strong>SmartTether</strong>: When you want content to follow the user with intelligent repositioning</li>
+  </ul>
+  <p>Each component has specific strengths that make it suitable for different scenarios.</p>
+</div>
+</details>
+</CollapsibleStepBlock>
+
+<CollapsibleStepBlock number={4} title="Implementing Custom Logic">
+
+Once you have detection and spatialization working, you can build custom logic for your specific AR experience.
+
+1. **Using SmartTether for Intelligent Object Placement**
+
+   `SmartTether` keeps content appropriately positioned relative to the user:
+
+   ```typescript
+   // SmartTether implementation
+   @component
+   export class SmartTether extends BaseScriptComponent {
+     @input
+     verticalDistanceFromTarget: number = 0.1; // Vertical threshold
+
+     @input
+     horizontalDistanceFromTarget: number = 0.1; // Horizontal threshold
+
+     update() {
+       // Get current positions
+       const targetPos = this.target.getTransform().getWorldPosition();
+       const objectPos = this.getSceneObject()
+         .getTransform()
+         .getWorldPosition();
+
+       // Check if object needs repositioning
+       if (this.needsRepositioning(targetPos, objectPos)) {
+         // Calculate new position based on target's view
+         const newPosition = this.calculateOptimalPosition(targetPos);
+
+         // Apply new position
+         this.getSceneObject().getTransform().setWorldPosition(newPosition);
+       }
+     }
+
+     // Determines if the object is too far from ideal position
+     needsRepositioning(targetPos: vec3, objectPos: vec3): boolean {
+       // Implementation details...
+     }
+
+     // Calculates the best position relative to target
+     calculateOptimalPosition(targetPos: vec3): vec3 {
+       // Implementation details...
+     }
+   }
+   ```
+
+2. **Event-Based Interactions**
+
+   Implement event handlers for interaction with detected objects:
+
+   ```javascript
+   // Example of custom events for object interaction
+   function setupObjectInteractions(detectionObject, className) {
+     // Create tap event
+     const tapEvent = detectionObject.createEvent('onTap');
+
+     // Bind action to tap
+     tapEvent.bind(function () {
+       print('User tapped on ' + className);
+
+       // Custom logic based on detected object
+       switch (className) {
+         case 'chair':
+           showChairCustomization();
+           break;
+         case 'tv':
+           playVideoOnTV();
+           break;
+         // Add more interactions for other classes
+       }
+     });
+
+     // Add visual feedback for interactive objects
+     addVisualFeedback(detectionObject);
+   }
+   ```
+
+3. **Dynamic Content Based on Detections**
+
+   Create adaptive experiences based on what the model detects:
+
+   ```javascript
+   // Dynamic content system
+   function updateSceneBasedOnDetections(detections) {
+     // Track what types of objects are detected
+     const detectedClasses = {};
+
+     detections.forEach((detection) => {
+       detectedClasses[detection.className] = true;
+     });
+
+     // Customize experience based on detected objects
+     if (detectedClasses['chair'] && detectedClasses['table']) {
+       // Show furniture arrangement UI
+       showFurnitureArrangementUI();
+     } else if (detectedClasses['tv']) {
+       // Show media controls
+       showMediaControls();
+     } else {
+       // Default state when no relevant objects detected
+       showSearchingUI();
+     }
+   }
+   ```
+
+4. **Spatial Relationships Between Multiple Detections**
+
+   Analyze relationships between detected objects:
+
+   ```javascript
+   // Analyzing spatial relationships
+   function analyzeObjectRelationships(detections) {
+     if (detections.length < 2) return;
+
+     // Compare position of each pair of objects
+     for (let i = 0; i < detections.length; i++) {
+       for (let j = i + 1; j < detections.length; j++) {
+         const pos1 = detections[i].worldPosition;
+         const pos2 = detections[j].worldPosition;
+
+         // Calculate distance between objects
+         const distance = vec3.distance(pos1, pos2);
+
+         // Check if objects are close to each other
+         if (distance < 1.0) {
+           // 1 meter threshold
+           print(
+             detections[i].className + ' is near ' + detections[j].className
+           );
+
+           // Custom logic for nearby objects
+           handleNearbyObjects(detections[i], detections[j]);
+         }
+       }
+     }
+   }
+   ```
+
+<div className="admonition admonition-info alert alert--info">
+  <div className="admonition-heading">
+    <h5>Performance Considerations</h5>
+  </div>
+  <div className="admonition-content">
+    <p>When implementing custom logic:</p>
+    <ul>
+      <li>
+        <strong>Batch Processing</strong>: Process detections in batches rather
+        than individually
+      </li>
+      <li>
+        <strong>Throttle Updates</strong>: Don't update UI or logic every frame
+        if not needed
+      </li>
+      <li>
+        <strong>LOD (Level of Detail)</strong>: Simplify processing for distant
+        or less important objects
+      </li>
+      <li>
+        <strong>Asynchronous Operations</strong>: Move heavy computations off
+        the main thread when possible
+      </li>
+    </ul>
+  </div>
+</div>
+
+<details>
+<summary><b>Advanced Implementation Patterns</b></summary>
+
+For more sophisticated applications:
+
+1. **State Machines**: Use state management to control the flow of your experience
+2. **Object Persistence**: Implement tracking IDs to maintain object identity across frames
+3. **Prediction**: Estimate future positions for smoother tracking during occlusions
+4. **Multi-Object Relationships**: Build logic around how multiple detected objects relate to each other
+5. **Environment Understanding**: Combine ML detection with Spectacles' environment features for enhanced context
+
+These patterns help create more robust and responsive AR experiences.
+
+</details>
+
+</CollapsibleStepBlock>
+
+### Complete Workflow Summary
+
+<div
+  style={{
+    background: '#f8f9fa',
+    padding: '20px',
+    borderRadius: '8px',
+    marginBottom: '2rem',
+    border: '1px solid #ddd',
+    overflowX: 'auto',
+  }}
+>
+  <div
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '10px',
+      width: 'max-content',
+      minWidth: '100%',
+    }}
+  >
+    <div
+      style={{
+        minWidth: '120px',
+        textAlign: 'center',
+        padding: '10px',
+        borderRadius: '8px',
+        background: '#EAEAF2',
+        fontWeight: 'bold',
+        flexShrink: 0,
+      }}
+    >
+      <div style={{ fontSize: '12px', marginBottom: '5px', color: '#666' }}>
+        STEP 1
+      </div>
+      Environment Setup
+    </div>
+    <div style={{ color: '#999', fontSize: '24px', flexShrink: 0 }}>→</div>
+    <div
+      style={{
+        minWidth: '120px',
+        textAlign: 'center',
+        padding: '10px',
+        borderRadius: '8px',
+        background: '#E5F1E3',
+        fontWeight: 'bold',
+        flexShrink: 0,
+      }}
+    >
+      <div style={{ fontSize: '12px', marginBottom: '5px', color: '#666' }}>
+        STEP 2
+      </div>
+      Dataset Prep
+    </div>
+    <div style={{ color: '#999', fontSize: '24px', flexShrink: 0 }}>→</div>
+    <div
+      style={{
+        minWidth: '120px',
+        textAlign: 'center',
+        padding: '10px',
+        borderRadius: '8px',
+        background: '#F2EADC',
+        fontWeight: 'bold',
+        flexShrink: 0,
+      }}
+    >
+      <div style={{ fontSize: '12px', marginBottom: '5px', color: '#666' }}>
+        STEP 3
+      </div>
+      Model Training
+    </div>
+    <div style={{ color: '#999', fontSize: '24px', flexShrink: 0 }}>→</div>
+    <div
+      style={{
+        minWidth: '120px',
+        textAlign: 'center',
+        padding: '10px',
+        borderRadius: '8px',
+        background: '#F2E3E3',
+        fontWeight: 'bold',
+        flexShrink: 0,
+      }}
+    >
+      <div style={{ fontSize: '12px', marginBottom: '5px', color: '#666' }}>
+        STEP 4
+      </div>
+      ONNX Export
+    </div>
+    <div style={{ color: '#999', fontSize: '24px', flexShrink: 0 }}>→</div>
+    <div
+      style={{
+        minWidth: '120px',
+        textAlign: 'center',
+        padding: '10px',
+        borderRadius: '8px',
+        background: '#E1EEF5',
+        fontWeight: 'bold',
+        flexShrink: 0,
+      }}
+    >
+      <div style={{ fontSize: '12px', marginBottom: '5px', color: '#666' }}>
+        STEP 5
+      </div>
+      Import Model
+    </div>
+    <div style={{ color: '#999', fontSize: '24px', flexShrink: 0 }}>→</div>
+    <div
+      style={{
+        minWidth: '120px',
+        textAlign: 'center',
+        padding: '10px',
+        borderRadius: '8px',
+        background: '#E8E3F3',
+        fontWeight: 'bold',
+        flexShrink: 0,
+      }}
+    >
+      <div style={{ fontSize: '12px', marginBottom: '5px', color: '#666' }}>
+        STEP 6
+      </div>
+      Spatialization
+    </div>
+    <div style={{ color: '#999', fontSize: '24px', flexShrink: 0 }}>→</div>
+    <div
+      style={{
+        minWidth: '120px',
+        textAlign: 'center',
+        padding: '10px',
+        borderRadius: '8px',
+        background: '#F5E1E5',
+        fontWeight: 'bold',
+        flexShrink: 0,
+      }}
+    >
+      <div style={{ fontSize: '12px', marginBottom: '5px', color: '#666' }}>
+        STEP 7
+      </div>
+      Custom Logic
+    </div>
+  </div>
+</div>
+
+This comprehensive guide has walked you through the entire SnapML workflow for Spectacles, from environment setup and model training to Lens Studio implementation and custom interaction logic. By understanding both the ML pipeline and the script architecture, you can create sophisticated AR experiences that intelligently interact with real-world objects.
+
+### Resources
+
+- [SnapML Templates GitHub Repository](https://github.com/Snapchat/snapml-templates)
+- [YOLOv7 GitHub Repository](https://github.com/WongKinYiu/yolov7)
+- [Roboflow Documentation](https://docs.roboflow.com/)
+- [Lens Studio ML Documentation](https://docs.snap.com/lens-studio/references/guides/lens-features/machine-learning/ml-overview)
+- [Spectacles Developer Documentation](https://docs.snap.com/spectacles/guides/overview)
+
+### Conclusion
+
+Incorporating machine learning into Spectacles experiences opens up powerful new possibilities for AR interaction. By following this workflow, you've learned how to train custom object detection models and deploy them to Spectacles using SnapML, as well as how to implement the necessary scripts for spatialization, smoothing, and custom logic.
+
+The combination of cloud-based training environments, dataset management tools, and the specialized script architecture in Lens Studio makes it possible to create sophisticated machine learning features without requiring extensive ML expertise.
+
+As you continue developing for Spectacles, experiment with different model architectures, datasets, detection parameters, and interaction patterns to create increasingly engaging and responsive AR experiences.

@@ -1,0 +1,647 @@
+---
+description: 'Place virtual objects on real-world surfaces using depth-based hit-test raycasting optimized for Spectacles, with optional surface classification.'
+---
+
+# World Query Module
+
+## Overview
+
+The World Query Module enables you to place objects on real-world surfaces instantly and accurately. This lightweight solution is specifically designed for Spectacles' wearable platform.
+
+### Why Use World Query?
+
+Traditional surface detection APIs like [hitTestWorldMesh] or [DepthTexture.sampleDepthAtPoint] can be computationally expensive for wearable devices. The World Query Module provides:
+
+- **Instant placement**: Fast hit testing for real surfaces
+- **Lightweight performance**: Optimized for wearable devices
+- **Surface analysis**: Depth and normal sampling at specific locations
+- **Smoothing options**: Results can be smoothed across multiple hits
+
+### How It Works
+
+The [World Query Hit Test] performs ray casting against real surfaces by:
+
+1. Computing a depth map for the current view
+2. Intersecting the ray with depth data to find hit points
+3. Determining surface position and normal vectors
+4. Returning null if the ray falls outside the field of view
+
+<video
+  src="/img/spectacles/world-query/world-query-module-example.webm"
+  style={{ maxWidth: '500px', width: '100%', borderRadius: '8px' }}
+  autoPlay
+  loop
+  muted
+  playsInline
+></video>
+
+:::warning
+**Performance Limitation**
+
+Due to the low, 5Hz update rate of the underlying depth data, the hit test works only for static or slowly moving objects. Consider use cases accordingly.  
+:::
+
+## Basic Surface Placement
+
+### Setup Requirements
+
+Before implementing World Query, ensure you have:
+
+1. Project configured for Spectacles with Interactive Preview enabled
+2. Spectacles Interaction Kit imported and initialized
+3. A target object to place on surfaces
+
+### Implementation Steps
+
+Follow these steps to implement basic surface placement using the [WorldQueryHit] API:
+
+**Step 1:** Create a new TypeScript or JavaScript file with the required imports
+
+**Step 2:** Set up the hit test session with filtering options
+
+**Step 3:** Handle hit test results and object placement
+
+**Step 4:** Configure user interaction for spawning objects
+
+### Complete Example
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs>
+<TabItem value="ts" label="TypeScript">
+
+```ts
+// import required modules
+import {
+  InteractorTriggerType,
+  InteractorInputType,
+} from 'SpectaclesInteractionKit.lspkg/Core/Interactor/Interactor';
+import { SIK } from 'SpectaclesInteractionKit.lspkg/SIK';
+
+const WorldQueryModule = require('LensStudio:WorldQueryModule');
+const EPSILON = 0.01;
+
+@component
+export class NewScript extends BaseScriptComponent {
+  private primaryInteractor;
+  private hitTestSession: HitTestSession;
+  private transform: Transform;
+  private lastHitResult: any; // Store last hit result for trigger end callback
+  @input
+  indexToSpawn: number;
+
+  @input
+  targetObject: SceneObject;
+
+  @input
+  objectsToSpawn: SceneObject[];
+
+  @input
+  filterEnabled: boolean;
+
+  onAwake() {
+    // create new hit session
+    this.hitTestSession = this.createHitTestSession(this.filterEnabled);
+    if (!this.sceneObject) {
+      print('Please set Target Object input');
+      return;
+    }
+    this.transform = this.targetObject.getTransform();
+    // disable target object when surface is not detected
+    this.targetObject.enabled = false;
+    this.setObjectEnabled(this.indexToSpawn);
+
+    // Set up trigger end callback
+    this.setupTriggerEndCallback();
+
+    // create update event
+    this.createEvent('UpdateEvent').bind(this.onUpdate.bind(this));
+  }
+
+  setupTriggerEndCallback() {
+    // Get all interactors and set up trigger end callbacks
+    const allInteractors = SIK.InteractionManager.getInteractorsByType(
+      InteractorInputType.All
+    );
+
+    for (const interactor of allInteractors) {
+      interactor.onTriggerEnd.add(() => {
+        // Only place object if we have a valid hit result and this is the primary interactor
+        if (this.lastHitResult && this.primaryInteractor === interactor) {
+          this.placeObject();
+        }
+      });
+    }
+  }
+
+  placeObject() {
+    if (!this.lastHitResult) return;
+
+    // Copy the plane/axis object
+    const parent = this.objectsToSpawn[this.indexToSpawn].getParent();
+    const newObject = parent.copyWholeHierarchy(
+      this.objectsToSpawn[this.indexToSpawn]
+    );
+    newObject.setParentPreserveWorldTransform(null);
+
+    // Set position and rotation from last hit
+    const hitPosition = this.lastHitResult.position;
+    const hitNormal = this.lastHitResult.normal;
+
+    let lookDirection;
+    if (1 - Math.abs(hitNormal.normalize().dot(vec3.up())) < EPSILON) {
+      lookDirection = vec3.forward();
+    } else {
+      lookDirection = hitNormal.cross(vec3.up());
+    }
+
+    const toRotation = quat.lookAt(lookDirection, hitNormal);
+    newObject.getTransform().setWorldPosition(hitPosition);
+    newObject.getTransform().setWorldRotation(toRotation);
+  }
+
+  createHitTestSession(filterEnabled) {
+    // create hit test session with options
+    const options = HitTestSessionOptions.create();
+    options.filter = filterEnabled;
+
+    const session = WorldQueryModule.createHitTestSessionWithOptions(options);
+    return session;
+  }
+
+  onHitTestResult(results) {
+    if (results === null) {
+      this.targetObject.enabled = false;
+      this.lastHitResult = null;
+    } else {
+      this.targetObject.enabled = true;
+      // Store hit result for potential trigger end callback
+      this.lastHitResult = results;
+
+      // get hit information
+      const hitPosition = results.position;
+      const hitNormal = results.normal;
+
+      //identifying the direction the object should look at based on the normal of the hit location.
+
+      let lookDirection;
+      if (1 - Math.abs(hitNormal.normalize().dot(vec3.up())) < EPSILON) {
+        lookDirection = vec3.forward();
+      } else {
+        lookDirection = hitNormal.cross(vec3.up());
+      }
+
+      const toRotation = quat.lookAt(lookDirection, hitNormal);
+      //set position and rotation
+      this.targetObject.getTransform().setWorldPosition(hitPosition);
+      this.targetObject.getTransform().setWorldRotation(toRotation);
+    }
+  }
+
+  onUpdate() {
+    this.primaryInteractor =
+      SIK.InteractionManager.getTargetingInteractors().shift();
+    if (
+      this.primaryInteractor &&
+      this.primaryInteractor.isActive() &&
+      this.primaryInteractor.isTargeting()
+    ) {
+      const rayStartOffset = new vec3(
+        this.primaryInteractor.startPoint.x,
+        this.primaryInteractor.startPoint.y,
+        this.primaryInteractor.startPoint.z + 30
+      );
+      const rayStart = rayStartOffset;
+      const rayEnd = this.primaryInteractor.endPoint;
+
+      this.hitTestSession.hitTest(
+        rayStart,
+        rayEnd,
+        this.onHitTestResult.bind(this)
+      );
+    } else {
+      this.targetObject.enabled = false;
+    }
+  }
+
+  setObjectIndex(i) {
+    this.indexToSpawn = i;
+  }
+
+  setObjectEnabled(i) {
+    for (let i = 0; i < this.objectsToSpawn.length; i++)
+      this.objectsToSpawn[i].enabled = i == this.indexToSpawn;
+  }
+}
+```
+
+</TabItem>
+<TabItem value="js" label="JavaScript">
+
+```js
+// import required modules
+const Interactor = require('SpectaclesInteractionKit.lspkg/Core/Interactor/Interactor');
+const InteractorTriggerType = Interactor.InteractorTriggerType;
+const InteractorInputType = Interactor.InteractorInputType;
+const { SIK } = require('SpectaclesInteractionKit.lspkg/SIK');
+
+const WorldQueryModule = require('LensStudio:WorldQueryModule');
+const EPSILON = 0.01;
+
+//@input int indexToSpawn
+//@input SceneObject targetObject
+//@input SceneObject[] objectsToSpawn
+//@input bool filterEnabled
+
+function WorldQueryHitExample() {
+  // Private variables
+  var primaryInteractor;
+  var hitTestSession;
+  var transform;
+  var lastHitResult; // Store last hit result for trigger end callback
+
+  function onAwake() {
+    // create new hit session
+    hitTestSession = createHitTestSession(script.filterEnabled);
+    if (!script.sceneObject) {
+      print('Please set Target Object input');
+      return;
+    }
+    transform = script.targetObject.getTransform();
+    // disable target object when surface is not detected
+    script.targetObject.enabled = false;
+    setObjectEnabled(script.indexToSpawn);
+
+    // Set up trigger end callback
+    setupTriggerEndCallback();
+
+    // create update event
+    script.createEvent('UpdateEvent').bind(onUpdate);
+  }
+
+  function setupTriggerEndCallback() {
+    // Get all interactors and set up trigger end callbacks
+    var allInteractors = SIK.InteractionManager.getInteractorsByType(
+      InteractorInputType.All
+    );
+
+    for (var i = 0; i < allInteractors.length; i++) {
+      var interactor = allInteractors[i];
+      interactor.onTriggerEnd.add(
+        (function (currentInteractor) {
+          return function () {
+            // Only place object if we have a valid hit result and this is the primary interactor
+            if (lastHitResult && primaryInteractor === currentInteractor) {
+              placeObject();
+            }
+          };
+        })(interactor)
+      );
+    }
+  }
+
+  function placeObject() {
+    if (!lastHitResult) return;
+
+    // Copy the plane/axis object
+    var parent = script.objectsToSpawn[script.indexToSpawn].getParent();
+    var newObject = parent.copyWholeHierarchy(
+      script.objectsToSpawn[script.indexToSpawn]
+    );
+    newObject.setParentPreserveWorldTransform(null);
+
+    // Set position and rotation from last hit
+    var hitPosition = lastHitResult.position;
+    var hitNormal = lastHitResult.normal;
+
+    var lookDirection;
+    if (1 - Math.abs(hitNormal.normalize().dot(vec3.up())) < EPSILON) {
+      lookDirection = vec3.forward();
+    } else {
+      lookDirection = hitNormal.cross(vec3.up());
+    }
+
+    var toRotation = quat.lookAt(lookDirection, hitNormal);
+    newObject.getTransform().setWorldPosition(hitPosition);
+    newObject.getTransform().setWorldRotation(toRotation);
+  }
+
+  function createHitTestSession(filterEnabled) {
+    // create hit test session with options
+    var options = HitTestSessionOptions.create();
+    options.filter = filterEnabled;
+
+    var session = WorldQueryModule.createHitTestSessionWithOptions(options);
+    return session;
+  }
+
+  function onHitTestResult(results) {
+    if (results === null) {
+      script.targetObject.enabled = false;
+      lastHitResult = null;
+    } else {
+      script.targetObject.enabled = true;
+      // Store hit result for potential trigger end callback
+      lastHitResult = results;
+
+      // get hit information
+      var hitPosition = results.position;
+      var hitNormal = results.normal;
+
+      //identifying the direction the object should look at based on the normal of the hit location.
+
+      var lookDirection;
+      if (1 - Math.abs(hitNormal.normalize().dot(vec3.up())) < EPSILON) {
+        lookDirection = vec3.forward();
+      } else {
+        lookDirection = hitNormal.cross(vec3.up());
+      }
+
+      var toRotation = quat.lookAt(lookDirection, hitNormal);
+      //set position and rotation
+      script.targetObject.getTransform().setWorldPosition(hitPosition);
+      script.targetObject.getTransform().setWorldRotation(toRotation);
+    }
+  }
+
+  function onUpdate() {
+    primaryInteractor =
+      SIK.InteractionManager.getTargetingInteractors().shift();
+    if (
+      primaryInteractor &&
+      primaryInteractor.isActive() &&
+      primaryInteractor.isTargeting()
+    ) {
+      var rayStartOffset = new vec3(
+        primaryInteractor.startPoint.x,
+        primaryInteractor.startPoint.y,
+        primaryInteractor.startPoint.z + 30
+      );
+      var rayStart = rayStartOffset;
+      var rayEnd = primaryInteractor.endPoint;
+
+      hitTestSession.hitTest(rayStart, rayEnd, onHitTestResult);
+    } else {
+      script.targetObject.enabled = false;
+    }
+  }
+
+  function setObjectIndex(i) {
+    script.indexToSpawn = i;
+  }
+
+  function setObjectEnabled(indexToEnable) {
+    for (var i = 0; i < script.objectsToSpawn.length; i++) {
+      script.objectsToSpawn[i].enabled = i == indexToEnable;
+    }
+  }
+
+  // Initialize
+  onAwake();
+
+  // Expose public methods
+  script.setObjectIndex = setObjectIndex;
+  script.setObjectEnabled = setObjectEnabled;
+}
+
+// Register and initialize the script
+script.WorldQueryHitExample = WorldQueryHitExample;
+WorldQueryHitExample();
+```
+
+</TabItem>
+</Tabs>
+
+### Integration Steps
+
+1. **Save the script** and add it to your scene
+2. **Create a target object** to place on surfaces
+3. **Set the Target Object** input in the script component
+4. **Test in preview** by moving the mouse and tapping, or send to Connected Spectacles
+
+This example demonstrates the simplest method for spawning objects on surfaces using hand gestures (point to move, pinch to spawn).
+
+:::tip Asset Library Resources
+Check out the `World Query Hit - Spawn On Surface` and `Surface Detection` assets in the [Asset Library](https://developers.snap.com/spectacles/about-spectacles-features/asset-library) for ready-to-use implementations, or download them as unpacked packages from the [GitHub repository](https://github.com/specs-devs/packages/).
+:::
+
+## Semantic Hit Testing
+
+### Ground Detection
+
+World Query can identify specific surface types, such as ground surfaces. This enables automatic object placement based on surface classification.
+
+:::info
+
+**Experimental Feature**
+
+You need to enable [Experimental APIs] in your project settings to use semantic hit testing functionality.
+
+:::
+
+<video
+  src="/img/spectacles/world-query/world-query-module-ground-hit.webm"
+  style={{ maxWidth: '500px', width: '100%', borderRadius: '8px' }}
+  autoPlay
+  loop
+  muted
+  playsInline
+></video>
+
+### Classification Implementation
+
+Enable semantic classification to detect ground surfaces:
+
+<Tabs>
+<TabItem value="ts" label="TypeScript">
+
+```ts
+import {
+  InteractorTriggerType,
+  InteractorInputType,
+} from 'SpectaclesInteractionKit.lspkg/Core/Interactor/Interactor';
+import { SIK } from 'SpectaclesInteractionKit.lspkg/SIK';
+
+const WorldQueryModule =
+  require('LensStudio:WorldQueryModule') as WorldQueryModule;
+
+@component
+export class HitTestClassification extends BaseScriptComponent {
+  private hitTestSession: HitTestSession;
+  private primaryInteractor;
+
+  onAwake() {
+    this.hitTestSession = this.createHitTestSession();
+
+    this.createEvent('UpdateEvent').bind(this.onUpdate);
+  }
+
+  createHitTestSession() {
+    const options = HitTestSessionOptions.create();
+    options.classification = true;
+
+    const session = WorldQueryModule.createHitTestSessionWithOptions(options);
+    return session;
+  }
+
+  onHitTestResult = (result: WorldQueryHitTestResult) => {
+    if (result === null) {
+      // Hit test failed
+      return;
+    }
+
+    const hitPosition = result.position;
+    const hitNormal = result.normal;
+    const hitClassification = result.classification;
+
+    switch (hitClassification) {
+      case SurfaceClassification.Ground:
+        print('Hit ground!');
+        break;
+      case SurfaceClassification.None:
+        print('Hit unknown surface!');
+        break;
+    }
+  };
+
+  onUpdate = () => {
+    this.primaryInteractor =
+      SIK.InteractionManager.getTargetingInteractors().shift();
+    if (
+      this.primaryInteractor &&
+      this.primaryInteractor.isActive() &&
+      this.primaryInteractor.isTargeting()
+    ) {
+      const rayStartOffset = new vec3(
+        this.primaryInteractor.startPoint.x,
+        this.primaryInteractor.startPoint.y,
+        this.primaryInteractor.startPoint.z + 30
+      );
+      const rayStart = rayStartOffset;
+      const rayEnd = this.primaryInteractor.endPoint;
+
+      this.hitTestSession.hitTest(rayStart, rayEnd, this.onHitTestResult);
+    }
+  };
+}
+```
+
+</TabItem>
+<TabItem value="js" label="JavaScript">
+
+```js
+// import required modules
+const Interactor = require('SpectaclesInteractionKit.lspkg/Core/Interactor/Interactor');
+const InteractorTriggerType = Interactor.InteractorTriggerType;
+const InteractorInputType = Interactor.InteractorInputType;
+const { SIK } = require('SpectaclesInteractionKit.lspkg/SIK');
+
+const WorldQueryModule = require('LensStudio:WorldQueryModule');
+
+function HitTestClassification() {
+  // Private variables
+  var hitTestSession;
+  var primaryInteractor;
+
+  function onAwake() {
+    hitTestSession = createHitTestSession();
+
+    script.createEvent('UpdateEvent').bind(onUpdate);
+  }
+
+  function createHitTestSession() {
+    var options = HitTestSessionOptions.create();
+    options.classification = true;
+
+    var session = WorldQueryModule.createHitTestSessionWithOptions(options);
+    return session;
+  }
+
+  function onHitTestResult(result) {
+    if (result === null) {
+      // Hit test failed
+      return;
+    }
+
+    var hitPosition = result.position;
+    var hitNormal = result.normal;
+    var hitClassification = result.classification;
+
+    switch (hitClassification) {
+      case SurfaceClassification.Ground:
+        print('Hit ground!');
+        break;
+      case SurfaceClassification.None:
+        print('Hit unknown surface!');
+        break;
+    }
+  }
+
+  function onUpdate() {
+    primaryInteractor =
+      SIK.InteractionManager.getTargetingInteractors().shift();
+    if (
+      primaryInteractor &&
+      primaryInteractor.isActive() &&
+      primaryInteractor.isTargeting()
+    ) {
+      var rayStartOffset = new vec3(
+        primaryInteractor.startPoint.x,
+        primaryInteractor.startPoint.y,
+        primaryInteractor.startPoint.z + 30
+      );
+      var rayStart = rayStartOffset;
+      var rayEnd = primaryInteractor.endPoint;
+
+      hitTestSession.hitTest(rayStart, rayEnd, onHitTestResult);
+    }
+  }
+
+  // Initialize
+  onAwake();
+}
+
+// Register and initialize the script
+script.HitTestClassification = HitTestClassification;
+HitTestClassification();
+```
+
+</TabItem>
+</Tabs>
+
+<video
+  src="/img/spectacles/world-query/world-query-module-example.webm"
+  style={{ maxWidth: '300px', width: '100%', borderRadius: '8px' }}
+  autoPlay
+  loop
+  muted
+  playsInline
+></video>
+
+## Additional Resources
+
+### API Reference
+
+- [WorldQueryModule] - Main module for world querying functionality
+- [HitTestSession] - Session management for hit testing operations
+- [HitTestSessionOptions] - Configuration options for hit test sessions
+- [WorldQueryHitTestResult] - Results returned from hit test operations
+
+### Related APIs
+
+- [hitTestWorldMesh] - Alternative world mesh hit testing
+- [Physics.Probe.raycast] - Physics-based ray casting
+- [DepthTexture.sampleDepthAtPoint] - Direct depth sampling
+
+[World Query Hit Test]: https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built-In.HitTestSession.html#hittest
+[WorldQueryHit]: https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built-In.HitTestSession.html#hittest
+[World Query Module]: https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built-In.WorldQueryModule.html
+[hitTestWorldMesh]: https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built-In.DeviceTracking.html#hittestworldmesh
+[Physics.Probe.raycast]: https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built-In.Probe.html#raycast
+[DepthTexture.sampleDepthAtPoint]: https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built-In.DepthTextureProvider.html#sampledepthatpoint
+[HitTestSession]: https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built-In.HitTestSession.html
+[WorldQueryHitTestResult]: https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built-In.WorldQueryHitTestResult.html
+[WorldQueryModule]: https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built-In.WorldQueryModule.html
+[HitTestSessionOptions]: https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built-In.HitTestSessionOptions.html
+[Experimental APIs]: ../../permission-privacy/experimental-apis.mdx

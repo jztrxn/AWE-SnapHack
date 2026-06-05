@@ -1,0 +1,84 @@
+---
+sidebar_position: 1
+sidebar_label: 'Get Started'
+description: 'Set up and integrate the Spectacles UI Kit into your Lens project to build spatial user interfaces with pre-built components.'
+---
+
+# Get Started with UI Kit
+
+<img
+  src="/img/spectacles/spectacles-ui-kit/splash-ui-kit.png"
+  style={{
+    maxWidth: '1000px',
+    width: '100%',
+    borderRadius: '8px',
+    border: '1px solid #e0e0e0',
+  }}
+/>
+
+Spectacles UI Kit (SUIK) is a collection of components, utilities, and assets designed to help developers create interactive AR user interfaces for the Spectacles platform. It provides a cohesive design across the system and also interfaces seemlessly with Spectacles Interaction Kit, our package that handles inputs. It is designed to be easy to use for both beginners and extensible for advanced users.
+
+:::tip For Designers and Developers
+
+- **Designers**: Use the [Snap OS 2.0 Design Kit](../../best-practices/design-for-spectacles/snap-os-design-kit.mdx) (Figma) to create UI mockups with official tokens, styles, and components
+- **Developers**: Use Spectacles UI Kit (this package) to implement those designs in Lens Studio
+
+Both resources share the same design language, ensuring consistency from design to development.
+:::
+
+Spectacles UI Kit frequently updates so please refer to the [release notes](./release-notes.mdx) for the latest changes.
+
+## Adding UI Kit to Your Spectacles Project
+
+If you don't have a Spectacles project yet, create one by following our [Spectacles Lens setup guide](../../get-started//start-building/spectacles-lens-setup.mdx#create-a-lens-project).
+
+### Install the UI Kit Package
+
+1. In Lens Studio, go to **Window** → **Asset Library**
+2. In the search bar, type **"Spectacles UI Kit"**
+3. Click **Install** on the SpectaclesUIKit package
+
+   <img
+     src="/img/spectacles/asset-library/asset-library-ui-kit.png"
+     style={{ maxWidth: '400px', width: '100%', borderRadius: '8px' }}
+   />
+
+### Explore the Example Components
+
+The UI Kit includes pre-built example components to help you get started:
+
+4. In your **Resources Panel**, find the **SpectaclesUIKit** package
+5. Drag the **ExampleInterface** prefab into your **Scene Hierarchy**
+
+   <img
+     src="/img/spectacles/spectacles-ui-kit/example-interface.png"
+     style={{ maxWidth: '1000px', width: '100%', borderRadius: '8px' }}
+   />
+
+6. Go to your **Preview Panel** to see the UI components in action and understand how they work
+
+#### Next Steps
+
+- Check out the **Components** section for detailed usage examples
+- Explore how you can [customize your visuals](./custom-visual.mdx) and [extend components](./extend-component.mdx)
+
+## Upgrading Spectacles UI Kit within a Project
+
+Open your project. After TypeScript compilation is complete, right-click the SpectaclesUIKit package in the Asset Browser. If **Pull Update from Library** is available, select it.
+
+{' '}
+
+<img
+  src="/img/spectacles/spectacles-ui-kit/package-pull-update.png"
+  style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+/>
+
+To manually check for updates, navigate to **Asset Library \> Spectacles \> SpectaclesUIKit** and verify if a new version is available for installation. You can also select a specific version to install. After updating, right-click the SpectaclesUIKit package in the Asset Browser and select **Pull Update from Library**.
+
+Now your project is updated\!
+
+:::tip
+
+Compilation errors may result after updates from changes in the API. Review the release notes for any updates on new APIs and make the necessary edits.
+
+:::

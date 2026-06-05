@@ -1,0 +1,901 @@
+---
+sidebar_position: 4
+description: 'Spectacles Mobile Kit iOS SDK API reference covering bonding, session management, request handling, and asset loading in Swift.'
+---
+
+# iOS APIs
+
+### [BondingManager](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/BondingManager.swift)
+
+The main entry point for working with the Spectacles Mobile Kit. It manages bonding and session setup between your app and Spectacles.
+
+```Swift
+public protocol BondingManager: Sendable
+```
+
+#### Methods
+
+##### bind
+
+```Swift
+func bind(
+    request: BondingRequest,
+    deeplinkAsyncStream: AsyncStream<URL>
+) async -> BondingResult
+```
+
+Initiates a secure bonding process with the Lens specified in the provided BondingRequest.
+
+| Parameters          |                                                                                          |
+| :------------------ | :--------------------------------------------------------------------------------------- |
+| request             | Identifies the Lens to bind with.                                                        |
+| deeplinkAsyncStream | The deeplink for passing the bonding result from Spectacles App back to the current app. |
+
+##### unbind
+
+```Swift
+func unbind(
+    id: String,
+    deeplinkAsyncStream: AsyncStream<URL>
+) async -> BondingResult
+```
+
+Ends an existing secure bonding with a Lens.
+
+| Parameters          |                                                                                            |
+| :------------------ | :----------------------------------------------------------------------------------------- |
+| id                  | The ID of the bonding to revoke.                                                           |
+| deeplinkAsyncStream | The deeplink for passing the unbinding result from Spectacles App back to the current app. |
+
+| Return        |                       |
+| :------------ | :-------------------- |
+| BondingResult | The unbinding result. |
+
+##### avaliableBondings
+
+```Swift
+func avaliableBondings() -> [any Bonding]
+```
+
+Returns all available bondings.
+
+| Return        |                        |
+| :------------ | :--------------------- |
+| [any Bonding] | All existing bondings. |
+
+##### getBonding
+
+```Swift
+func etBongding(id: String) -> (any Bonding)?
+```
+
+Fetches the Bonding associated with the given id.
+
+| Parameters |                 |
+| :--------- | :-------------- |
+| id         | The bonding ID. |
+
+| Return  |                                                 |
+| :------ | :---------------------------------------------- |
+| Bonding | The bonding if found, or null if not available. |
+
+##### createSession
+
+```Swift
+func createSession(
+    bonding: any Bonding,
+    request: SessionRequest,
+    delegateBuiler: @escaping (any SpectaclesSession) -> any
+    SpectaclesRequestDelegate
+) throws -> any SpectaclesSession
+```
+
+Creates a session to communicate with the bounded Lens.
+
+| Parameters      |                                                             |
+| :-------------- | :---------------------------------------------------------- |
+| bonding         | The secure bonding to use.                                  |
+| request         | The session settings.                                       |
+| delegateBuilder | Factory for creating a delegate to handle session requests. |
+
+| Return            |                     |
+| :---------------- | :------------------ |
+| SpectaclesSession | The created session |
+
+### [Builder](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/Builder.swift)
+
+Used to create a BondingManager instance with required app credentials.
+
+```Swift
+public protocol Builder
+```
+
+#### Methods
+
+##### setIdentifier
+
+```Swift
+func setIdentifier(_ identifier: ClientIdentifier) -> Self
+```
+
+Set the unique identifier for your application.
+
+| Parameters |                             |
+| :--------- | :-------------------------- |
+| identifier | The app’s client identifier |
+
+| Return  |              |
+| :------ | :----------- |
+| Builder | For chaining |
+
+##### setVersion
+
+```Swift
+func setVersion(_ version: String) -> Self
+```
+
+Set the app version.
+
+| Parameters |                 |
+| :--------- | :-------------- |
+| version    | The app version |
+
+| Return  |              |
+| :------ | :----------- |
+| Builder | For chaining |
+
+##### setAuth
+
+```Swift
+func setAuth(_ auth: any Authentication) -> Self
+```
+
+Sets the authentication provider.
+
+| Parameters |                            |
+| :--------- | :------------------------- |
+| auth       | The Authentication to use. |
+
+| Return  |              |
+| :------ | :----------- |
+| Builder | For chaining |
+
+##### setBluetoothAdapter
+
+```Swift
+func setBluetoothAdapter(_ bluetoothAdapter: BluetoothAdapter) -> Self
+```
+
+Sets the bluetooth adapter. Optional, default to BluetoothAdapter/defaultInstance.
+
+| Parameters       |                               |
+| :--------------- | :---------------------------- |
+| bluetoothAdapter | The bluetooth adapter to use. |
+
+| Return  |              |
+| :------ | :----------- |
+| Builder | For chaining |
+
+##### build
+
+```Swift
+func build() -> any BondingManager
+```
+
+Builds and returns a BondingManager instance.
+
+| Return         |                              |
+| :------------- | :--------------------------- |
+| BondingManager | The BondingManager instance. |
+
+### [ClientIdentifier](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/BondingManager.swift)
+
+Represents your app's unique identifier.
+
+```Swift
+public struct ClientIdentifier: Sendable
+```
+
+#### Properties
+
+##### clientId
+
+```Swift
+public let clientId: String
+```
+
+The client identifier.
+
+##### appName
+
+```Swift
+public let appName: String
+```
+
+The app name.
+
+### [Authentication](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/BondingManager.swift)
+
+:::warning
+
+Reserved for future use.
+
+:::
+
+```Swift
+public protocol Authentication: Sendable
+```
+
+### [BondingRequest](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/BondingManager.swift)
+
+Represents a request to initiate bonding with a specific Lens.
+
+:::warning
+
+Since names are not unique, **singleLensByLensName** is for development use. Use **singleLens** in production for better security.
+
+:::
+
+:::warning
+
+When using **singleLensByLensName**, make sure untrusted Lens connections are set to allowed — see [SessionRequest](#sessionrequest) for details.
+
+:::
+
+```Swift
+public enum BondingRequest: Sendable {
+    case singleLens(lensId: String)
+    case singleLensByLensName(lensName: String)
+}
+```
+
+#### Enum Cases
+
+| Cases                              |                                                            |
+| :--------------------------------- | :--------------------------------------------------------- |
+| singleLens(lensId: String)         | Requests bonding with a specific Lens using its unique ID. |
+| singleLensByName(lensName: String) | Requests bonding with a Lens by its human-readable name.   |
+
+### [Bonding](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/BondingManager.swift)
+
+Represents a secure bonding between the app and a Lens.
+
+```Swift
+public protocol Bonding: Sendable
+```
+
+#### Properties
+
+##### id
+
+```Swift
+val id: String
+```
+
+The unique ID of the bonding.
+
+### [BondingResult](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/BondingManager.swift)
+
+Represents the result of a bonding attempt.
+
+```Swift
+public typealias BondingResult = Result<any Bonding, any Error>
+```
+
+### [ClientException](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/ClientException.swift)
+
+Base class for exceptions related to client errors.
+
+```Swift
+public class ClientException: Error, @unchecked Sendable
+```
+
+#### Properties
+
+##### message
+
+```Swift
+public let message: String
+```
+
+A human-readable description of the error.
+
+##### cause
+
+```Swift
+public let cause: (any Error)?
+```
+
+The underlying error that caused this exception, if available.
+
+### ClientException.LensClientNotInstalled
+
+Indicates that the Lens Client is not installed on the device.
+
+```Swift
+public class LensClientNotInstalled: ClientException
+```
+
+### ClientException.DeviceNotFound
+
+Indicates that the target device could not be found.
+
+```Swift
+public class DeviceNotFound: ClientException
+```
+
+### [SessionRequest](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/BondingManager.swift)
+
+Represents configuration options for establishing a session with
+Spectacles.
+
+```Swift
+public struct SessionsRequest: Sendable
+```
+
+#### Properties
+
+##### autoReconnect
+
+```Swift
+public let autoReconnect: Bool
+```
+
+If true, the session will try to reconnect automatically.
+
+##### acceptUnfusedSpectacles
+
+```Swift
+public let acceptUnfusedSpectacles: Bool
+```
+
+Allows connections to unfused (debug) Spectacles.
+
+##### acceptUntrustedLens
+
+```Swift
+public let acceptUntrustedLens: Bool
+```
+
+Allows untrusted Lens connections, useful for development with Lenses pushed from Lens Studio.
+
+### [SpectaclesSession](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/SpectaclesSession.swift)
+
+Represents an active session for connecting to and interacting with a specific Lens.
+
+```Swift
+public protocol SpectaclesSession: Sendable
+```
+
+#### Properties
+
+##### connectionStatusStream
+
+```Swift
+var connectionStatusStream: AsyncStream<ConnectionStatus>
+```
+
+A stream that emits status updates as the connection state changes.
+
+##### connectionStatus
+
+```Swift
+var connectionStatus: ConnectionStatus
+```
+
+The most recent known status of the connection at any given moment.
+
+#### Methods
+
+##### close
+
+```Swift
+func close(reason: ClonseReason?)
+```
+
+Closes the session and terminates the connection.
+
+| Parameters |                                            |
+| :--------- | :----------------------------------------- |
+| reason     | (Optional) Reason for closing the session. |
+
+### [CloseReason](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/SpectaclesSession.swift)
+
+Defines possible reasons for manually closing a session.
+
+```Swift
+public enum CloseReason {
+    case incompatibleLens
+}
+```
+
+#### Enum Cases
+
+| Cases            |                                     |
+| :--------------- | :---------------------------------- |
+| incompatibleLens | The connected Lens is incompatible. |
+
+### [DisconnectReason](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/SpectaclesSession.swift)
+
+Defines reasons for unexpected disconnection.
+
+```Swift
+public enum DisconnectReason: Sendable {
+    case sessionClosed
+    case connectionLost
+}
+```
+
+#### Enum Cases
+
+| Cases          |                                                    |
+| :------------- | :------------------------------------------------- |
+| sessionClosed  | The session was explicitly closed by the caller.   |
+| connectionLost | Connection was lost, likely due to network issues. |
+
+### [ConnectionStatus](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/SpectaclesSession.swift)
+
+Represents the current state of the connection to a Lens.
+
+```Swift
+public enum ConnectionStatus: Sendable {
+    case connectStart
+    case connected(Metadata)
+    case error(any Error)
+    case disconnected(DisconnectReason)
+}
+```
+
+#### Enum Cases
+
+| Cases                          |                                                                                                                |
+| :----------------------------- | :------------------------------------------------------------------------------------------------------------- |
+| connectStart                   | Indicates the session is starting a connection.                                                                |
+| connected(Metadata)            | Connection successfully established; includes identifying metadata about the Lens.                             |
+| error(any Error)               | An error occurred during connection or session management.                                                     |
+| disconnected(DisconnectReason) | The connection has ended, either intentionally or due to failure. The associated reason clarifies the context. |
+
+### [Metadata](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/SpectaclesSession.swift)
+
+Provides information about the connected Lens.
+
+```Swift
+public struct Metadata: Sendable
+```
+
+#### Properties
+
+##### lensId
+
+```Swift
+public let lensId: String
+```
+
+The unique identifier of the Lens.
+
+##### lensVersion
+
+```Swift
+public let lensVersion: String
+```
+
+The version of the connected Lens.
+
+### [SpectaclesRequestDelegate](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/SpectaclesRequestDelegate.swift)
+
+Delegate for processing incoming Lens requests.
+
+```Swift
+public protocol SpectaclesRequestDelegate: AnyObject, Sendable
+```
+
+#### Methods
+
+##### processServiceRequest
+
+```Swift
+func processServiceRequest(_ request: SpectaclesRequest) async
+```
+
+Handles an incoming service request from the Lens asynchronously.
+
+| Parameters |                                                                          |
+| :--------- | :----------------------------------------------------------------------- |
+| request    | The incoming SpectaclesRequest from the Lens that needs to be processed. |
+
+### [SpectaclesRequest](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/Requests/SpectaclesRequest.swift)
+
+The SpectaclesRequest is the top-level request abstraction used by the Spectacles Mobile Kit. It provides a unified representation of all request types initiated by the SDK. This allows consumers to work generically with requests while supporting a structured and type-safe mechanism for handling different categories of requests (e.g., API, asset).
+
+```Swift
+public enum SpectaclesRequest: Sendable
+```
+
+#### Enum Cases
+
+| Cases  |                                          |
+| :----- | :--------------------------------------- |
+| api    | API request (SpectaclesApiRequest).      |
+| assert | Asset requests (SpectaclesAssetRequest). |
+
+#### Properties
+
+##### underlyingRequest
+
+```Swift
+public var underlyingRequest: any RequestProtocol
+```
+
+The wrapped request conforms to the RequestProtocol. Useful for generic handling.
+
+### [SpectaclesRequest.RequestProtocol](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/Requests/SpectaclesRequest.swift)
+
+The base protocol for all internal request types. All request payloads must conform to this protocol.
+
+```Swift
+public protocol RequestProtocol: Sendable
+```
+
+### [SpectaclesRequestWithResponseProtocol](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/Requests/SpectaclesRequest.swift)
+
+Represents a request that expects a **single** response (e.g., a one-time request).
+
+```Swift
+public protocol SpectaclesRequestWithResponseProtocol<Payload>: SpectaclesRequest.RequestProtocol
+```
+
+#### Associated Types
+
+##### Payload
+
+```Swift
+associatedtype Payload: Sendable
+```
+
+The type of data returned upon successful request completion.
+
+#### Methods
+
+##### complete
+
+```Swift
+func complete(with result: Result<Payload, SpectaclesRequestError>)
+```
+
+Completes the request with either a successful result or an error.
+
+### [SpectaclesRequestWithStreamResponseProtocol](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/Requests/SpectaclesRequest.swift)
+
+Represents a request that may produce **multiple** responses (e.g., a subscription).
+
+```Swift
+public protocol SpectaclesRequestWithStreamResponseProtocol<Payload>: SpectaclesRequest.RequestProtocol
+```
+
+#### Associated Types
+
+##### Payload
+
+```Swift
+associatedtype Payload: Sendable
+```
+
+The type of data returned upon successful request completion.
+
+#### Methods
+
+##### yield
+
+```Swift
+func yield(_ value: Payload, isComplete: Bool)
+```
+
+Delivers a response.
+
+| Parameters |                                            |
+| :--------- | :----------------------------------------- |
+| value      | The response payload.                      |
+| isComplete | Indicates whether to complete the request. |
+
+##### finish
+
+```Swift
+func finish(throwing error: SpectaclesRequestError)
+```
+
+Finishes the request with an error.
+
+| Parameters |            |
+| :--------- | :--------- |
+| error      | The error. |
+
+### [SpectaclesRequestWithoutResponseProtocol](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/Requests/SpectaclesRequest.swift)
+
+Describes a request that does not expect a response (e.g., an event).
+
+```Swift
+public protocol SpectaclesRequestWithStreamResponseProtocol: SpectaclesRequest.RequestProtocol
+```
+
+### [SpectaclesRequestError](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/SpectaclesRequestError.swift)
+
+Enum representing possible errors that can occur during a request.
+
+```Swift
+public enum SpectaclesRequestError: Int, Error
+```
+
+#### Enum Cases
+
+| Cases            |                                                                                                                  |
+| :--------------- | :--------------------------------------------------------------------------------------------------------------- |
+| unknown          | Default state or unset.                                                                                          |
+| redirected       | Redirected. Corresponds to the 3XX HTTP response status codes.                                                   |
+| badRequest       | Bad request. Corresponds to the 4XX HTTP response status codes other than 401, 403, 404, 408, 413, 414, and 431. |
+| accessDenied     | Access denied. Corresponds to the HTTP response status codes 401 and 403.                                        |
+| notFound         | Not found. Corresponds to the HTTP response status code 404.                                                     |
+| timeout          | Timeout. Corresponds to the HTTP response status codes 408 and 504.                                              |
+| requestTooLarge  | Request too large. Corresponds to the HTTP response status codes 413, 414, and 431.                              |
+| serverError      | Server error. Corresponds to the 5XX HTTP response status codes other than 504.                                  |
+| requestCancelled | Request cancelled by the caller.                                                                                 |
+| internalError    | Internal error in the remote API framework.                                                                      |
+
+### [SpectaclesApiRequest](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/Requests/SpectaclesApiRequest.swift)
+
+An enum representing API requests made to the mobile app. Requests are either **call** requests (with a response stream) or **notify** requests (no response expected). All requests conform to a shared protocol defining a method name and parameters.
+
+```Swift
+public enum SpectaclesApiRequest: Sendable
+```
+
+#### Enum Cases
+
+| Cases                                          |                                                                                                                           |
+| :--------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------ |
+| call(any SpectaclesApiCallRequestProtocol)     | A request that expects a stream-based response from Spectacles. The payload conforms to SpectaclesApiCallRequestProtocol. |
+| notify(any SpectaclesApiNotifyRequestProtocol) | A one-way notification that does not expect any response. The payload conforms to SpectaclesApiNotifyRequestProtocol.     |
+
+#### Properties
+
+##### underlyingRequest
+
+```Swift
+public var underlyingRequest: any RequestProtocol
+```
+
+The wrapped request conforms to the RequestProtocol. Useful for generic handling.
+
+### SpectaclesApiRequest.RequestProtocol
+
+The base protocol for all SpectaclesApiRequest variants.
+
+```Swift
+public protocol RequestProtocol: SpectaclesRequest.RequestProtocol
+```
+
+#### Properties
+
+##### method
+
+```Swift
+var method: String { get }
+```
+
+The name of the API method being invoked.
+
+##### params
+
+```Swift
+var params: ByteArray { get }
+```
+
+The serialized parameters for the API method.
+
+### [SpectaclesApiCallRequestProtocol](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/Requests/SpectaclesApiRequest.swift)
+
+A protocol for Lens API calls that expect a stream-based response (e.g., a request or subscription).
+
+```Swift
+public protocol SpectaclesApiCallRequestProtocol: SpectaclesApiRequest.RequestProtocol,
+    SpectaclesRequestWithStreamResponseProtocol where Payload == Data {}
+```
+
+### [SpectaclesApiNotifiRequestProtocol](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/Requests/SpectaclesApiRequest.swift)
+
+A protocol for Lens API notifications that do **not** expect a response.
+
+```Swift
+public protocol SpectaclesApiNotifyRequestProtocol: SpectaclesApiRequest.RequestProtocol,
+    SpectaclesRequestWithoutResponseProtocol {}
+```
+
+### [SpectaclesAssetRequest](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/Requests/SpectaclesAssetRequest.swift)
+
+An enum representing asset-related requests. Currently supports loading asset content.
+
+```Swift
+public enum SpectaclesAssetRequest: Sendable
+```
+
+#### Enum Cases
+
+| Cases                                |                                                                                      |
+| :----------------------------------- | :----------------------------------------------------------------------------------- |
+| load(any SpectaclesLoadAssetRequest) | A request to load an asset by URI and version. The result includes the Asset object. |
+
+#### Properties
+
+##### underlyingRequest
+
+```Swift
+public var underlyingRequest: any RequestProtocol
+```
+
+The wrapped request conforms to the RequestProtocol. Useful for generic
+handling.
+
+### [SpectaclesAssetRequest.Asset](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/Requests/SpectaclesAssetRequest.swift)
+
+A structure representing an asset, including its name, version, and raw data.
+
+```Swift
+public struct Asset: Sendable {
+    public var name: String
+    public var version: String?
+    public var data: Data
+}
+```
+
+#### Properties
+
+##### name
+
+```Swift
+public var name: String
+```
+
+The name of the asset.
+
+##### version
+
+```Swift
+public var version: String?
+```
+
+The version identifier of the asset being delivered.
+This will be returned back to the app in future requests for version comparison.
+
+##### data
+
+```Swift
+public var data: Data
+```
+
+The raw data associated with the asset.
+
+### [SpectaclesAssetRequest.RequestProtocol](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/Requests/SpectaclesAssetRequest.swift)
+
+The base protocol for all SpectaclesAssetRequest variants.
+
+```Swift
+public protocol RequestProtocol: SpectaclesRequest.RequestProtocol
+```
+
+### [SpectaclesLoadAssetRequest](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/Requests/SpectaclesAssetRequest.swift)
+
+Represents a request from the Lens to load a SpectaclesAsset from the app.
+
+```Swift
+public protocol SpectaclesLoadAssetRequest: SpectaclesAssetRequest.RequestProtocol,
+    SpectaclesRequestWithResponseProtocol where Payload == SpectaclesAssetRequest.Asset
+```
+
+#### Properties
+
+##### uri
+
+```Swift
+var uri: String { get }
+```
+
+The path or URI of the requested asset.
+
+##### version
+
+```Swift
+var version: String? { get }
+```
+
+The version of the asset currently cached on Spectacles (if any). This may be a file checksum or timestamp, as determined by the SDK or
+Lens developer.  
+The app can use this to decide whether to:
+
+- return a new version of the asset, or
+- indicate that the cached version is still up-to-date.
+
+### [Log](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/Log.swift)
+
+Configures how logging output is produced and allows client applications to customize or disable logging entirely.
+
+```Swift
+public enum Log
+```
+
+#### Properties
+
+##### logger
+
+```Swift
+public static var logger: (any Logger)?
+```
+
+Spectacles Mobile Kit utilizes a logger instance to record events. You can customize this behavior:
+
+- Assign a custom Logger: Integrate SpectaclesKit logging with your application's existing logging systems.
+- Assign nil: Disable logging completely.
+- Default: The DefaultLogger is used if no custom logger is assigned.
+
+### [Log.Logger](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/Log.swift)
+
+Protocol for custom logging implementations.
+
+```Swift
+public protocol Logger: Sendable
+```
+
+#### Methods
+
+##### log
+
+```Swift
+func log(level: LogLevel, message: @autoclosure () -> String)
+```
+
+Logs a message.
+
+| Parameters |                                                                                                              |
+| :--------- | :----------------------------------------------------------------------------------------------------------- |
+| level      | The severity of the log message.                                                                             |
+| message    | A string message to log. Evaluated lazily to avoid unnecessary computation when the message won't be logged. |
+
+### [Log.LogLevel](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/Log.swift)
+
+Represents the severity level of a log message.
+
+```Swift
+public enum LogLevel: Int, Sendable
+```
+
+#### Enum Cases
+
+| Cases  |                                                      |
+| :----- | :--------------------------------------------------- |
+| debug  | Verbose information intended for debugging.          |
+| info   | Informational messages for normal operations.        |
+| notice | Significant but non-error events.                    |
+| error  | Recoverable error conditions.                        |
+| fault  | Serious errors that may indicate system instability. |
+
+### [Log.DefaultLogger](https://github.com/specs-devs/samples/tree/main/Spectacles%20Mobile%20Kit/sdk/iOS/SpectaclesKit/Sources/API/Log.swift)
+
+Default implementation of Log.Logger that writes logs to the system
+os.Logger API.
+
+```Swift
+public struct DefaultLogger: Logger
+```
+
+#### Methods
+
+##### init
+
+```Swift
+public init(level: LogLevel = .info, enablePublicLogging: Bool = false)
+```
+
+Logs a message.
+
+| Parameters          |                                               |
+| :------------------ | :-------------------------------------------- |
+| level               | Minimum severity to log (default: .info).     |
+| enablePublicLogging | Controls privacy marking for message content. |

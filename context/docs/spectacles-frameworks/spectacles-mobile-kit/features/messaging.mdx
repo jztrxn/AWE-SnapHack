@@ -1,0 +1,45 @@
+---
+sidebar_position: 2
+description: 'Send and receive messages between Spectacles mobile app and Spectacles Lenses using the Mobile Kit messaging framework.'
+---
+
+# Messages
+
+### Send Requests
+
+Use sendRequest() to send a message to the connected mobile app and wait for a response.
+
+```JavaScript
+try {
+    const response = await session.sendRequest('hello world!')
+    print(`Response: ${response}`)
+} catch (error) {
+    print(`Error: ${error}`)
+}
+```
+
+### Send Events
+
+Use sendData() to send a one-way message to the connected mobile app. This is a fire-and-forget operation, no response is expected.
+
+```JavaScript
+session.sendData('A Event!')
+```
+
+### Subscribe Events
+
+Lens can subscribe to events pushed from the connected mobile app using startSubscription().
+
+```JavaScript
+// subscribe to a topic
+const subscription = session.startSubscription(
+    'Topic-1',
+    (error) => {
+        print(`Subscription error: ${error}`)
+    }
+)
+
+subscription.add((event) => {
+    print(`Subscription event: ${event}`)
+})
+```

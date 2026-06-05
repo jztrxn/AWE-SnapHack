@@ -1,0 +1,939 @@
+---
+sidebar_label: 'Release Notes'
+description: 'Version history, breaking changes, migration steps, and new features for each Spectacles Interaction Kit release.'
+---
+
+# Release Notes
+
+## **v0.17.2**
+
+Spectacles Interaction Kit v0.17.2 introduces a major overhaul to near-field interactions, a unified physical interaction system, and a streamlined Inspector experience. Please review these release notes before getting started, as these improvements will significantly enhance the stability and developer experience of your Spectacles applications!
+
+To update the SIK in your existing project and consume it in the packed state:
+
+1. Right-click the SpectaclesInteractionKit folder in your Asset Browser and select **Pull Update**!
+   1. If **Pull Update** is not an available option, select **Register to Library** instead, then try again.
+2. Click on the SpectaclesInteractionKit prefab in your scene hierarchy and click **Revert** in the Inspector window.
+   1. ⚠️ If any errors are logged for missing script inputs, please close and re-open Lens Studio.
+
+For more information on updating your SpectaclesInteractionKit package, please review the updating documentation.
+
+### **Unified Physical Interactions**
+
+Users can now seamlessly start a poke and transition into a pinch drag without releasing the target, thanks to a new unified **PhysicalInteractionProvider** that replaces the separate poke and direct pinch systems. Dense UI layouts no longer exhibit false hover states on adjacent buttons during poke interactions.
+
+⚠️ **PokeTargetProvider** and **DirectTargetProvider** are now deprecated in favor of **PhysicalInteractionProvider**.
+
+### **Near-Field Interaction Improvements**
+
+This release includes extensive improvements to near-field interaction stability:
+
+- **Stable Pinch Locus**: The cursor no longer jumps or rubber bands when starting or releasing a near-field pinch. The locus is cached on pinch start and smoothly blends back to finger tracking on release.
+- **Smooth Mode Transitions**: Transitioning between far-field and near-field modes now includes a cursor fade animation instead of an abrupt switch.
+- **Reduced Mode Flickering**: Near-field zone boundaries now use hysteresis and debouncing to prevent rapid mode switching when the hand is near the edge of an **InteractionPlane**.
+- **Wrist Rotation Support**: The near-field pinch locus now follows hand rotation naturally, enabling more intuitive cursor movement during wrist rotation.
+
+### **Improved Inspector Panels**
+
+Inspector panels for common SIK components have been reorganized for a streamlined developer experience. Internal fine-tuning parameters that affect the "feel" and consistency of interactions have been hidden from the Inspector while remaining programmatically accessible. The new Inspector pattern uses styled section labels with clear visual hierarchy.
+
+Components updated include **Billboard**, **Headlock**, **ProximitySensor**, **InteractableManipulation**, **InteractionPlane**, **InteractorCursor**, **CursorController**, **Interactable**, **MobileInteractor**, **HandInteractor**, **MouseInteractor**, **BaseInteractor**, **LogLevelConfiguration**, **SIKLogLevelConfiguration**, and **HandVisual**.
+
+### **Core Updates**
+
+**HandInteractor**
+
+- Fixed ray oscillation during manipulation when the finger crosses the **InteractionPlane**.
+
+**InteractionPlane**
+
+- ⚠️ Renamed APIs for clarity (backward-compatible deprecation aliases provided):
+
+| Old Name                    | New Name              |
+| --------------------------- | --------------------- |
+| **proximityDistance**       | **nearFieldDepth**    |
+| **directZoneDistance**      | **physicalZoneDepth** |
+| **behindDistance**          | **behindZoneDepth**   |
+| **isWithinInteractionZone** | **isInNearFieldZone** |
+| **isWithinDirectZone**      | **isInPhysicalZone**  |
+
+- Reduced exposed Inspector inputs from 9 to 5.
+- Added hysteresis-based entry/exit thresholds for near-field and physical zones to prevent mode flickering at boundaries.
+- Fixed a bug where a **HandInteractor** could keep a destroyed **InteractionPlane** cached, causing errors during interaction.
+
+### **Interaction Updates**
+
+**Billboard**
+
+- Added a proximity deadzone that disables rotation when the camera is very close to the target, preventing instability when pulling a Frame close to the user's face.
+
+**InteractableManipulation**
+
+- Fixed single-axis constrained rotation (e.g., **rotationAxis** set to X, Y, or Z) to correctly constrain both position and rotation during direct manipulation.
+
+**InteractorCursor**
+
+- Cursor and ray visuals now smoothly fade as the hand approaches an **InteractionPlane** in near-field mode.
+
+**BaseInteractor**
+
+- Fixed a bug in **isHoveringInteractableHierarchy()** that could prevent hover states from transitioning properly when moving between unrelated **Interactables**.
+
+### **General Updates**
+
+**Utils - FunctionTimingUtils**
+
+- Added new **sleep()** async delay function for cleaner async/await flows compared to callback-based **setTimeout()**.
+
+## **v0.16.4**
+
+Spectacles Interaction Kit v0.16.4 includes major performance optimizations, cursor behavior improvements, and deprecation of legacy UI components. Please review these release notes before getting started, as these improvements will significantly enhance the performance and user experience of your Spectacles applications!
+
+To update the SIK in your existing project and consume it in the packed state:
+
+1. Right-click the SpectaclesInteractionKit folder in your Asset Browser and select **Pull Update**!
+   1. If **Pull Update** is not an available option, select **Register to Library** instead, then try again.
+2. Click on the SpectaclesInteractionKit prefab in your scene hierarchy and click **Revert** in the Inspector window.
+   1. ⚠️ If any errors are logged for missing script inputs, please close and re-open Lens Studio.
+
+For more information on updating your SpectaclesInteractionKit package, please review the updating documentation.
+
+### **Cursor V2**
+
+**InteractorCursor V2** is now enabled by default! The V2 cursor provides better depth interpolation, improved targeting visuals, and more natural cursor behavior. The cursor now moves freely along the plane of an Interactable rather than sticking to the fixed initial trigger point of interaction. In a future release, the V1 cursor will be deprecated and removed.
+
+### **Major Performance Optimizations**
+
+This release includes extensive performance optimizations across multiple components:
+
+- **Billboard**: Added frameskipping when within buffer, optimized math computations
+- **HandVisuals**: Added time-slicing and scene-aware update management
+- **Cursor V2**: Added caching and early exits for typical interactions.
+- **HandInteractor/TrackedHand**: Added FrameCache system to reduce redundant calculations.
+- **Poke Detection**: Now only spherecasts when in proximity to colliders
+- **SceneObjectUtils**: Hierarchy search functions are much more efficient.
+
+### **UI Component Deprecation**
+
+Legacy SIK UI components have been deprecated in favor of SpectaclesUIKit. The following components are now marked as deprecated and will be removed in a future release:
+
+- **ContainerFrame** → Use [Frame](../spectacles-ui-kit/components/Frame.mdx)
+- **PinchButton** → Use [Button](../spectacles-ui-kit/components/Button.mdx)
+- **ScrollBar** → Use [ScrollBar](../spectacles-ui-kit/components/ScrollBar.mdx)
+- **ScrollView** → Use [ScrollWindow](../spectacles-ui-kit/components/ScrollWindow.mdx)
+- **Slider** → Use [Slider](../spectacles-ui-kit/components/Slider.mdx)
+- **ToggleButton** → Use [Switch](../spectacles-ui-kit/components/Switch.mdx)
+
+Developers should migrate to SpectaclesUIKit for new projects and plan to update existing projects in future releases.
+
+### **PalmTap Deprecation**
+
+PalmTap interactions are being deprecated to ensure consistent system-level interactions and prevent conflicts with core OS functionality. This gesture is now reserved for system navigation and accessibility features. Developers should consider alternative interaction patterns such as pinch gestures, air tap, or voice commands for their application's user interface.
+
+### **Core Updates**
+
+**BaseInteractor**
+
+- Changed default **indirectDragThreshold** from 40cm to 10cm (from previous value) for more stable drag interactions.
+
+**HandInteractor**
+
+- Added **isTracking** check to avoid processing when hand is not tracked.
+- Optimized frequently-called APIs using new **FrameCache** system.
+- Improved performance by caching hand orientation and targeting pose calculations.
+
+**InteractionManager**
+
+- Added **hasMultipleActiveTargetingInteractors()** API for more efficient multi-interactor checks.
+
+**TrackedHand**
+
+- Implemented **FrameCache** for expensive computations like **isInTargetingPose()** and **getHandOrientation()**.
+
+- ⚠️ **Deprecated** - PalmTap functionality is now reserved for system usage.
+
+### **Interaction Updates**
+
+**Billboard**
+
+- Fixed long-standing gimbal lock issues that caused objects to flip when the user moved behind them.
+- Now rotates using YXZ order instead of XYZ to better handle the "user behind object" case.
+- Improved frame-rate independence for consistent behavior.
+- Added **animateToLookAtCamera(onComplete?: () => void)** API to smoothly animate objects to face the camera directly.
+- Added aggressive frame skipping when camera is within buffer zones.
+
+**InteractorCursor**
+
+- Cursor V2 is now enabled by default.
+- Removed sticky cursor behavior; cursor now slides freely along interaction planes.
+- Added **onRayVisibilityChangedEvent** for optimized ray visual updates.
+- Added **cursorParameters()** support for Cursor V2.
+- Moved to **LateUpdate** to avoid delayed movement during edge case transform modifications.
+
+**InteractorRayVisual**
+
+- Optimized update loop to only run when ray visual is actually visible.
+- Refactored expensive operations to check cheapest conditions first.
+
+**HandVisual**
+
+- Tied update loop and visual state to hand tracking; all effects hidden when hand is lost.
+- Optimized material/property updates to only run when corresponding visuals are active.
+- Refactored proximity checks to use time-slicing, processing colliders in batches across multiple frames.
+- Optimized distance calculations using squared distances with early exits.
+- Added early returns for "no target," "hand not tracked," and "AlwaysOn" states.
+
+**InteractableManipulation**
+
+- Fixed issue where interactables could remain stuck to cursor after release.
+- Tightened interactor filtering in **getTriggeringInteractors()**:
+  - Now requires **isActive()**
+  - Excludes hover-only states
+  - Only keeps interactors truly engaged with the current interactable
+- Added per-frame validation in **performManipulation()**:
+  - Polls current interactors and sends **EndManipulation** if none are engaged
+  - Sends **ChangeInteractors** signal if the engaged set changes
+
+**InteractionPlane**
+
+- Decreased default z-distance in front of **InteractionPlane** to 20cm for more comfortable near-field interactions.
+
+**PokeTargetProvider**
+
+- Now only performs expensive spherecasting when hand is in proximity to collider.
+
+### **UI Updates**
+
+**ContainerFrame**
+
+- ⚠️ **Deprecated** - Marked as deprecated in favor of SpectaclesUIKit components.
+
+**PinchButton**
+
+- ⚠️ **Deprecated** - Marked as deprecated in favor of SpectaclesUIKit components.
+
+**ScrollBar**
+
+- ⚠️ **Deprecated** - Marked as deprecated in favor of SpectaclesUIKit components.
+
+**ScrollView**
+
+- ⚠️ **Deprecated** - Marked as deprecated in favor of SpectaclesUIKit components.
+- Removed cursor positioning logic to support new free-sliding cursor behavior.
+
+**Slider**
+
+- ⚠️ **Deprecated** - Marked as deprecated in favor of SpectaclesUIKit components.
+- Fixed cursor position calculation when slider is scaled.
+- Removed cursor positioning logic to support new free-sliding cursor behavior.
+
+**ToggleButton**
+
+- ⚠️ **Deprecated** - Marked as deprecated in favor of SpectaclesUIKit components.
+
+### **General Updates**
+
+**Utils - SceneObjectUtils**
+
+- Added function overloads to accept either native component keys or type names.
+- Removed "Script" from function naming for consistency, e.g. **findScriptComponentInParents** renamed to **findComponentInParents**.
+- Now uses direct **getComponent()** or **getComponents()** calls instead of looping through all components.
+
+**Utils - UpdateDispatcher**
+
+- **UpdateDispatcherDebug** now uses last interval stats for "Top Consumers" instead of session-long averages.
+- Default interval set to 1 second for more meaningful real-time performance data.
+- Added stack trace to error logs when invoking **UpdateEvent** for easier debugging.
+
+**Utils - ColliderUtils**
+
+- Simplified **isCacheEntryValid()** for better performance.
+
+**Utils - FrameCache** (New)
+
+- Added new **FrameCache** utility class for caching expensive computations per frame.
+- Wraps frequently-called APIs to only calculate once per frame, avoiding redundant work.
+- Used extensively in **HandInteractor** and **TrackedHand** for orientation and pose calculations.
+
+**TypeScript Configuration**
+
+- Added stricter TypeScript compiler options for better code quality:
+  - **noFallthroughCasesInSwitch**: Ensures all switch cases either break or have explicit fall-through
+  - **noImplicitReturns**: Requires all code paths to return a value
+  - **noImplicitOverride**: Requires explicit override keyword for overridden methods
+- Fixed implicit override declarations in **DirectTargetProvider**, **MouseInteractor**, and **SyncInteractor**.
+
+## **v0.15.0**
+
+Spectacles Interaction Kit v0.15.0 has several new features, including new cursor behavior, interaction events, and SpectaclesSyncKit support\! Please review these release notes before getting started, as these improvements will greatly expand on what you can build for Spectacles\!
+
+To update the SIK in your existing project and consume it in the packed state:
+
+1. Right-click the SpectaclesInteractionKit folder in your Asset Browser and select **Pull Update**\!
+   1. If **Pull Update** is not an available option, select **Register to Library** instead, then try again.
+2. Click on the SpectaclesInteractionKit prefab in your scene hierarchy and click **Revert** in the Inspector window.
+   1. ⚠️ If any errors are logged for missing script inputs, please close and re-open Lens Studio.
+
+For more information on updating your SpectaclesInteractionKit package, please review the updating documentation.
+
+### **Hover / Trigger Event Changes**
+
+To allow users to cancel unintended interactions, SpectaclesInteractionKit has decoupled hover and trigger events. In earlier versions, triggering an **Interactable** would result in that **Interactable** remaining hovered until **onTriggerEnd** was invoked (unless the **Interactor** was disabled mid-interaction). For SpectaclesInteractionKit v0.15.0, triggering an **Interactable** will still allow users to end the hovering state mid-trigger by moving the cursor away from the object. If an **Interactable** is not hovered by the **Interactor** at the time of trigger end, the **onTriggerEndOutside** event will be invoked instead of **onTriggerEnd**. **Interactables** can now invoke the **onHoverExit** and **onHoverEnter** event while an **Interactor** is triggering the **Interactable**.
+
+<video
+  src="/img/spectacles/spectacles-interaction-kit/sik-release-0_15_0_visual_0.webm"
+  style={{ maxWidth: '300px', width: '100%', borderRadius: '8px' }}
+  autoPlay
+  loop
+  muted
+  playsInline
+></video>
+
+The new definition of a ‘hovered **Interactable**’ is ‘an **Interactable** currently intersected by the **Interactor**’s raycast’; the **currentInteractable** of an untriggered **Interactor** is the closest hovered **Interactable**.
+
+To allow devs to process these new events properly, several new APIs have been added to **Interactor**. **hoveredInteractables** allows devs to poll for all the currently hovered **Interactables** (defined by the intersection of the **Interactor**’s raycast). **isHoveringCurrentInteractable** and **wasHoveringCurrentInteractable** getters allow devs to poll if an **Interactor** is currently hovering the **currentInteractable** on the current frame. **isHoveringInteractable(interactable)** and **isHoveringInteractableHierarchy(interactable)** also allows devs to poll if certain **Interactables** are currently hovered by the **Interactor**.
+
+### **InteractorCursor V2**
+
+The **InteractorCursor** component now has a new opt-in behavior for visuals and positioning\! To enable this new behavior, please set **Use V2 Cursor** to **true** under the **CursorController** component of the **InteractorCursors** SceneObject.
+
+<video
+  src="/img/spectacles/spectacles-interaction-kit/sik-release-0_15_0_visual_1.webm"
+  style={{ maxWidth: '300px', width: '100%', borderRadius: '8px' }}
+  autoPlay
+  loop
+  muted
+  playsInline
+></video>
+
+The new V2 behavior will better adjust the depth of the cursor when targeting **Interactables** of different depths. Moving between two **Interactables** of different depths will interpolate the cursor between those depths. Moving the cursor entirely away from any **Interactable** will also hide the cursor to avoid visual clutter\! Devs can also place their **Interactables** under an **InteractionPlane** component in the hierarchy, which will cause the cursor to use that **InteractionPlane**’s flat surface to calculate the cursor position.
+
+The new V2 behavior also comes with new options for visuals\! Devs can set the **targetingVisual** of **Interactables** and **InteractionPlanes** to either the familiar **TargetingVisual.Cursor** or brand new **TargetingVisual.Ray**\! For any experiences that seem preferential to ray visuals rather than the 2D cursor, feel free to try out a brand new targeting visual\!
+
+### **SpectaclesSyncKit Compatibility**
+
+To enable developers to build better Connected Lenses using SpectaclesSyncKit, SpectaclesInteractionKit now builds sync functionality directly into its components if SpectaclesSyncKit is detected in the lens. If the SpectaclesSyncKit prefab is present in the Scene Hierarchy and the **\[OPTIONAL\] Connected Lens** SceneObject is enabled in the SpectaclesInteractionKit prefab hierarchy, components will be able to sync across connections.
+
+<video
+  src="/img/spectacles/spectacles-interaction-kit/sik-release-0_15_0_visual_2.webm"
+  style={{ maxWidth: '300px', width: '100%', borderRadius: '8px' }}
+  autoPlay
+  loop
+  muted
+  playsInline
+></video>
+
+To sync complex components like **InteractableManipulation**, **ContainerFrame**, **ScrollView**, **Slider**, and **ToggleButton**, a developer simply needs to set the **isSynced** value of that component to **true** via the Inspector. Simple feedback components like **ButtonFeedback**, **InteractableAudioFeedback**, **InteractableColorFeedback**, **InteractableOutlineFeedback**, **InteractableSquishFeedback**, **SliderFeedback**, and **ToggleFeedback** are synced by default.
+
+**Interactable** also has a new suite of events to subscribe to; every existing event for **Interactable** now has a sync version that is invoked whenever another connection invokes the original event. For example, if User A triggers a button, User A’s lens will fire an **onTriggerStart** event. The connected User B’s lens will then see an **onSyncTriggerStart** event for that same button. Devs are able to subscribe to just the local version of the event (**onTriggerStart**) if they want the button to only do something for the local user, or devs can subscribe to both the local **onTriggerStart** and the **onSyncTriggerStart** for the button to do something when triggered by either the local user or a connected user in the session.
+
+For more details, please see the official SpectaclesSyncKit x SpectaclesInteractionKit page [here](../spectacles-sync-kit/features/syncing-sik-components).
+
+### **Core Updates**
+
+**BaseInteractor**
+
+- Added **isHoveringCurrentInteractable** and **wasHoveringCurrentInteractable** API to return true if the **Interactor** is hovering the **currentInteractable**.
+- Added **isHoveringInteractable(interactable)** to return true if the **Interactor** is hovering the given **Interactable**.
+- Added **isHoveringInteractableHierarchy(interactable)** to return true if the **Interactor** is hovering the given **Interactable** or one of its descendant **Interactables**.
+- Added **hoveredInteractables** API to return the list of hovered **Interactables** currently intersected by the **Interactor**’s raycast.
+
+**HandInteractor**
+
+- Fixed an issue where the **HandInteractor** would incorrectly raycast past **InteractionPlanes**.
+- Fixed an issue where the **HandInteractor** would exit near field targeting mode when doing direct / poke interactions.
+- Fixed an issue where poking an **Interactable** in near field mode would result in inconsistent **planecastPoint** values.
+- Now smoothly transitions the raycast between far field targeting and near field targeting when entering / exiting proximity with an **InteractionPlane**.
+- Improved the stability of the near field raycast when doing interactions such as manipulation.
+- Improved logic for switching into near field targeting mode when in proximity to an **InteractionPlane**.
+
+**InteractionManager**
+
+- Added logic to invoke **onHoverEnter** and **onHoverExit** events during a triggered interaction when the **Interactor**’s raycast no longer intersects with the **Interactable**.
+- Added logic to invoke **onTriggerEndOutside** if the **Interactor**’s raycast no longer intersects with the **Interactable** at the time of trigger end.
+
+**SyncInteractionManager**
+
+- Added new component **SyncInteractionManager** that propagates **InteractionEvents** across users in a Connected Lens session.
+- Added new **\[OPTIONAL\] Connected Lenses** SceneObject to the **SpectaclesInteractionKit** prefab hierarchy.
+  - If the SceneObject is enabled with **SpectaclesSyncKit** also present in the hierarchy, **InteractionEvents** will be propagated across users (e.g. if User A invokes **onTriggerEnd** on an **Interactable**), User B will see an **onSyncTriggerEnd** on that same **Interactable**).
+
+**SyncInteractionManager**
+
+- Added new component **SyncInteractor** that is automatically instantiated when **SyncInteractionManager** is enabled in the hierarchy and another user enters the Connected Lens session.
+- For the purpose of callbacks for **InteractionEvents**, a local **SyncInteractor** represents an **Interactor** from another connected user.
+  - If User A triggers a button with their **HandInteractor**, User B will see an **onSyncTriggerStart** for that button with an associated **SyncInteractor**.
+
+### **Interaction Updates**
+
+**Billboard**
+
+- Added **setPivot(pivotPoint, interactor)** and **resetPivotPoint()** APIs to allow billboarded objects to rotate about a given pivot point by a given **Interactor**.
+- Added **targetTransform** to return the transform of the billboarded object.
+- Now calls **updateStartTransform()** of any associated **InteractableManipulation** components when billboarding during a manipulation.
+
+**CursorController**
+
+- Added **useV2** parameter to enable V2 behavior of **InteractorCursor**.
+
+**Interactable**
+
+- Added **onSyncHover**, **onSyncTrigger**, and **onSyncDrag** events that are invoked for the local user when a connected user invokes **onHover**, **onTrigger**, or **onDrag** in their own lens.
+- Added **onTriggerEndOutside** event, which is invoked whenever an **Interactor** ends its trigger while not hovering the originally triggered **Interactable**.
+- Added **targetingVisual** and **ignoreInteractionPlane** parameters to influence **InteractorCursor**’s positioning / visuals if using V2 behavior.
+- Added **keepHoverOnTrigger** to force the cursor and feedback scripts to maintain a hovered visual state for that **Interactable** even if the **Interactor** unhovers the **Interactable** during a trigger.
+
+**InteractableManipulation**
+
+- Added **updateStartTransform** API to update the cached values of the manipulation if another non-**InteractableManipulation** script has modified the target transform during the interaction.
+- Fixed an issue where the object would slightly drift if the **Billboard** component was also attached.
+- Added **isSynced** parameter to sync the state of the **InteractableManipulation** if SpectaclesSyncKit is present in the lens.
+
+**InteractionPlane**
+
+- Added **targetingVisual** parameter to influence **InteractorCursor**’s positioning / visuals if using V2 behavior.
+
+**InteractorCursor**
+
+- Modified cursor positioning during a triggered interaction to follow the raycast of the **Interactor** rather than sticking onto the **Interactable** (unless the **Interactable**’s **keepHoverOnTrigger \= true**).
+- Added V2 cursor positioning behavior, which is used when **CursorController** has **useV2 \= true**.
+  - Targeting visuals (cursor, ray) will naturally turn off when the **Interactor** is not targeting near any **Interactables** or **InteractionPlanes**.
+  - **InteractorCursor** now interpolates between different depths when moving between **Interactables** or **InteractionPlanes** at different distances from the user.
+  - Targeting visuals will match the **targetingVisual** of the closest **Interactable**, **InteractionPlane**, or **ContainerFrame**.
+
+### **UI Updates**
+
+**ContainerFrame**
+
+- Added pivoting logic to use the **Billboard** component’s new **setPivot** API during manipulations.
+- Added **targetingVisual** parameter to influence **InteractorCursor**’s positioning / visuals if using V2 behavior.
+- Added **isSynced** parameter to sync the state of the **ContainerFrame** if SpectaclesSyncKit is present in the lens.
+
+**ContainerFrame**
+
+- Added pivoting logic to use the **Billboard** component’s new **setPivot** API during manipulations.
+- Added **targetingVisual** parameter to influence **InteractorCursor**’s positioning / visuals if using V2 behavior.
+- Added **isSynced** parameter to sync the state of the **ContainerFrame** if SpectaclesSyncKit is present in the lens.
+
+**ScrollView**
+
+- Added **isSynced** parameter to sync the state of the **ScrollView** if SpectaclesSyncKit is present in the lens.
+
+**Slider**
+
+- Added **isSynced** parameter to sync the state of the **Slider** if SpectaclesSyncKit is present in the lens.
+
+**ToggleButton**
+
+- Added **isSynced** parameter to sync the state of the **ToggleButton** if SpectaclesSyncKit is present in the lens.
+
+### **General Updates**
+
+**Utils**
+
+- Added **SpringAnimate1D** class for spring animations along a single dimension
+- Added an optional parameter **out** for **SpringAnimate.evaluate(currentValue, targetValue, out)** as a performance improvement from using **out \= SpringAnimate.evaluate(currentValue, targetValue)**
+- Added **velocityX**, **velocityY**, and **velocityZ** APIs to **SpringAnimate**.
+
+**Helpers**
+
+- **ButtonFeedback**, **InteractableAudioFeedback**, **InteractableColorFeedback**, **InteractableOutlineFeedback**, **InteractableSquishFeedback**, **SliderFeedback**, and **ToggleFeedback** are now synced by default if SpectaclesSyncKit is present in the lens.
+- Feedback scripts now subscribe to **onTriggerEndOutside** to return to inactive state.
+
+## **v0.13.0**
+
+Spectacles Interaction Kit v0.13.0 has several new features, including new pinch filtering API\! Please review these release notes before getting started, as these improvements will greatly expand on what you can build for Spectacles\!
+
+To update the SIK in your existing project and consume it in the packed state:
+
+1. Right-click the SpectaclesInteractionKit folder in your Asset Browser and select **Pull Update**\!
+   1. If **Pull Update** is not an available option, select **Register to Library** instead, then try again.
+2. Click on the SpectaclesInteractionKit prefab in your scene hierarchy and click **Revert** in the Inspector window.
+3. If you have not done this yet for upgrading v0.11.0 to v0.12.0:
+   1. Right-click the newly updated SpectaclesInteractionKit package and select **Lock Package Contents**.
+   2. In your TypeScript or JavaScript files, change the path to any references to SIK assets from **“SpectaclesInteractionKit/…”** to **“SpectaclesInteractionKit.lspkg”**.
+
+For more information on updating your SpectaclesInteractionkit package, please review the updating documentation.
+
+### **Filtered Pinch**
+
+Interactables can now listen to a new set of **GestureModule** events for filtered pinches\! The filtered pinch events are more stable during interactions with high hand velocities, such as scrolling or dragging. For any of your components that use such interactions, we recommend setting **useFilteredPinch** of the associated **Interactable** to **true**\!
+
+Components like **ScrollView** and **InteractableManipulation** automatically set their **Interactables** to use filtered pinches; we hope these new events enable a higher level of stability during these interactions\! For more stationary interactions, we recommend not using filtered pinches for performance purposes.
+
+### **Core Updates**
+
+**InteractionManager**
+
+- Fixed an issue where deleting hovered **Interactables** would cause a null reference when updating interactions.
+
+### **Interaction Updates**
+
+**HandVisuals**
+
+- Added new value **HandVisualSelection.AlwaysOn** for **HandVisual.selectVisual**.
+  - Setting the value of **selectVisual** via Inspector will cause the hand visuals to always glow.
+
+**Interactable**
+
+- Added new API **useFilteredPinch** (default to false) that enables the **Interactable** to listen to filtered pinch events that are more stable during high velocity interactions.
+  - **useFilteredPinch** should be set to true for components w/ large motions like scrolling.
+
+**InteractableManipulation**
+
+- Refactored to now use a state machine to be more robust against API calls to enable/disable translation, scale, or rotation mid-interaction.
+
+**InteractionPlane**
+
+- Added new API **enableDirectZone** (default to true) that can be set to false to disable the inner direct zone that disables raycast targeting for the **HandInteractor**.
+
+### **UI Updates**
+
+**ContainerFrame**
+
+- Added get/set API **interactionPlane** to allow developers to modify the properties of the **ContainerFrame**’s **InteractionPlane** if **enableInteractionPlane \= true**.
+
+**ScrollView**
+
+- Fixed event propagation for multi-**Interactor** use cases to block interactions from outside of the scroll area.
+
+### **General Updates**
+
+**Script Lifecycle**
+
+- Shifted initialization of components to only reference other component classes during the **OnStart** event rather than **OnUpdate** to be more robust against different hierarchy orderings.
+
+**Typescript Compilation**
+
+- Made the SpectaclesInteractionKit codebase compliant with **strict** Typescript compilation.
+
+**Utils**
+
+- Fixed an issue where **setTimeout()** calls would sometimes cause other callbacks to be skipped.
+- Fixed a memory leak caused by **FrameScheduler.scheduleNextFrame()**.
+- Changed **onSignal** of **StateConfig** to also take in **signal** and **data** arguments for processing when receiving **StateMachine** signals.
+
+## **v0.12.0**
+
+Spectacles Interaction Kit v0.12.0 has several new features, including new package management features\! Please review these release notes before getting started, as these improvements will greatly expand on what you can build for Spectacles\!
+
+To update the SIK in your existing project and consume it in the packed state:
+
+1. Right-click the SpectaclesInteractionKit folder in your Asset Browser and select **Pull Update**\!
+   1. If **Pull Update** is not an available option, select **Register to Library** instead, then try again.
+2. Click on the SpectaclesInteractionKit prefab in your scene hierarchy and click **Revert** in the Inspector window.
+3. Right-click the newly updated SpectaclesInteractionKit package and select **Lock Package Contents**.
+4. In your TypeScript or JavaScript files, change the path to any references to SIK assets from **“SpectaclesInteractionKit/…”** to **“SpectaclesInteractionKit.lspkg”**.
+
+Please also select the SpectaclesInteractionKit prefab in your Scene Hierarchy and click **Revert** to ensure your scene has the proper script references.
+
+For more information on updating your SpectaclesInteractionkit package, please review the updating documentation.
+
+### **Package Management**
+
+As part of the Lens Studio 5.9 release, package management in Lens Studio has allowed for new workflows with SIK\! There are two main features to be leveraged: packed state consumption and package dependencies.
+
+### **Packed State (.lspkg) Consumption**
+
+If you would prefer to keep a cleaner working directory without an abundance of SIK assets and metafiles, you can now consume SIK in a packed state\! Instead of having SIK as an unpacked directory like **Assets/SpectaclesInteractionKit**, SIK can now be consumed as a **.lspkg** file as **Packages/SpectaclesInteractionKit.lspkg**. Import paths will have to be updated as a one-time step for the below process, but this change allows for a much cleaner directory structure\!
+
+### **Package Dependencies**
+
+Package dependencies are now live on Lens Studio 5.9\! If you would like to share your own packages that depend on SIK, you can simply right-click your directory to share, click **Create Package**, then right-click and export that package to see that a reference to SIK has been added to your package export. Any developer that installs your package will automatically pull SIK (if not present) into their scene.
+
+As part of this dependency work, **SpectaclesInteractionKit/Examples** has been pulled out of SIK and into its own Asset Library package named **SpectaclesInteractionKitExamples**. Installing this package into an empty scene will automatically pull in **SpectaclesInteractionKit** to resolve dependencies\!
+
+### **Upgrading from Unpacked Directory to Packed Package**
+
+To update the SIK in your existing project and consume it in the packed state:
+
+1. Right-click the SpectaclesInteractionKit folder in your Asset Browser and select **Pull Update**\!
+   1. If **Pull Update** is not an available option, select **Register to Library** instead, then try again.
+2. Click on the SpectaclesInteractionKit prefab in your scene hierarchy and click **Revert** in the Inspector window.
+3. Right-click the newly updated SpectaclesInteractionKit package and select **Lock Package Contents**.
+4. In your TypeScript or JavaScript files, change the path to any references to SIK assets from **“SpectaclesInteractionKit/…”** to **“SpectaclesInteractionKit.lspkg”**.
+
+### **Core Updates**
+
+**HandInteractor**
+
+- Added new API **hand** that returns a reference to the **TrackedHand** of the Interactor.
+- Removed deprecated raycasting algorithms, using the **GestureModule**’s targeting ray as the primary raycast.
+- Moved poke directionality logic from **Interactable** to **PokeTargetProvider** to prevent directionality checks from breaking other interactions.
+
+**MouseInteractor**
+
+- Added new Inspector inputs **moveInDepth** and **moveInDepthAmount** to help test 3D interactions along the z-axis in the Lens Studio Preview panel.
+
+**InteractionManager**
+
+- Added new field **endedInsideInteractable** to **onTriggerEnd** event arguments, which returns **true** if the triggering **Interactor** has ended the trigger while still intersecting with the **Interactable**’s collider.
+
+### **Interaction Updates**
+
+**HandVisuals**
+
+- Fixed an issue where the hand visuals would still display while holding a phone (which turns off hand interactions).
+- Removed **RadialOcclusionView** from **HandVisuals**.
+
+**Interactable**
+
+- Renamed poke directionalities and added better documentation for better clarity.
+- Set the default directionality to only accept pokes from the front face of the **Interactable** when **enablePokeDirectionality \= true**.
+- Added new APIs **isSynced** and **acceptableSyncInteractionTypes** to support synced interactions using the **SpectaclesSyncKit** package on future releases.
+  - If a project does not have **SpectaclesSyncKit**’s **SyncInteractionManager** present, these APIs are non-functional and can be ignored.
+- Fixed an issue where hovering with two **Interactors** and removing one **Interactor** would prevent **onHoverUpdate** from firing.
+
+**InteractableManipulation**
+
+- Fixed an issue where the user could drag an object out of raycasting range and not be able to target it after releasing the interaction.
+- Added new field **interactors** to all manipulation event arguments (such as **TranslateEventArg**) to enable easy access to manipulating **Interactors** in callback functions.
+- Fixed an issue where manipulation events (such as **onRotationStart/End**) would sometimes fire a start event but not an end event for the same interaction, and vice versa.
+  - Every start event will be followed by an end event when that specific manipulation has ended.
+- Fixed an issue where triggering an **Interactable** directly with one hand and indirectly with the other hand would break manipulations.
+
+**InteractorLineVisual**
+
+- Marked as deprecated for removal in future SIK releases.
+
+### **UI Updates**
+
+**ScrollView**
+
+- Added a new API **isReady** that returns **true** when the **ScrollView** has initialized and is ready for modifications.
+- Fixed an issue where children of **ScrollView** would not properly receive **onTrigger** and **onDrag** events during a scroll.
+- Added a new API **onContentLengthChanged** which fires whenever a developer sets the **contentLength** of the **ScrollView** manually.
+
+### **Helper Updates**
+
+**ButtonFeedback**
+
+- Fixed an issue where the button’s icon would not render when both **defaultIcon** and **onIcon** were defined.
+
+### **General Updates**
+
+**Utils**
+
+- Added a new API **f** to **NativeLogger** which throws a fatal exception after logging the inputted message with the logger’s tag.
+- Added new functions **spring**, **smooth**, **snappy**, and **bouncy** to **SpringAnimate** to help with animations.
+
+**Examples**
+
+- Example assets are now provided in a separate package **SpectaclesInteractionKitExamples** that can be deleted without any regressions for **SpectaclesInteractionKit** components.
+- Converted all thrown **Errors** in example scripts to use **NativeLogger.f** for fatal exceptions instead.
+
+**Documentation**
+
+- Added Inspector tooltips / TSDoc to every **@input** field of every component.
+
+**Package Management**
+
+- Added a **README** file to the **SpectaclesInteractionKit** package for usage instructions.
+- Move **SpectaclesInteractionKit/Examples** to its own package named **SpectaclesInteractionKitExamples**.
+
+## **v0.11.0**
+
+Spectacles Interaction Kit v0.11.0 has several improvements to the kit, including interaction filtering\! Please review these release notes before getting started, as these improvements will greatly expand on what you can build for Spectacles\!
+
+To update the SIK in your existing project, right-click the SpectaclesInteractionKit package in your Asset Browser and select Pull Update\! Please also select the SpectaclesInteractionKit prefab in your Scene Hierarchy and click **Revert** to ensure your scene has the proper script references.
+
+For more information on updating your SpectaclesInteractionKit package, please review the [upgrading documentation](/spectacles/spectacles-frameworks/spectacles-interaction-kit/get-started#upgrading-spectacles-interaction-kit-within-a-project).
+
+:::warning
+
+If you encounter issues updating the Spectacles Interaction Kit, follow the instructions below based on your operating system:
+
+- Close Lens Studio.
+- Navigate to the folder that contains your Lens Studio project.
+- Delete the `Cache` folder within that directory.
+- Delete the local global cache folder based on your operating system:
+
+**For MacOS :**
+
+- Open the search bar.
+- Enter the folder path `~/Library/Caches/Snap` .
+- Delete the specified folder.
+
+**For Windows :**
+
+- Open the search bar.
+- Enter the folder path `%localappdata%\snap` .
+- Delete the specified folder.
+
+:::
+
+### **Interaction Filtering**
+
+To allow a more intuitive transition between interacting with real life objects without needing to take off the Spectacles, the **HandInteractor** now processes new **GestureModule** information to block interactions when the user is not interacting with the AR scene.
+
+First, the **HandInteractor** now consumes **GestureModule**’s new **targetingIntent** API, which is designed to detect when the user is not intending to interact with AR content because of typing on a physical keyboard. The new intent processing system will try to detect that typing behavior to block the hands from targeting.
+
+Second, the **HandInteractor** now consumes **GestureModule**’s new **getIsPhoneInHandBegin/EndEvent** to flag when the user is holding a phone, blocking interactions as a result. The **TrackedHand** class also exposes a new event **onPhoneInHandBegin/EndEvent** for any devs that need easy access to this information.
+
+### **Interactor Events**
+
+**Interactors** now fire off their own **onTrigger** events\! This is helpful to detect pinches of the hand even when not targeting a specific **Interactable** or creating logic common to every interaction regardless of what it is triggering. As a frequently requested feature, we can’t wait to see what clever interactions spawn in from these events, like summoning a button whenever pinching empty space\!
+
+### **Near Field Improvements**
+
+Near field interactions have been refined through a multitude of ways, particularly with visuals, poke, and near field **InteractionPlanes** / **ContainerFrames**. First, **HandVisuals** have been modified to make it easier for the user to understand where their hand is relative to the near field UI. Second, the **HandInteractor** has improved the logic of detecting false pokes to avoid accidental triggers, while **Interactable** also exposes a new **enablePokeDirectionality** API to allow **Interactables** to only accept poke from certain directions\! Lastly, the cursor has been disabled during near field interactions for better clarity with the closer visuals. Near field interaction improvements will be a continued focus, so we can’t wait to see new experiences using near field UI\!
+
+### **Core Updates**
+
+**HandInteractor**
+
+- Now forced into physical targeting (poke, direct pinch) when interacting in close proximity to an **InteractionPlane**.
+- Improved the calculation of **interactionStrength** when poking **Interactables** to be more granular (rather than just 0 or 1).
+- Now modified to always process **GestureModule**’s targeting intent to block indirect raycast interactions.
+- Now modified to block interactions while holding a phone.
+  - Also fires **onPhoneInHandBegin/End** when detecting the phone in hand.
+
+**HandVisuals**
+
+- Adjusted parameters for better visibility during far field and palm interactions.
+- Fixed an issue with compression that caused distorted visuals in certain edge cases.
+- Fixed an issue with the hand menu persisting when calibrating the Mobile Controller.
+
+**Interactable**
+
+- Added poke directionality APIs: **enablePokeDirectionality**, **acceptableXDirections**, **acceptableYDirections**, **acceptableZDirections**.
+  - When enabled and set to a targeting mode that includes **TargetingMode.Poke**, the **Interactable** can only be poked from the given directions.
+
+**Interactor**
+
+- Added events **onTriggerStart/Update/End/Cancel** to enable devs to listen directly to the **Interactor** for triggers that aren’t necessarily targeting **Interactables**.
+- Moved **release** logic to be handled in **BaseInteractor** rather than subclasses.
+- Blocked **TargetProviders** from targeting objects outside of FoV.
+- Fixed an issue where **TargetProviders** could not target child **Interactables** of a **ScrollView** / **ContainerFrame** if behind the parent object.
+- Fixed an issue where **planecastPoint** would return **null** when in physical proximity to the **Interactable**.
+
+### **Interaction Updates**
+
+**InteractionPlane**
+
+- Added an inner targeting zone that causes **HandInteractor** to only use physical targeting (poke, direct pinch).
+- Fixed a potential race condition by registering / deregistering the **InteractionPlane** when enabled / disabled.
+
+**InteractorCursor**
+
+- Now modified to hide the cursor during near field interactions with the **ContainerFrame**.
+
+### **UI Updates**
+
+**ContainerFrame**
+
+- Exposed APIs **showFollowButton** and **showCloseButton** to programmatically show/hide the buttons.
+- Exposed API **enableCutout(isEnabled)** to programmatically show/hide the inner cutout.
+- Fixed an issue with destroying snappable **ContainerFrames** from improper teardown.
+- Fixed an issue where snapping was prevented due to a null reference.
+- Fixed an issue where scaling the frame quickly when near the min/max side would reject the scaling.
+- Fixed an issue where calling **enableClose/FollowButton** would not also show/hide the button.
+- Made the Follow button pokeable by default.
+
+**ScrollView**
+
+- Fixed an issue where **onFocusEnter/Exit** was being invoked too many times when using multiple Interactors.
+- Fixed an issue where cursors would sometimes stick incorrectly when using multiple Interactors.
+
+**PinchButton**
+
+- Fixed an issue where **PinchButton** was catching errors without logging them; callback functions now correctly throw errors.
+
+### **Helper Updates**
+
+**InteractableAudioFeedback**
+
+- Enabled programmatic instantiation of **InteractableAudioFeedback** instead of needing to create in Scene Hierarchy before runtime.
+
+### **Miscellaneous Changes**
+
+**setTimeout**
+
+- Moved **setTimeout** from **debounce.ts** to **FunctionTimingUtils.ts**.
+
+**Logs**
+
+- Added **Info** level logs for **GestureModule** events
+
+## **v0.10.0**
+
+Spectacles Interaction Kit v0.10.0 has several improvements to the kit, including a new near field interaction paradigm\! Please review these release notes before getting started, as these improvements will greatly expand on what you can build for Spectacles\!
+
+To update the SIK in your existing project, you will need to open your project using **Lens Studio v5.4**\! Then, right-click the SpectaclesInteractionKit package in your Asset Browser and select Pull Update\! Please also select the SpectaclesInteractionKit prefab in your Scene Hierarchy and click **Revert** to ensure your scene has the proper script references.
+
+For more information on updating your SpectaclesInteractionkit package, please review the [updating documentation](../spectacles-interaction-kit/get-started.mdx#upgrading-spectacles-interaction-kit-within-a-project).
+
+### **Near Field Interactions**
+
+To better support near field interactions (where the hand is in physical proximity to Interactables rather than raycasting) of 2.5D UI, SIK now has the **InteractionPlane** that enhances the targeting capabilities of any **HandInteractors** in front of it\! While this component is in early development, you can consume these enhancements by placing your UI in a **ContainerFrame** and setting **Container.enableInteractionPlane \= true** either through the Inspector or through script\! The **InteractionPlane** adjusts the raycast of the **HandInteractor** to be much more comfortable to target nearby UI precisely while also displaying our new **HandVisuals** to help with depth perception.
+
+### **HandVisuals Update**
+
+SIK’s default **HandVisuals** has been updated to better help the user understand the position of their hand, particularly with depth\! Users should be able to see their hand in relation to any 2.5D UI’s that use the **ContainerFrame** (with **enableInteractionPlane \= true**) much easier, while also providing some extra data like if the user’s hand is about to pass through an **Interactable** entirely\!
+
+These new visuals have also improved SIK’s hand occlusion when in proximity to **Interactables**. If you would like the hand visuals to only consist of an occluder (instead of also providing hints via glow), you can set **HandVisuals.selectVisual \= “Occluder”** via Inspector\!
+
+### **Targeting Intent**
+
+As an experimental behavior, developers can now enable **HandInteractor.filterBasedOnIntent \= true** via Inspector to enable a new intent processing flag to block interactions when the hand might not be targeting those elements. One such use case is if the user is typing on a laptop while wearing the device; the new intent processing system will try to detect that typing behavior to block the hands from targeting. Other future use cases include blocking interactions while using the phone, etc.
+
+While this intent processing is still in development, this behavior will be off by default until enabled manually\! Feel free to try this new system out or keep your SIK as-is\!
+
+### **Core Updates**
+
+**HandInteractor**
+
+- Added support for near field interactions that use the **InteractionPlane**
+  - Introduced API **currentInteractionPlane** that returns the closest **InteractionPlane** whose zone contains the hand
+  - Introduced API **isFarField** that returns true if the hand is not in any **InteractionPlane**’s zone
+  - Adjusted the hand’s raycast to target objects easier whenever the hand is inside an **InteractionPlane**’s zone
+- Added experimental API **filterBasedOnTargetingIntent** that enables experimental behavior to filter out interactions if the hand is interacting with the real world (typing on keyboard, using phone)
+
+**InteractionManager**
+
+- Added API **getInteractionPlanes** that returns a reference to all **InteractionPlanes** in the scene
+
+### **Interaction Updates**
+
+**Billboard**
+
+- Fixed a gimbal lock issue that would cause infinite rotations
+
+**HandVisuals**
+
+- Updated the shader material for a stronger finger tip outline and glow
+- Now always activated during near field interactions with **InteractionPlane**
+
+**InteractionPlane**
+
+- Introduced the **InteractionPlane** component which can automatically be used to improve **ContainerFrame** interactions
+- Added APIs **planeSize** and **proximityDistance** to define the bounds of an ‘interaction zone’ in front of an Interactable
+- Added API **projectPoint** to project a point in world space onto the closest point on the plane defined by the **InteractionPlane**’s normal and origin position
+
+### **UI Updates**
+
+**ContainerFrame**
+
+- Added API **enableInteractionPlane** that instantiates an **InteractionPlane** when set to **true** to improve near field interactions (when the hand is in within \~30cm of the **ContainerFrame**)
+
+## **v0.9.0**
+
+Spectacles Interaction Kit v0.9.0 has several improvements to the kit, including an all-new example scene\! Please review these release notes before getting started, as these improvements will greatly expand on what you can build for Spectacles\!
+
+To [update the SIK](../spectacles-interaction-kit/get-started#upgrading-spectacles-interaction-kit-within-a-project) in your existing project, right-click the SpectaclesInteractionKit package in your Asset Browser and select Pull Update\!
+
+### **Sample Scene: Rocket Workshop**
+
+<video
+  src="/img/spectacles/spectacles-interaction-kit/sik-release-0_9_0-note-example.webm"
+  style={{ maxWidth: '300px', width: '100%', borderRadius: '8px' }}
+  autoPlay
+  loop
+  muted
+  playsInline
+></video>
+
+As the main feature of SIK v0.9.0, SIK now comes with a reworked example scene\! SIK has split into two main prefabs: **SpectaclesInteractionKit.prefab** for components that handle interactions (e.g. **Interactors** and **Cursors**), and **SIK Examples.prefab** for examples on how to use SIK to build an effective UI\!
+
+Check out the new examples for setting up more complex components such as **ContainerFrame** and **ScrollView**\!
+
+:::warning
+
+This division of the original SIK prefab into core interaction components and examples will also allow for a smoother update process in the future. As a one-time process, we recommend deleting the SpectaclesInteractionKit prefab in your Scene Hierarchy before updating your SIK to v0.9.0, then re-dragging the SpectaclesInteractionKit prefab back into your Scene Hierarchy.
+
+:::
+
+### **Core Updates**
+
+**HandInteractor**
+
+- Changed **dragVector** to return **vec3.zero()** whenever the hand goes from out of FoV to in FoV, preventing noisy drag updates
+
+**InteractionManager**
+
+- Added **getInteractablesThatTarget** which returns all Interactables that can be targeting by a given type
+  - e.g. **getInteractablesThatTarget(TargetingMode.Poke)** would return all Interactables of **TargetingMode.Poke** or **TargetingMode.All**
+- Deprecated **getInteractablesByTargetingMode** in favor of **getInteractablesThatTarget**
+
+**Interactor**
+
+- Changed **TargetingMode.All** to also include poke targeting ( previously only **Indirect** & **Direct** targeting)
+
+### **Interaction Updates**
+
+**Billboard**
+
+- Deprecated the redundant **duration** property for cleaner usage
+
+**InteractableManipulation**
+
+- Fixed an issue where disabled Interactors could still manipulate the SceneObject
+
+**InteractorCursor**
+
+- Renamed **enableCursorSnapping** to **enableCursorHolding** for more accurate naming
+
+### **UI Updates**
+
+**ContainerFrame**
+
+- Fixed snapping issues
+- Fixed an issue with deleting the ContainerFrame’s HoverBehavior
+- Fixed an issue with mishandling the cursor visual when interacting with the ContainerFrame
+- Removed redundant / deprecated input parameters and API
+- Improved the look of the ContainerFrame’s content by adding a cutout of the background
+- Updated the resizing algorithm for smoother usage
+
+**ScrollBar**
+
+- Refactored initialization to avoid a crash on enable
+
+**ScrollView**
+
+- Improved the scroll interaction by filtering noise at the end of the drag
+- Refactored initialization to avoid a crash on enable
+
+### **Helper Updates**
+
+**InteractableAudioFeedback**
+
+- Updated the default .mp3 assets for trigger start / end
+
+**InteractableColorFeedback**
+
+- Fixed callback logic to display the proper interaction feedback
+
+### **Provider Updates**
+
+**CameraProvider**
+
+- Fixed an issue where the camera component being disabled would cause unexpected behavior
+
+**HandVisuals**
+
+- Improved start up time via lazy instantiation
+- Exposed **initialize** to allow developers to instantiate the visuals at-will
+
+**TrackedHand**
+
+- Added a wrist Keypoint to **allPoints**
+- Fixed hand tracking calculations to operate in world space to prevent scene hierarchy issues
+
+### **General Updates**
+
+**Documentation**
+
+- Added TSDocs to all components for better class documentation
+
+**Logging**
+
+- Added a log to print the exact SIK version in the console on lens start
+
+**Material Improvements**
+
+- Fixed frustrum culling in many SIK assets to improve visibility and power consumption
+
+**Package Metadata**
+
+- Added a link to documentation in the package’s description in Asset Browser / Inspector
+- Added preliminary setup steps in the package’s description in Asset Browser / Inspector

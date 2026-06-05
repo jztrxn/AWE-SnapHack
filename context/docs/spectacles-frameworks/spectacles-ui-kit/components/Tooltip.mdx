@@ -1,0 +1,105 @@
+---
+sidebar_position: 1
+description: 'Display contextual help text near interactive elements in Spectacles Lenses using the UI Kit Tooltip component for guidance.'
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Tooltip
+
+This component creates a pop-up tooltip when hovering over its parent. Create a child object, create this Tooltip component, and use its transform to position it.
+
+<video
+  src="/img/spectacles/spectacles-ui-kit/tooltip-docs-demo.webm"
+  style={{ borderRadius: '8px' }}
+  autoPlay
+  loop
+  muted
+  playsInline
+  style={{ maxWidth: '500px', width: '100%', borderRadius: '8px' }}
+/>
+
+## Component Breakdown
+
+<img
+  src="/img/spectacles/spectacles-ui-kit/tooltip-panel.png"
+  style={{ maxWidth: '500px', width: '100%', borderRadius: '8px' }}
+/>
+<br />
+<br />
+
+|                |                                                      |
+| :------------- | :--------------------------------------------------- |
+| `Render Order` | Sets the renderOrder for the visuals of the element. |
+| `Tip`          | Sets the text of the Tooltip.                        |
+
+### Code Example
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+import { TextInputField } from 'SpectaclesUIKit.lspkg/Scripts/Components/TextInputField/TextInputField';
+import { Tooltip } from 'SpectaclesUIKit.lspkg/Scripts/Tooltip';
+
+/**
+ * Example script for the Tooltip component.
+ * It creates a text input field and a tooltip and sets the tooltip's text and position.
+ */
+
+@component
+export class ExampleTooltipScript extends BaseScriptComponent {
+  onAwake() {
+    const textInputField = this.sceneObject.createComponent(
+      TextInputField.getTypeName()
+    );
+    textInputField.placeholderText = 'Enter your name';
+    textInputField.inputType = 'default';
+    textInputField.size = new vec3(15, 3, 1);
+
+    const tooltipObject = global.scene.createSceneObject('Tooltip');
+    tooltipObject.setParent(this.sceneObject);
+    const tooltip = tooltipObject.createComponent(Tooltip.getTypeName());
+    tooltip.tip = 'This is a tooltip';
+    tooltipObject.getTransform().setLocalPosition(new vec3(0, 4, 0));
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+// Import required modules
+const TextInputField =
+  require('SpectaclesUIKit.lspkg/Scripts/Components/TextInputField/TextInputField').TextInputField;
+const Tooltip = require('SpectaclesUIKit.lspkg/Scripts/Tooltip').Tooltip;
+
+/**
+ * Example script for the Tooltip component.
+ * It creates a text input field and a tooltip and sets the tooltip's text and position.
+ */
+
+function onAwake() {
+  const textInputField = script.sceneObject.createComponent(
+    TextInputField.getTypeName()
+  );
+  textInputField.placeholderText = 'Enter your name';
+  textInputField.inputType = 'default';
+  textInputField.size = new vec3(15, 3, 1);
+
+  const tooltipObject = global.scene.createSceneObject('Tooltip');
+  tooltipObject.setParent(script.sceneObject);
+  const tooltip = tooltipObject.createComponent(Tooltip.getTypeName());
+  tooltip.tip = 'This is a tooltip';
+  tooltipObject.getTransform().setLocalPosition(new vec3(0, 4, 0));
+}
+
+// Start the script
+onAwake();
+```
+
+</TabItem>
+
+</Tabs>

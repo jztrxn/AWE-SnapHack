@@ -1,0 +1,119 @@
+---
+sidebar_position: 2
+description: 'Manage authentication tokens in Spectacles Lenses including secure storage, automatic refresh, and expiration handling with Auth Kit.'
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Token Management
+
+Auth Kit provides automatic token management including secure storage, automatic refresh, and lifecycle handling through the integrated Token and TokenManager classes.
+
+## Overview
+
+Token management in Auth Kit is handled transparently by the main OAuth2 class, which uses the TokenManager for persistent storage and the Token class for token representation. Developers interact with tokens through simple APIs while the library handles the complexity.
+
+## Token Storage
+
+### Automatic Storage
+
+Tokens are automatically stored securely when authentication completes:
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```typescript
+import { OAuth2 } from 'AuthKit.lspkg/Core/OAuth2';
+
+const oauth = new OAuth2({
+  clientId: 'your-client-id',
+  authorizationUri: 'https://provider.com/oauth/authorize',
+  tokenUri: 'https://provider.com/oauth/token',
+  authenticationType: 'code',
+});
+
+// Tokens are automatically stored after successful authorization
+const token = await oauth.authorize('read write');
+// Token is now stored and associated with the clientId
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+var OAuth2 = require('AuthKit.lspkg/Core/OAuth2').OAuth2;
+
+var oauth = new OAuth2({
+  clientId: 'your-client-id',
+  authorizationUri: 'https://provider.com/oauth/authorize',
+  tokenUri: 'https://provider.com/oauth/token',
+  authenticationType: 'code',
+});
+
+// Tokens are automatically stored after successful authorization
+const token = await oauth.authorize('read write');
+// Token is now stored and associated with the clientId
+```
+
+</TabItem>
+</Tabs>
+
+### Persistent Storage
+
+Tokens persist across app sessions using Lens Studio's persistent storage system:
+
+```typescript
+// Check if user is already authorized from previous session
+if (oauth.isAuthorized) {
+  print('User is already logged in');
+  // Existing tokens are automatically loaded
+  const accessToken = await oauth.getAccessToken();
+} else {
+  print('User needs to log in');
+  await oauth.authorize('required scopes');
+}
+```
+
+## Automatic Token Refresh
+
+Auth Kit automatically handles token refresh when access tokens expire:
+
+```typescript
+// getAccessToken() automatically refreshes if token is expired
+const accessToken = await oauth.getAccessToken();
+
+// No manual refresh logic needed - it's handled internally
+const response = await fetch('https://api.provider.com/user', {
+  headers: {
+    Authorization: `Bearer ${accessToken}`,
+  },
+});
+```
+
+### Token Expiration Handling
+
+The Token class automatically calculates expiration with a 1-minute buffer.
+
+## Token Structure
+
+### Token Class
+
+The Token class represents OAuth2 tokens with the following properties:
+
+```typescript
+// Token interface
+interface IToken {
+  access_token: string;
+  refresh_token: string | null;
+  expires_in: number;
+  expiration_timestamp: number;
+}
+
+// Token is created automatically during authorization
+// No need to manually create Token instances
+```
+
+### TokenManager Class
+
+The TokenManager handles token persistence and refresh operations.

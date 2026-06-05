@@ -1,0 +1,111 @@
+.temp_clone/
+.DS_Store
+**/.DS_Store
+
+# Binary media files
+*.mp4
+*.mov
+*.avi
+*.webm
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+*.tiff
+*.webp
+*.svg
+
+# Audio files
+*.wav
+*.mp3
+
+# 3D model files
+*.fbx
+*.obj
+*.glb
+
+# Lens Studio binary assets
+*.hdr
+*.mat
+*.renderTarget
+*.rendertarget
+*.deviceCameraTexture
+*.devicecameratexture
+*.prefab
+*.mesh
+*.ss_graph
+*.animationAsset
+*.animationLayer
+*.animationCurveTrack
+
+# Spectacles module files
+*.cameraModule
+*.internetModule
+*.blueToothCentralModule
+*.asrModule
+*.screenTexture
+*.handTracking3D
+*.location
+*.location_mesh
+*.connectedLensModules
+*.locationCloudStorageModule
+
+# Font files
+*.otf
+*.ttf
+
+# Other binary files
+*.matter
+*.ino
+*.animationMixerLayer
+*.screenCropTexture
+*.pvr
+*.audioOutput
+*.lsc
+*.lensanim
+*.textTexture
+*.remoteServiceModule
+*.cloudModuleStorage
+*.onnx
+*.native
+
+# Asset metadata files
+*.meta
+
+# VFX graph files
+*.vfxgraph
+
+# Framework development files
+frameworks/*/Assets/Testing/
+frameworks/*/Assets/[LEGACY]*/
+frameworks/*/LensUnitTesting/
+frameworks/*/Support/
+frameworks/*/package-lock.json
+frameworks/*/tsconfig.json
+frameworks/SpectaclesSyncKit/CustomLandmarkGuidance/
+
+# SpectaclesUIKit exclusions (examples, tests, resources)
+frameworks/SpectaclesUIKit/Extras.lspkg/
+frameworks/SpectaclesUIKit/TestScripts.lspkg/
+frameworks/SpectaclesUIKit/UIKitResources/
+frameworks/SpectaclesUIKit/ExampleScene.lspkg/
+
+# Package and framework project files (keep only .lspkg source)
+packages/*/*.scene
+packages/*/*.esproj
+frameworks/*/*.scene
+frameworks/*/*.esproj
+frameworks/*/*.json
+packages/README.md
+samples/README.md
+
+# Docs website files
+docs/**/*.tsx
+docs/**/*.css
+docs/**/*.scss
+docs/**/_helpers/
+docs/**/_helpers-*/
+
+# GitHub workflows and CI configs
+.github/

@@ -1,0 +1,133 @@
+---
+description: 'Embed interactive web content including pages, videos, and web applications inside Spectacles Lenses with touch and keyboard support.'
+---
+
+# Web View
+
+## Overview
+
+<video
+  src="/img/spectacles/web-view/web-view-example.webm"
+  style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+  autoPlay
+  loop
+  muted
+  playsInline
+></video>
+
+The WebView script allows creators to host web content within their Lens. Combined with [Spectacles Interaction Kit (SIK)][SIK] users will be able to fully interact with web content through touch, and will be able to provide text input through the keyboard.
+
+WebViews are meant to embed web content; they are not full-fledged browsers. This means that while most web capabilities are supported, there are cases where compatibility may not be possible.
+
+:::note
+At this time only `https` content is supported.
+:::
+
+:::warning
+Camera and microphone access are not supported for web content. If you open a website that requests camera or microphone access, it will fail to load.
+:::
+
+### Use Cases
+
+Common use cases for the WebView script are:
+
+- Linking to content for your Lens
+  - What’s New page for your Lens
+  - Contact Us pages
+  - Embedded videos
+  - Help and Documentation
+- Embedded Videos from websites like YouTube
+- Web Applications that work with your Lens
+
+:::note
+At this time all web content must be hosted externally. WebView does not allow for loading HTML content from the Lens itself.
+:::
+
+:::note
+A Lens can create multiple WebViews but the platform may suspend a WebView to free up resources. A suspended WebView can be resumed by the user by interacting with it, which will force a page reload. When a WebView is suspended, the last rendered version of the page is displayed as a snapshot.
+:::
+
+:::note
+At this time, WebView is only supported on Spectacles. It is not supported on Snapchat or Lens Studio.
+:::
+
+## Getting Started
+
+### Prerequisites
+
+- Lens Studio v5.3.0 or later
+- Spectacles OS v5.58.621 or later
+
+### Initial Setup
+
+It is strongly recommended that creators start with the WebView from the Asset Library. This handles integration with the Spectacles Interaction Kit and ensures that the WebView life cycle events are correctly handled. This guide will cover usage with [SIK] \+ WebView script.
+
+WebView has a dependency on [SIK] but [SIK] is not required to be in the Scene Hierarchy if no input is necessary in which case a simplified version of the WebView script could be used instead. Please refer to the [API](https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built-In.InternetModule.html#createwebview) documentation for more information.
+
+#### Project Settings
+
+WebView is still an experimental feature and is subject to change. This means that the experimental flag is necessary in order to access the APIs.
+
+<img
+  src="/img/spectacles/web-view/web-view-image3.png"
+  style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+/>
+
+### Install WebView Package
+
+<img
+  src="/img/spectacles/web-view/web-view-image4.png"
+  style={{ maxWidth: '300px', width: '100%', borderRadius: '8px' }}
+/>
+
+Install and import the WebView from the [Asset Library](/lens-studio/assets-pipeline/asset-library/asset-library-overview#using-the-asset-library).
+
+:::note
+After installing WebView from the Asset Library, you will need to import it into your project. For more information, please refer to the [documentation](../../../lens-studio/features/package-management/asset-packages-introduction#asset-library).
+:::
+
+### Setup Scene Hierarchy
+
+1. Create a new empty **Scene Object**. Make sure the Scene Object is under the hiearchy of Spectacles Interaction Kit.
+2. Open Scene Object in Inspector view.
+3. Drag and drop the WebView Script from the Asset Browser to SceneObject.
+
+   <img
+     src="/img/spectacles/web-view/web-view-image6.png"
+     style={{ maxWidth: '300px', width: '100%', borderRadius: '8px' }}
+   />
+
+Under the WebView settings the following can be changed:
+
+    <img
+    src="/img/spectacles/web-view/web-view-image7.png"
+    style={{ maxWidth: '300px', width: '100%' , borderRadius: '8px' }}
+    />
+
+- **URL**\: If the desired URL is known or fixed, it can be specified here. Otherwise it can be left blank and set through scripts at runtime.
+- **Resolution**\: The desired web page resolution in pixels. This is separate from the Spectacles display resolution. This must be set before initialization. The maximum resolution supported is 2048x2048. This can not be changed after initialization.
+- **User-Agent**\: If a custom user-agent is required it can be set here or at runtime through the script api.
+- **Include Poke**\: WebView relies on indirect targeting using hand tracking and cursor. It can also support direct targeting using finger tracking when this setting is enabled. This does not disable indirect targeting.
+
+### WebView Render Scale
+
+Even though the specified resolution is used to render the Web Content to a texture. The output size must still be configured in the Scene Hierarchy. In the WebView script a RenderMeshVisual is used to render the Texture onto. This means that the Transform Scale can be used to adjust the visual size in the scene.
+
+The WebPage Resolution aspect ratio must match the Scale aspect ratio in the XY plane.
+
+- In the following example, the WebPage Resolution is set to 600x800, which is a 0.75 ratio.
+
+  <img
+    src="/img/spectacles/web-view/web-view-image7.png"
+    style={{ maxWidth: '300px', width: '100%', borderRadius: '8px' }}
+  />
+
+- Next set the scale to match this ratio. In the above example 60x80 is used for the XY plane.
+
+  :::note
+  A unit in Lens Studio results in cm. This results in 60cm x 80cm WebView in AR space.  
+  :::
+
+- In most cases using values based on the 100cm scale will give a comfortable render size. As long as the aspect ratio is correct, any magnitude of scale will function correctly.
+
+[SIK]: ../../spectacles-frameworks/spectacles-interaction-kit/get-started.mdx

@@ -1,0 +1,344 @@
+---
+sidebar_label: 'Release Notes'
+description: 'Version history, breaking changes, dependency updates, and migration steps for each Spectacles UI Kit release.'
+---
+
+# Release Notes
+
+## **v0.1.4**
+
+### Dependencies
+
+| Package                  | Version |
+| ------------------------ | ------- |
+| SpectaclesInteractionKit | 0.16.4  |
+| Lens Studio              | 5.15.2+ |
+
+---
+
+### ⚠️ Breaking Changes
+
+The following changes require updates to existing implementations. Migration guidance is provided for each.
+
+#### 1. ScrollBar No Longer Accepts External Slider Input
+
+**Previous Behavior:** ScrollBar required a Slider component to be passed as an input parameter.
+
+**New Behavior:** ScrollBar now creates and manages its own internal Slider instance.
+
+**Migration:**
+
+```typescript
+// BEFORE: Required external Slider reference
+@input slider: Slider
+
+// AFTER: Remove Slider input - ScrollBar handles this internally
+// Simply remove any @input references to Slider for ScrollBar usage
+```
+
+If you were configuring the Slider separately, use the new ScrollBar properties instead:
+
+- `scrollBar.playAudio` - Controls audio feedback
+- `scrollBar.renderOrder` - Sets render order
+
+---
+
+#### 2. Element Property Change: `inactive` Property
+
+**Change:** All Element-based components (buttons, sliders, switches, text input fields, ScrollBar, etc.) now use the `inactive` property consistently for controlling interactability. If an UI element is `inactive` it will not react to interactions.
+
+**Migration:**
+
+```typescript
+// Setting a component to non-interactive
+element.inactive = true;
+
+// Checking if a component is interactive
+if (!element.inactive) {
+  // Component is active and interactive
+}
+```
+
+This applies to: `RectangleButton`, `CapsuleButton`, `RoundButton`, `RadioButton`, `Checkbox`, `Slider`, `ConfirmationSlider`, `Switch`, `TextInputField`, `ScrollBar`, and any custom components extending `Element`.
+
+---
+
+#### 3. ScrollBar No Longer Auto-Hides When Non-Scrollable
+
+**Previous Behavior:** ScrollBar automatically managed its own visibility based on whether content was scrollable.
+
+**New Behavior:** ScrollBar visibility is now fully controlled by the developer.
+
+**Migration:**
+
+```typescript
+// Manual visibility control required
+const isScrollable = scrollBar.isScrollable;
+scrollBar.getSceneObject().enabled = isScrollable;
+```
+
+Use the `isScrollable` getter to help determine when to show/hide the ScrollBar.
+
+---
+
+#### 4. RoundedRectangle Gradient Visual Change
+
+**Change:** The underlying mesh and shader for RoundedRectangle have been rebuilt to improve rendering performance. This causes subtle visual differences in `Rectangle` type gradients.
+
+**Impact:** Most implementations will see no visible difference. However, if your application relies on precise gradient positioning with `Rectangle` type gradients, visual verification is recommended. Previous gradient positions may need to be adjusted.
+
+**Migration:** No code changes required. Visual review recommended for gradient-heavy UIs.
+
+---
+
+#### 5. Deprecated Utility Functions
+
+The following functions are deprecated and will be removed in a future release:
+
+| Deprecated                   | Replacement                                    |
+| ---------------------------- | ---------------------------------------------- |
+| `findAllChildComponents()`   | `findAllComponentsInSelfOrChildren()` from SIK |
+| `findComponentInAncestors()` | `findComponentInSelfOrParents()` from SIK      |
+
+**Migration:**
+
+```typescript
+// BEFORE (UIKit utility)
+import { findAllChildComponents } from './Utility/SceneUtilities';
+const components = findAllChildComponents(sceneObject, ComponentType);
+
+// AFTER (SIK utility)
+import { findAllComponentsInSelfOrChildren } from 'SpectaclesInteractionKit.lspkg/Utils/SceneObjectUtils';
+const components = findAllComponentsInSelfOrChildren(
+  sceneObject,
+  ComponentType
+);
+```
+
+---
+
+### New Features
+
+#### TextStylePresets Component
+
+A new utility component for standardizing text styling across Spectacles experiences. Provides design-compliant text sizing based on viewing distance and content hierarchy.
+
+**Usage:** Attach to a SceneObject with an existing Text component.
+
+**Supported Rankings:** Title 1, Title 2, Headline XL, Headline 1, Headline 2, Subheadline, Button, Callout, Body, Caption
+
+**Supported Distances:** Near (55cm), Far (110cm)
+
+```typescript
+const presets = sceneObject.getComponent(TextStylePresets.getTypeName());
+presets.distance = Distance.Near;
+presets.ranking = Ranking.Headline1;
+// Text style updates automatically when distance or ranking is set
+```
+
+**Note:** Sizes are calibrated for the Objektiv font family. Other fonts will scale proportionally but may not match exact design specifications.
+
+#### RadioButton Component
+
+A new toggle button component for single-selection groups, extending BaseButton.
+
+#### Checkbox Component
+
+A new toggle button component for multi-selection scenarios, extending RadioButton.
+
+**Features:**
+
+- Checkmark texture states for default, hovered, and toggled states
+- Integrated visual feedback
+- SnapOS 2.0 gradient theming
+
+#### Frame: Follow Mode Events
+
+New `onFollowingChange` event for monitoring follow mode state changes.
+
+```typescript
+frame.onFollowingChange.add((isFollowing: boolean) => {
+  if (isFollowing) {
+    // Frame is now following the user
+  } else {
+    // Frame has stopped following
+  }
+});
+```
+
+#### Frame: Non-Uniform Scaling
+
+New `allowNonUniformScaling` property enables independent width and height scaling.
+
+```typescript
+frame.allowNonUniformScaling = true;
+// Width and height now scale independently, clamped to min/max bounds
+```
+
+#### Frame: Min/Max Size Accessors
+
+New getter and setter properties for controlling Frame size bounds at runtime.
+
+```typescript
+// Set bounds
+frame.minimumSize = new vec2(15, 15);
+frame.maximumSize = new vec2(100, 80);
+
+// Read current bounds
+const minSize = frame.minimumSize;
+const maxSize = frame.maximumSize;
+```
+
+#### Frame: allowScaling Accessor
+
+New getter and setter for the `allowScaling` property.
+
+```typescript
+frame.allowScaling = true;
+const canScale = frame.allowScaling;
+```
+
+#### DropShadow Integration
+
+DropShadow is now integrated into VisualElement with automatic state management.
+
+```typescript
+// Enable shadow on any VisualElement
+visualElement.hasShadow = true;
+```
+
+The `DropShadowVisual` automatically updates shadow properties based on interaction state (default, hovered, triggered).
+
+#### ScrollBar Enhancements
+
+New properties and events for improved ScrollBar control:
+
+```typescript
+// New properties
+scrollBar.currentValue; // Normalized position (0-1)
+scrollBar.isScrollable; // Whether content exceeds window
+scrollBar.playAudio; // Audio feedback toggle
+scrollBar.renderOrder; // Render order control
+
+// New event
+scrollBar.onScrolled.add((normalizedValue: number) => {
+  // Fires when scrollbar value changes
+});
+```
+
+ScrollBar orientation (Horizontal or Vertical) is configured via the inspector at design time.
+
+#### ScrollWindow Improvements
+
+- `scrollPosition` and `scrollPositionNormalized` properties for programmatic scroll control
+- Snapping now uses spring physics for smoother behavior
+- Added deadzone to prevent small movements from triggering snapping
+- Improved bounce-back rubber feel
+
+---
+
+### Performance Improvements
+
+This release includes optimizations to reduce GPU rendering costs and improve initialization times:
+
+- **RoundedRectangle Optimization:** Rebuilt with a new mesh topology that moves per-fragment shader calculations into vertex data, reducing GPU power consumption.
+
+- **Frame Material Optimization:** Baked dynamic graphics into textures for reduced shader complexity.
+
+- **Hierarchy Search Optimization:** Replaced internal hierarchy traversal with more efficient SIK utilities, reducing frame time and garbage collection pressure.
+
+- **Initialization Optimization:** Reduced redundant material updates during RoundedRectangleVisual creation.
+
+---
+
+### Bug Fixes
+
+#### Interaction
+
+- **Element Event Bubbling:** Fixed an issue where interactable events were incorrectly bubbling up through the Element hierarchy. Events now properly check propagation phase before firing.
+
+- **Frame onTriggerStart Null Check:** Added null check for `targetHitInfo` to prevent TypeError crashes.
+
+- **Frame Interaction Plane Enable:** Fixed an issue where the interaction plane would incorrectly enable after the Frame was disabled and re-enabled, even when `enableInteractionPlane` was set to false.
+
+- **Frame OnInitialized Event:** Fixed duplicate event firing. The `onInitialized` event now fires exactly once.
+
+#### Visual and Rendering
+
+- **Button Visibility During Opacity Animations:** Fixed a bug where opacity animations would re-enable Frame buttons that were explicitly hidden via `showCloseButton` or `showFollowButton`.
+
+- **ScrollBar Window Size Updates:** Fixed ScrollBar knob size and position becoming incorrect when the parent ScrollWindow resized.
+
+- **RenderMeshVisual Management:** Fixed a bug with RMV visibility management in Frame's `OnEnable` handler.
+
+- **RoundedRectangle Texture Artifact:** Fixed sub-pixel artifacts around edges when using textures with transparent edges.
+
+- **TextInputField Render Order:** Fixed incorrect render order assignments.
+
+#### Toggle and State Machine
+
+- **Toggle Functionality:** Removed vestigial state machine logic that was preventing toggles from functioning correctly.
+
+- **InteractableStateMachine Toggle Logic:** Reworked toggle and dragging logic for improved reliability.
+
+- **BaseToggleGroup Inspector Callbacks:** Fixed callback setup in the inspector panel.
+
+#### ScrollWindow
+
+- **Snapping with Even Page Counts:** Fixed snapping behavior when content divides evenly into the window size.
+
+- **Infinite Scroll:** Fixed behavior when scroll dimension is set to -1.
+
+- **Collider Management:** ScrollWindow now respects Element's disabled/inactive state when managing child colliders.
+
+- **Velocity Persistence:** Fixed ScrollWindow continuing to scroll after being disabled and re-enabled.
+
+#### Slider
+
+- **Cursor Position with Scaling:** Fixed incorrect cursor positioning when the Slider's parent has non-uniform scale.
+
+- **Drag Value Calculation:** Drag updates are now consistently calculated based on the Slider's value at interaction start.
+
+---
+
+### UI/UX Improvements
+
+#### Switch Component
+
+Updated Switch component visuals to match SnapOS 2.0 design specifications, including refined gradients for track, knob, and fill states.
+
+#### Slider Component
+
+Updated Slider colors and gradients to align with current design standards.
+
+#### TextInputField
+
+Visual refresh including updated colors and replaced scale behavior with position-based feedback.
+
+---
+
+### Code Quality Improvements
+
+- All setters now have corresponding getters
+- All `PublicApi` typed objects are now readonly
+- `Element` is now an abstract class (no `@component` decorator)
+- Created centralized `UIKitAudioPlayer` for consistent audio feedback
+
+---
+
+### Removed Assets
+
+The following unused assets have been removed to reduce package size:
+
+- BaseRoundedRectangle materials and shaders
+- CapsuleSphere materials and shaders
+- DefaultButton mesh and materials
+- DefaultSwitch materials and shaders
+- RoundedRectangleStroke materials
+- ReadMe asset images
+
+---
+
+## **v0.8.0**
+
+First public release of Spectacles UI Kit! 🎉

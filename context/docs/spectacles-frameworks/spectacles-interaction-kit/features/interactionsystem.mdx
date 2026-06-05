@@ -1,0 +1,119 @@
+---
+sidebar_position: 2
+description: "Learn how the Spectacles Interaction Kit's core system manages input sources, raycasting, and event dispatching for Spectacles Lenses."
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Interaction System
+
+Spectacles Interaction Kit features a multi-modal interaction system for creating interactive and dynamic AR experiences. This system consists of three core components: **Interactors**, **Interactables**, and the **Interaction Manager**. **Interactors** represent various input methods, such as hands or mobile devices. Each input type is associated with its own Interactor: for example, a user’s hand is managed by a **HandInteractor**, while a mobile controller is managed by a **MobileInteractor**.
+
+**Interactors** manage interactions with **Interactables**, which are AR objects in the scene that users can interact with. Each **Interactable** has states that reflect its interaction status, such as hover, trigger started, or trigger ended. The **Interaction Manager** controls the lifecycle of interactions, ensuring smooth transitions and responses to user inputs.
+
+SIK supports two main input modalities: hand tracking and mobile device input. Hand tracking enables natural and intuitive interaction with AR content through gestures like direct-pinch and direct-poke. Mobile device input allows users to calibrate their Spectacles with the mobile app, using smartphones as controllers. This multi-modal approach enhances the user experience, offering versatile and contextually appropriate interactions in AR environments.
+
+<video
+  src="/img/spectacles/gestures/pinch-scale.webm"
+  style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+  autoPlay
+  loop
+  muted
+  playsInline
+></video>
+
+## Relevant Components
+
+**Interactor** reads input from either hands (using **HandInteractor**) or a phone (using **MobileInteractor**) to target, trigger, and drag **Interactables** in the scene.
+
+**Interactable** enables a **SceneObject** with a **Collider** component to be interacted with through an **Interactor**. Developers can attach callback logic to **Interactable** events, such as **onTriggerEnd**, to execute lens-specific actions after a button is triggered.
+
+**InteractionManager** oversees all interactions, providing a comprehensive event cascading system. It utilizes a bubble-up / trickle-down approach, where ancestor **Interactables** of a targeted **Interactable** also receive the event.
+
+**InteractableManipulation** allows **Interactables** to be translated, scaled, and rotated using an **Interactor**, facilitating the manipulation of movable elements like menus.
+
+### Code Example
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+import { Interactable } from 'SpectaclesInteractionKit.lspkg/Components/Interaction/Interactable/Interactable';
+import { InteractorEvent } from 'SpectaclesInteractionKit.lspkg/Core/Interactor/InteractorEvent';
+import { SIK } from 'SpectaclesInteractionKit.lspkg/SIK';
+
+@component
+export class ExampleInteractionScript extends BaseScriptComponent {
+  onAwake() {
+    this.createEvent('OnStartEvent').bind(() => {
+      this.onStart();
+    });
+  }
+
+  onStart() {
+    let interactionManager = SIK.InteractionManager;
+
+    // This script assumes that an Interactable (and Collider) component have already been instantiated on the SceneObject.
+    let interactable = this.sceneObject.getComponent(
+      Interactable.getTypeName()
+    );
+
+    // You could also retrieve the Interactable component like this:
+    interactable = interactionManager.getInteractableBySceneObject(
+      this.sceneObject
+    );
+
+    // Define the desired callback logic for the relevant Interactable event.
+    let onTriggerStartCallback = (event: InteractorEvent) => {
+      print(
+        `The Interactable has been triggered by an Interactor with input type: ${event.interactor.inputType} at position: ${event.interactor.targetHitInfo.hit.position}`
+      );
+    };
+
+    interactable.onInteractorTriggerStart(onTriggerStartCallback);
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+const SIK = require('SpectaclesInteractionKit.lspkg/SIK').SIK;
+const interactionManager = SIK.InteractionManager;
+const interactionConfiguration = SIK.InteractionConfiguration;
+
+function onAwake() {
+  // Wait for other components to initialize by deferring to OnStartEvent.
+  script.createEvent('OnStartEvent').bind(() => {
+    onStart();
+  });
+}
+
+function onStart() {
+  // This script assumes that an Interactable (and Collider) component have already been instantiated on the SceneObject.
+  var interactableTypename =
+    interactionConfiguration.requireType('Interactable');
+  var interactable = script.sceneObject.getComponent(interactableTypename);
+
+  // You could also retrieve the Interactable component like this:
+  interactable = interactionManager.getInteractableBySceneObject(
+    script.sceneObject
+  );
+
+  // Define the desired callback logic for the relevant Interactable event.
+  var onTriggerStartCallback = (event) => {
+    print(
+      `The Interactable has been triggered by an Interactor with input type: ${event.interactor.inputType} at position: ${event.interactor.targetHitInfo.hit.position}`
+    );
+  };
+
+  interactable.onInteractorTriggerStart(onTriggerStartCallback);
+}
+
+onAwake();
+```
+
+</TabItem>
+</Tabs>

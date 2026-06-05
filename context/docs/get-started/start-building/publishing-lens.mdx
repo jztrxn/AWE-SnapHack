@@ -1,0 +1,118 @@
+---
+sidebar_position: 5
+description: 'Submit your Spectacles Lens for review, get it listed in Lens Explorer, and learn what it takes to get featured with the publishing checklist.'
+---
+
+# Publishing Your Spectacles Lens
+
+To distribute Lenses to a wider audience, select the "Publish" button to initiate the publishing process. Note that the size limit for Lenses published to Snapchat is 8 MB, whereas Spectacles allows a maximum Lens size of 25 MB. For additional details on publishing Lenses, refer to the [provided guide](/lens-studio/publishing/submitting/submitting-your-lens#upload-and-publish).
+
+<img
+  src="/img/spectacles/misc/publish-lens.png"
+  style={{ maxWidth: '1000px', width: '100%', borderRadius: '8px' }}
+/>
+
+Unlike Lenses for Mobile, which use 9x16 videos as previews, Lenses for Spectacles use 3x4 images as previews. If a video preview is added in Lens Studio, Spectacles will use a cropped first frame of the video as the preview. It is recommended to add an image preview later in the submission flow within My Lenses.
+
+Recommendations for designing effective Lens previews:
+
+- **Show the function of the Lens.** Users viewing the preview in Lens Explorer should understand the Lens's effect when opened.
+
+- **Include people in the frame for connected Lenses.** Indicate which Lenses can be used together.
+  - Depict people in the frame wearing Spectacles.
+
+- **Use bright colors.** Note that black appears transparent, and dark colors may be difficult to see.
+
+- **Keep the background simple** to focus on the Lens elements. Prefer a blank background unless the location or placement is relevant.
+
+- **Avoid text.** The tile is small, and Lens and creator names will already be overlaid.
+
+After submission, Snap’s moderation team reviews Spectacles Lenses within 2-3 business days to ensure compliance with [Snap’s community guidelines](/lens-studio/publishing/submitting/submission-guidelines). Approved Lenses may then be added to Lens Explorer.
+
+Congratulations on publishing your Lens\! We encourage you to take a capture and share your Lens with the community on the [r/Spectacles](https://www.reddit.com/r/Spectacles/) subreddit.
+
+## Getting Your Lens into Lens Explorer
+
+The Spectacles team reviews all Lenses prior to publication in Lens Explorer. Lenses that meet the following requirements are eligible to be published to Lens Explorer:
+
+- The Lens has a defined objective. Upon activation, the Lens displays visuals that indicate the required actions.
+- The Lens follows our [design best practices](../../best-practices/design-for-spectacles/design-best-practices.mdx) and feels performant (60 fps).
+- The Lens is free of crashes and bugs.
+- The Lens has a custom icon and a preview image.
+
+If you believe your Lens meets the above requirements and you do not see your Lens in All Lenses within a week of submission, please message the moderators on the [r/Spectacles](https://www.reddit.com/r/Spectacles/) subreddit.
+
+## Getting Your Lens Featured
+
+The Featured category showcases compelling Lenses that set the bar for quality and demonstrate what is possible on Spectacles. This category will be regularly refreshed as new Lenses are published and get updated.
+
+The Spectacles team will curate the selection of featured Lenses based on the below factors, all of which amount to a great experience that users will love.
+
+### Must-haves
+
+- **User Experience:** The Lens is intuitive to use, easy to navigate, and delivers user value. Interactions feel natural and responsive.
+- **Completeness & Depth:** The Lens feels complete and provides recurring value. If there is storytelling, there is a beginning, middle and end, and a way to repeat.
+- **Design & Polish:** The Lens is visually appealing and polished, with attention to detail in both aesthetics and functionality.
+
+### Other considerations
+
+- **Innovation:** The Lens provides unique value and pushes the bounds of what has been previously done with AR. It inspires other developers to think outside of the box.
+- **Popularity:** The Lens is already proving to be valuable to the Spectacles community.
+
+### AR Lens Developer Checklist for Spectacles
+
+1. Frame Rate & Performance
+   - Target 60 FPS at all times. Values under 60 FPS are a good indicator of being over power budget.
+   - Use the [Lens Performance Overlay](../../best-practices/profiling/lens-performance-overlay.mdx) to monitor and verify FPS, CPU/GPU usage, thermal metrics live on device before submitting.
+   - Refer to [Performance Optimization Guide](../../best-practices/performance-optimization/optimizing-lens-performance.mdx) for draw call limits, shader tips, mesh efficiency, Update() optimizations.
+
+2. File Size
+   - Final published Lens must be ≤ 25 MB.
+   - Use cloud storage or compressed assets when needed.
+
+3. Power & Thermal Budget
+   - Use the [Spectacles Monitor](../../best-practices/profiling/spectacles-monitor.mdx) to track power, thermal load, memory, and generate Perfetto traces.
+   - Stay within Snap’s recommended power and memory budget to avoid thermal throttling and frame drops from persistent high CPU/GPU load (e.g., frequent Update(), physics, real-time lighting).
+   - Exceeding the budget limits the experience's runtime due to thermal standby and the device's need to cool, rather than battery constraints. While the experience may still run, reduced performance and runtime can negatively impact the user.
+
+4. Crash & Stability
+   - Include a visible version number and log “Lens Opened: vX.X.X” on startup.
+
+5. Debug/Test Mode (Recommended)
+   - Provide a debug menu and in-lens tests to help teams validate individual Lens states and logic paths as you are making changes.
+
+6. On-Device Testing
+   - Always validate the Lens on real Spectacles hardware after making changes and submitting to avoid issues and reduce turn around times — emulators don’t reflect full performance or thermal behavior.
+   - Share a list of tests performed and recommend tests steps we should perform with the lens submission.
+
+7. Capturability
+   - Lens should use components that are capturable by default unless explicitly agreed with Snap to use something that is not supported.
+
+8. Version Visibility & Logging
+   - Show the version number visibly on Lens launch in the start up prompt or on UI. Helpful for troubleshooting.
+   - Log the version number on startup to make it easy to troubleshoot if we get a bug report.
+
+9. Metadata Requirements for Every Submission
+   - Preview image (ideally 3×4 ratio), or video with first frame used as thumbnail
+   - Custom icon
+   - Concise description (what the Lens does)
+   - Release notes (what changed, issues fixed, known issues, features added)
+
+10. Design & UX Best Practices
+    - Follow [Design for Spectacles principles](../../best-practices/design-for-spectacles/design-best-practices.mdx):
+    - Use the latest recommend assets e.g SIK, UI Kit
+    - Minimize user fatigue: optimize for posture, hand gestures, attention shift
+    - Ensure legibility and depth placement
+    - Keep effects close to the real world, but not cluttered
+    - Leverage sounds as well as visuals
+    - Add an onboarding and consider the lens story line
+    - Align on if there should be a demo mode for events
+
+11. Source Links Summary
+    | Purpose | Link|
+    | ------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+    | Publishing Guide | [developers.snap.com/publishing-lens](../start-building/publishing-lens.mdx) |
+    | Design Best Practices | [developers.snap.com/design-best-practices](../../best-practices/design-for-spectacles/design-best-practices.mdx) |
+    | Performance Optimization | [developers.snap.com/performance](../../best-practices/performance-optimization/optimizing-lens-performance.mdx) |
+    | Lens Performance Overlay | [developers.snap.com/lens-performance-overlay](../../best-practices/profiling/lens-performance-overlay.mdx) |
+    | Spectacles Monitor | [developers.snap.com/spectacles-monitor](../../best-practices/profiling/spectacles-monitor.mdx) |

@@ -1,0 +1,63 @@
+---
+sidebar_position: 3
+description: 'Design Spectacles experiences that account for user movement, head rotation, and physical comfort during extended AR sessions.'
+---
+
+# Designing for Movement
+
+Because Spectacles are untethered, lightweight, and see-through, users may wear Spectacles throughout their daily activities while engaging in a variety of physical motions and postures.
+
+## User Postures
+
+When designing an experience, consider the most likely posture for your use case. In each posture, the user’s physical dimensions, head angle, and reach ranges may vary. Accordingly, each posture might prefer different sizes, orientations or positions for virtual content. Different postures may also encounter different real-world obstacles that require special consideration – such as desks, tables, soft furniture or walls.
+
+- Standing
+- Seated
+- Lounging
+- On-the-Go: Users may be walking and moving around. Within On-the-Go, there are two additional considerations:
+  - Portability: The user stops their motion to open and interact with an interface. The interface opens in relation to their current position after their motion.
+  - Mobility: The user can continually interact with an interface during active movement.
+
+## Anchor Dynamics
+
+Different postures may require different types of anchor dynamics. Anchor dynamics describe the logic of how content is positioned in a scene. Content can be **anchored in the real world** with a fixed position, **follow the user's head** or **hand as relative anchors**, or dynamically follow a real-world object using Object Trackers.
+
+Choosing an anchor dynamic will influence the size of your content, the **portability** of your experience, and the ease of use while in motion.
+
+<img
+  src="/img/spectacles/misc/anchor-dynamics.png"
+  style={{ maxWidth: '1000px', width: '100%', borderRadius: '8px' }}
+/>
+
+### Fixed in the World
+
+Content that is fixed in the world is flexible, simple, and native to AR. Users can move around this content as if it were a real-world object. Fixed content can also appear larger than life size.
+
+- Tradeoff: Fixed content may get left behind or appear lost if the user moves away from its initial position.
+- If specific movement needs are not required, choose fixed anchoring as a starting point, as it offers the most flexibility for other design choices.
+
+### Following the User’s Head
+
+For experiences designed to be used on-the-go and continuously in motion, UI that follows the user is easiest to interact with. This ensures content is never left behind and remains easily accessible. This pattern is particularly useful for critical privacy controls like mic or camera, allowing users to move around without losing access to these important interfaces.
+
+- It is best to keep the UI smaller and glanceable to avoid blocking the user's full field of view while in motion.
+- SIK Containers offer several following dynamics to choose from.
+
+### Following the User’s Hand
+
+For experiences requiring significant movement, content can be anchored relative to the user’s hand. Examples like Basketball Trainer and Loop Lab keep controls nearby, but not always visible in the field of view. Hand menus like these maintain content accessibility with user motion, without introducing distractions to the field of view.
+
+- Position hand menus near the user's non-dominant hand to allow the dominant hand to be used for targeting and selection.
+- Keep hand menus small and limited to fewer interfaces and details.
+- Provide a hint directing users to look at their hands to find hand menus in your experience. Without this hint, users may not think to look at their hands and may miss the intended interface.
+
+## Containers
+
+Snap OS utilizes Containers as a standard affordance to move and adjust spatial content. Containers use manipulation around a spherical coordinate frame, allowing users to **adjust content in** **different postures**, based on their comfort and arm length preferences. Some Containers provide a toggle option to change their anchor dynamic from fixed in the world to following the user, enabling users to switch anchor modes according to their preference. Containers support the following features:
+
+- Move, Scale, Rotate
+- Close
+- Change Anchor Dynamic
+- Snap to other Containers for organization and alignment
+
+Use the Container pattern to give your users flexibility to move content around real world obstacles, to adjust content for personal comfort, or if your experience has multiple panels that need movement and management. Containers support both 3D and 2D media, as well as interactive interfaces. For [near-field](../../../spectacles/best-practices/design-for-spectacles/positioning-sizing-content.mdx#z-axis-near-field-or-far-field) interfaces with direct interactions, Containers can help users move the interface to a distance that fits their arm’s reach. Container parameters are optional and can be adjusted to suit your experience. Size Containers to fit around your content as if it were a typical interactive element, leaving enough margin to follow target sizing recommendations. Containers are available in the [Spectacles Interaction Kit](../../spectacles-frameworks/spectacles-interaction-kit/get-started.mdx) for easy adoption.

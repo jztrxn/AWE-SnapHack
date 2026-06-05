@@ -1,0 +1,70 @@
+---
+sidebar_position: 2
+description: 'Check which Lens Studio features and scripting APIs are supported on Spectacles versus Snapchat and other Camera Kit platforms.'
+---
+
+import SpectaclesFeatureList from '@site/src/components/SpectaclesFeatureList';
+
+# Compatibility List
+
+## Overview
+
+Spectacles uses the same Lens Studio API set as Snapchat and Camera Kit. However, some APIs work exclusively on Spectacles and are marked as "wearable only." Additionally, certain existing APIs do not function on the Spectacles (2024) device; refer to the list below for details.
+
+:::note
+Many features are still being ported and tested from the Snapchat API to Spectacles. You can try using these features since the Lens Studio workflow is similar. **Features that are consolidated are usually accompanied by spectacles samples or asset**. If a feature isn't listed or supported, you can test it and provide [feedback](https://www.reddit.com/r/Spectacles/) to our team . Visit our [Samples Repository](https://github.com/snapchat/Spectacles-Sample/) for development resources. **Asset Library resource won't be linked in this page, you will need to find them in the Assets Library within Lens Studio**.
+:::
+
+### Resources per feature
+
+Here is a detailed list of AR-specific and anticipated features, along with their current level of support on Spectacles and related resources. We are dedicated to continually improving the AR experience on Spectacles, so please stay tuned for future updates. Consider this a chance to explore and experiment with the features that are currently available but also a guide to help you finding the right resources for your development needs.
+
+<SpectaclesFeatureList />
+
+## Unsupported APIs
+
+See below for a list of APIs that are not supported on Spectacles.
+
+### Assets
+
+| [DialogModule](/api/lens-studio/Classes/Assets#DialogModule)             |
+| :----------------------------------------------------------------------- |
+| [LocalizationsAsset](/api/lens-studio/Classes/Assets#LocalizationsAsset) |
+
+### Components
+
+| [BlurNoiseEstimation](/api/lens-studio/Classes/Components#BlurNoiseEstimation)     |
+| :--------------------------------------------------------------------------------- |
+| [DepthSetter](/api/lens-studio/Classes/Components#DepthSetter)                     |
+| [EyeColorVisual](/api/lens-studio/Classes/Components#EyeColorVisual)               |
+| [FaceInsetVisual](/api/lens-studio/Classes/Components#FaceInsetVisual)             |
+| [FaceMaskVisual](/api/lens-studio/Classes/Components#FaceMaskVisual)               |
+| [FaceStretchVisual](/api/lens-studio/Classes/Components#FaceStretchVisual)         |
+| [HintsComponent](/api/lens-studio/Classes/Components#HintsComponent)               |
+| [InteractionComponent](/api/lens-studio/Classes/Components#InteractionComponent)   |
+| [ManipulateComponent](/api/lens-studio/Classes/Components#ManipulateComponent)     |
+| [TrackedPointComponent](/api/lens-studio/Classes/Components#TrackedPointComponent) |
+
+### Events
+
+| [BrowsLoweredEvent](/api/lens-studio/Classes/Events#BrowsLoweredEvent)                   |
+| :--------------------------------------------------------------------------------------- |
+| [BrowsRaisedEvent](/api/lens-studio/Classes/Events#BrowsRaisedEvent)                     |
+| [BrowsReturnedToNormalEvent](/api/lens-studio/Classes/Events#BrowsReturnedToNormalEvent) |
+| [CameraBackEvent](/api/lens-studio/Classes/Events#CameraBackEvent)                       |
+| [CameraFrontEvent](/api/lens-studio/Classes/Events#CameraFrontEvent)                     |
+| [KissFinishedEvent](/api/lens-studio/Classes/Events#KissFinishedEvent)                   |
+| [KissStartedEvent](/api/lens-studio/Classes/Events#KissStartedEvent)                     |
+| [ManipulateEndEvent](/api/lens-studio/Classes/Events#ManipulateEndEvent)                 |
+| [ManipulateStartEvent](/api/lens-studio/Classes/Events#ManipulateStartEvent)             |
+| [MouthClosedEvent](/api/lens-studio/Classes/Events#MouthClosedEvent)                     |
+| [MouthOpenedEvent](/api/lens-studio/Classes/Events#MouthOpenedEvent)                     |
+| [SmileFinishedEvent](/api/lens-studio/Classes/Events#SmileFinishedEvent)                 |
+| [SmileStartedEvent](/api/lens-studio/Classes/Events#SmileStartedEvent)                   |
+| [SnapImageCaptureEvent](/api/lens-studio/Classes/Events#SnapImageCaptureEvent)           |
+| [SnapRecordStartEvent](/api/lens-studio/Classes/Events#SnapRecordStartEvent)             |
+| [SnapRecordStopEvent](/api/lens-studio/Classes/Events#SnapRecordStopEvent)               |
+| [TapEvent](/api/lens-studio/Classes/Events#TapEvent)                                     |
+| [TouchEndEvent](/api/lens-studio/Classes/Events#TouchEndEvent)                           |
+| [TouchMoveEvent](/api/lens-studio/Classes/Events#TouchMoveEvent)                         |
+| [TouchStartEvent](/api/lens-studio/Classes/Events#TouchStartEvent)                       |

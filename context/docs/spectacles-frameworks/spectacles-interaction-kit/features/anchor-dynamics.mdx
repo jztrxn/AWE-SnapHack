@@ -1,0 +1,97 @@
+---
+sidebar_position: 7
+description: "Use Billboard and Headlock components to anchor objects relative to the user's position and gaze in Spectacles Lenses."
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Anchor Dynamics
+
+Spectacles Interaction Kit provides components that dynamically anchor objects relative to the user. The **Billboard** component ensures that a **SceneObject** always faces the user by updating its rotation based on the user’s position every frame. The **Headlock** component keeps a **SceneObject** within the user's field of view by adjusting its position according to the user’s gaze direction.
+
+## Relevant Components
+
+**Billboard** rotates a **SceneObject** to always face the user’s position.
+
+**Headlock** positions a **SceneObject** to maintain the same position relative to the user’s gaze.
+
+### Code Example
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+import { Billboard } from 'SpectaclesInteractionKit.lspkg/Components/Interaction/Billboard/Billboard';
+import { Interactable } from 'SpectaclesInteractionKit.lspkg/Components/Interaction/Interactable/Interactable';
+import { ToggleButton } from 'SpectaclesInteractionKit.lspkg/Components/UI/ToggleButton/ToggleButton';
+
+@component
+export class ExampleAnchorDynamicsScript extends BaseScriptComponent {
+  onAwake() {
+    this.createEvent('OnStartEvent').bind(() => {
+      this.onStart();
+    });
+  }
+
+  onStart() {
+    // This script assumes that a Billboard (and ToggleButton + Interactable + Collider) component have already been instantiated on the SceneObject.
+    let billboard = this.sceneObject.getComponent(Billboard.getTypeName());
+
+    // Disable billboarding initially.
+    billboard.xAxisEnabled = false;
+    billboard.yAxisEnabled = false;
+    billboard.zAxisEnabled = false;
+
+    let toggleButton = this.sceneObject.getComponent(
+      ToggleButton.getTypeName()
+    );
+
+    // Whenever toggling the state of the button, enable billboarding along the y-axis to reflect the state.
+    toggleButton.onStateChanged.add((state) => {
+      billboard.yAxisEnabled = state;
+    });
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+const SIK = require('SpectaclesInteractionKit.lspkg/SIK').SIK;
+const interactionConfiguration = SIK.InteractionConfiguration;
+
+function onAwake() {
+  // Wait for other components to initialize by deferring to OnStartEvent.
+  script.createEvent('OnStartEvent').bind(() => {
+    onStart();
+  });
+}
+
+function onStart() {
+  // This script assumes that a Billboard (and ToggleButton + Interactable + Collider) component have already been instantiated on the SceneObject.
+  var billboard = script.sceneObject.getComponent(
+    interactionConfiguration.requireType('Billboard')
+  );
+
+  // Disable billboarding initially.
+  billboard.xAxisEnabled = false;
+  billboard.yAxisEnabled = false;
+  billboard.zAxisEnabled = false;
+
+  var toggleButton = script.sceneObject.getComponent(
+    interactionConfiguration.requireType('ToggleButton')
+  );
+
+  // Whenever toggling the state of the button, enable billboarding along the y-axis to reflect the state.
+  toggleButton.onStateChanged.add((state) => {
+    billboard.yAxisEnabled = state;
+  });
+}
+
+onAwake();
+```
+
+</TabItem>
+</Tabs>

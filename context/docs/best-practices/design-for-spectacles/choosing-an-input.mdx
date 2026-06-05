@@ -1,0 +1,26 @@
+---
+sidebar_position: 2
+description: 'Compare hand tracking, voice, and mobile controller input methods for Spectacles to choose the best interaction model for your Lens.'
+---
+
+# Choosing an Input
+
+When designing an experience for Spectacles, Lens Developers get to choose their desired input method. Snap OS primarily uses hand interactions. Users perform system gestures, such as pointing and pinching, to navigate to your Lens. Within your Lens, decide whether to use hands, voice, or a custom mobile controller as the primary input. Consider device position and real-time object trackers as additional inputs.
+
+<img
+  src="/img/spectacles/misc/choosing-an-input.png"
+  style={{ maxWidth: '750px', width: '100%', borderRadius: '8px' }}
+/>
+
+Different input methods result in distinct experiences. **Hand interactions** require different design considerations compared to **voice interactions** or a **custom mobile controller**.
+
+- Use hand interactions as the default interaction. Hand interactions can also help with expressive, creative, tactile or assembly actions. Lens examples: Lego Bricktacular, Chess, Loop Lab, Paint Together.
+- Use voice interactions for natural conversations or as a shortcut to a specific action. Lens examples: My AI, Solar System, Imagine Together.
+- Use the mobile controller as a familiar gamepad with world-scale output, or use the phone itself as a physical controller that can be tracked in 6DoF space, or as a keyboard helper for text input. Lens examples: Tiny Motors, Golf, Browser.
+
+For hand interactions, the [Spectacles Interaction Kit](../../spectacles-frameworks/spectacles-interaction-kit/get-started.mdx) supports both direct (near-field) and indirect (far-field) interactions. Choose the appropriate mode based on your AR experience and goals. No additional developer effort is needed to support either mode. The targeting system automatically switches based on the distance to the intended target.
+
+- **Direct Mode:** Uses tangible, immediate interactions. Users reach out and directly intersect the target with their hand. Direct interactions can feel more like real-world actions
+- **Indirect Mode:** Uses smaller, precise motions, similar to pointing in VR or desktop interfaces, with more distance between the user and the action.
+
+For both modes, provide **targeting feedback**for all interactive elements. Style this feedback as needed. Snap OS typically uses a white circular cursor and yellow outline with yellow glow effect to indicate active targeting.

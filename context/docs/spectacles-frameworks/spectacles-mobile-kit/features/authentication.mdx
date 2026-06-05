@@ -1,0 +1,23 @@
+---
+sidebar_position: 1
+description: "Verify the connected mobile app's identity in Spectacles Lenses using the app digest for Mobile Kit authentication."
+---
+
+# Authentication
+
+Before exchanging data, it’s recommended to authenticate the connected mobile application. A Lens can request the SHA-256 digest of the app and verify it against a known trusted value.
+
+```JavaScript
+// The "app://digest" request is handled internally,
+// not forwarded to the mobile app.
+// It retrieves the SHA-256 digest of the connected mobile application,
+// allowing the Lens to verify whether the app is trusted.
+try {
+    const response = await session.sendRequest('app://digest')
+
+    // Validate the received digest against the expected value.
+    print(`Digest: ${response}`)
+} catch (error) {
+    print(`Error: ${error}`)
+}
+```

@@ -1,0 +1,201 @@
+---
+sidebar_position: 5
+description: 'Extend Spectacles UI Kit components with custom behavior, additional properties, and modified interaction patterns for Spectacles Lenses.'
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Extend Component
+
+### How to extend a button component
+
+<p>
+  You can extend a UIKit component by creating a new component that extends the
+  existing component. You can do this through TypeScript by creating a new
+  component, extending an existing component, and adding additional
+  functionality. Here is an example of how to do this with a RectangleButton:
+</p>
+
+<video
+  src="/img/spectacles/spectacles-ui-kit/custom-button-example.webm"
+  style={{ maxWidth: '500px', width: '100%', borderRadius: '8px' }}
+  autoPlay
+  loop
+  muted
+  playsInline
+/>
+
+### Code Example
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+import { RectangleButton } from 'SpectaclesUIKit.lspkg/Scripts/Components/Button/RectangleButton';
+import { IMAGE_MATERIAL_ASSET } from 'SpectaclesUIKit.lspkg/Scripts/Components/Element';
+import { RoundedRectangleVisual } from 'SpectaclesUIKit.lspkg/Scripts/Visuals/RoundedRectangle/RoundedRectangleVisual';
+
+/**
+ * CustomButton is a custom button component that allows you to create a button with an image and text.
+ * It extends the RectangleButton component and uses a RoundedRectangleVisual for the visual.
+ */
+
+@component
+export class CustomButton extends RectangleButton {
+  @input
+  text: string = 'Hello World';
+
+  @input
+  icon: Texture;
+
+  /*
+   * Can be overridden to create a custom visual for the button.
+   * See the Custom Visual section for more information.
+   */
+  protected createDefaultVisual(): void {
+    if (!this._visual) {
+      const defaultVisual: RoundedRectangleVisual = new RoundedRectangleVisual({
+        sceneObject: this.sceneObject,
+        style: {
+          visualElementType: RectangleButton.name,
+          style: this._style,
+        },
+        transparent: this._style === 'Ghost',
+      });
+
+      defaultVisual.cornerRadius = 0.5;
+      this._visual = defaultVisual;
+    }
+  }
+
+  onAwake(): void {
+    super.onAwake();
+    this.createButtonContent();
+  }
+
+  createButtonContent(): void {
+    const canvas = this.sceneObject.createComponent('Canvas');
+    // create text
+    const textObject = global.scene.createSceneObject('Text');
+    textObject.setParent(this.sceneObject);
+    const text = textObject.createComponent('Text');
+    text.text = this.text; // set input text
+    text.size = 50;
+    text.worldSpaceRect = Rect.create(
+      -this.size.x * 0.5 + 1,
+      this.size.x * 0.5 - 1,
+      -this.size.y * 0.5,
+      this.size.y * 0.5
+    );
+    text.horizontalAlignment = HorizontalAlignment.Right;
+    // create image
+    const imageObject = global.scene.createSceneObject('Image');
+    imageObject.setParent(this.sceneObject);
+    const image = imageObject.createComponent('Image');
+    image.mainMaterial = IMAGE_MATERIAL_ASSET.clone(); // provide image material
+    image.mainPass.baseTex = this.icon; // set icon texture
+    const imageTransform = imageObject.getTransform();
+    imageTransform.setLocalPosition(
+      new vec3(this.size.x * -0.5 + this.size.y * 0.5, 0, 0.1)
+    );
+    imageTransform.setLocalScale(
+      new vec3(this.size.y * 0.5, this.size.y * 0.5, 1)
+    );
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+// Import required modules
+const RectangleButton =
+  require('SpectaclesUIKit.lspkg/Scripts/Components/Button/RectangleButton').RectangleButton;
+const IMAGE_MATERIAL_ASSET =
+  require('SpectaclesUIKit.lspkg/Scripts/Components/Element').IMAGE_MATERIAL_ASSET;
+const RoundedRectangleVisual =
+  require('SpectaclesUIKit.lspkg/Scripts/Visuals/RoundedRectangle/RoundedRectangleVisual').RoundedRectangleVisual;
+
+//@input string text = "Hello World" {"hint":"Button text"}
+//@input Asset.Texture icon {"hint":"Button icon texture"}
+
+/**
+ * CustomButton is a custom button component that allows you to create a button with an image and text.
+ * It extends the RectangleButton component and uses a RoundedRectangleVisual for the visual.
+ */
+
+// Define the CustomButton class that extends RectangleButton
+var CustomButton = function () {
+  RectangleButton.call(this);
+
+  this._text = script.text || 'Hello World';
+  this._icon = script.icon;
+};
+
+// Set up inheritance
+CustomButton.prototype = Object.create(RectangleButton.prototype);
+CustomButton.prototype.constructor = CustomButton;
+
+// Override createDefaultVisual method
+CustomButton.prototype.createDefaultVisual = function () {
+  if (!this._visual) {
+    const defaultVisual = new RoundedRectangleVisual({
+      sceneObject: this.sceneObject,
+      style: {
+        visualElementType: RectangleButton.name,
+        style: this._style,
+      },
+      transparent: this._style === 'Ghost',
+    });
+
+    defaultVisual.cornerRadius = 0.5;
+    this._visual = defaultVisual;
+  }
+};
+
+// Override onAwake method
+CustomButton.prototype.onAwake = function () {
+  RectangleButton.prototype.onAwake.call(this);
+  this.createButtonContent();
+};
+
+CustomButton.prototype.createButtonContent = function () {
+  const canvas = this.sceneObject.createComponent('Canvas');
+  // create text
+  const textObject = global.scene.createSceneObject('Text');
+  textObject.setParent(this.sceneObject);
+  const text = textObject.createComponent('Text');
+  text.text = this._text;
+  text.size = 50;
+  text.worldSpaceRect = Rect.create(
+    -this.size.x * 0.5 + 1,
+    this.size.x * 0.5 - 1,
+    -this.size.y * 0.5,
+    this.size.y * 0.5
+  );
+  text.horizontalAlignment = HorizontalAlignment.Right;
+  // create image
+  const imageObject = global.scene.createSceneObject('Image');
+  imageObject.setParent(this.sceneObject);
+  const image = imageObject.createComponent('Image');
+  image.mainMaterial = IMAGE_MATERIAL_ASSET.clone();
+  image.mainPass.baseTex = this._icon;
+  const imageTransform = imageObject.getTransform();
+  imageTransform.setLocalPosition(
+    new vec3(this.size.x * -0.5 + this.size.y * 0.5, 0, 0.1)
+  );
+  imageTransform.setLocalScale(
+    new vec3(this.size.y * 0.5, this.size.y * 0.5, 1)
+  );
+};
+
+// Note: This script defines a custom button class.
+// To use it, you would need to create an instance of CustomButton
+// and attach it to a scene object programmatically.
+```
+
+</TabItem>
+
+</Tabs>

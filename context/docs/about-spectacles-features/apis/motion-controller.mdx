@@ -1,0 +1,300 @@
+---
+description: 'Build mobile phone controllers that send position, rotation, touchpad, and haptic data to Spectacles via the companion app.'
+---
+
+# Motion Controller Module
+
+```mdx-code-block
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+```
+
+## Overview
+
+<video
+  src="/img/spectacles/motion-controller/motion-controller-example.webm"
+  style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+  autoPlay
+  loop
+  muted
+  playsInline
+></video>
+
+Developers for Spectacles are able to build mobile controllers that are able to communicate to Spectacles that are linked to the mobile companion app [Spectacles App](../../get-started/start-building/spectacles-lens-setup.mdx#download-spectacles-app). The following guide explains how to integrate a motion controller into a Lens Studio project and utilize its api.
+
+:::info  
+This Motion Controller Module is designed to support a variety of 3rd party input devices in future. At the moment only the Spectacles App controller is supported and only one Motion Controller can be connected to Spectacles at a time. In the long future, we expect that there may be multiple Motion Controllers simultaneously.  
+:::
+
+Motion Controller allows access to track world position and rotation of a mobile controller, track touch events and invoke haptic feedback on the mobile device.
+
+## Example
+
+Let’s build a simple example that would allow us to manipulate a 3D object in space and provide certain interactions.
+
+### Prerequisites
+
+Please configure your [Lens Studio project](../../get-started/start-building/spectacles-lens-setup.mdx#starting-a-new-project) for Spectacles and [connect](../../get-started/start-building/connecting-lens-studio-to-spectacles.mdx) your Spectacles device.  
+Also please have the Spectacles App installed on your phone.
+
+### Adding a Motion Controller to Your Project
+
+You can access the Motion Controller through the Motion Controller Module asset like this:
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+@input
+motionControllerModule: MotionControllerModule;
+
+const motionController = this.motionControllerModule.getController();
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+// @input Asset.MotionControllerModule motionControllerModule
+
+const motionController = script.motionControllerModule.getController();
+```
+
+</TabItem>
+</Tabs>
+
+Alternatively, you can import it as a module using the `require` keyword:
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+const MotionControllerModule = require('LensStudio:MotionControllerModule');
+const motionController = MotionControllerModule.getController();
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+const MotionControllerModule = require('LensStudio:MotionControllerModule');
+const motionController = MotionControllerModule.getController();
+```
+
+</TabItem>
+</Tabs>
+
+### Simple Transform Controller
+
+Create a new scene object and a new child object of your choice. This is the 3D object we’ll be manipulating.
+
+<img
+  src="/img/spectacles/motion-controller/motion-controller-scene-hierarchy.png"
+  style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+/>
+Scale and move the child object as shown below.
+<img
+  src="/img/spectacles/motion-controller/motion-controller-scene-view.png"
+  style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+/>
+
+Then create a new script file in Asset Browser based on the preference (TypeScript or JavaScript) and paste the code:
+
+```mdx-code-block
+<Tabs>
+<TabItem value="TypeScript">
+```
+
+```ts
+const MotionControllerModule = require('LensStudio:MotionControllerModule');
+
+@component
+export class NewScript extends BaseScriptComponent {
+  private transform;
+  private controller;
+  onAwake() {
+    var options = MotionController.Options.create();
+    options.motionType = MotionController.MotionType.SixDoF;
+    this.controller = MotionControllerModule.getController(options);
+
+    this.transform = this.sceneObject.getTransform();
+    this.controller.onTransformEvent.add(this.updateTransform.bind(this));
+  }
+
+  updateTransform(position, rotation) {
+    this.transform.setWorldPosition(position);
+    this.transform.setWorldRotation(rotation);
+  }
+}
+```
+
+```mdx-code-block
+</TabItem>
+<TabItem value="JavaScript">
+```
+
+```js
+const MotionControllerModule = require('LensStudio:MotionControllerModule');
+let options = MotionController.Options.create();
+options.motionType = MotionController.MotionType.SixDoF;
+const motionController = MotionControllerModule.getController(options);
+
+const sceneObject = script.getSceneObject();
+const transform = sceneObject.getTransform();
+
+motionController.onTransformEvent.add((worldPosition, worldRotation) => {
+  transform.setWorldPosition(worldPosition);
+  transform.setWorldRotation(worldRotation);
+});
+```
+
+```mdx-code-block
+</TabItem>
+</Tabs>
+```
+
+Save the script and add it to the parent scene object we created above.
+
+Just like this the simplest example is ready. Click on the \`Preview Lens\` button and select \`Send to Connected Spectacles\`. Open the Spectacles App, go through the calibration step and enable the \`Controller\` toggle.
+
+<img
+  src="/img/spectacles/motion-controller/motion-controller-controller.jpg"
+  style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+/>
+
+At this point you should see the object move and rotate with your phone\!
+
+:::tip  
+You may find the complete Motion Controller Helper example in Lens Studio Asset Library\!  
+:::
+
+### Using Touch Events
+
+Let’s expand our code by adding a couple lines :
+
+- Add another script input:
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+@input
+childObject: SceneObject
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+// @input SceneObject childObject
+```
+
+</TabItem>
+</Tabs>
+
+- Add an `onTouchEvent` function:
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+onTouchEvent(normalizedPosition, touchId, timestampMs, phase) {
+  if (phase != MotionController.TouchPhase.Began) {
+    return;
+  }
+  this.childObject.enabled = !this.childObject.enabled;
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+function onTouchEvent(normalizedPosition, touchId, timestampMs, phase) {
+  if (phase != MotionController.TouchPhase.Began) {
+    return;
+  }
+  script.childObject.enabled = !script.childObject.enabled;
+}
+```
+
+</TabItem>
+</Tabs>
+
+- And finally add an event callback in onAwake function
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+this.controller.onTouchEvent.add(this.onTouchEvent.bind(this));
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+motionController.onTouchEvent.add(onTouchEvent);
+```
+
+</TabItem>
+</Tabs>
+
+Send the lens to Spectacles and try tapping on the screen to toggle the object.
+
+:::tip  
+The Motion Controller also invokes usual script touch events such as TapEvent, TouchStartEvent, TouchMoveEvent and TouchEndEvent. Which means you can reutilize some of existing helper scripts and create touch interactions that also work in Lens Studio.  
+:::
+
+### Adding Haptic Feedback
+
+Motion Controller allows you to invoke the tactile response or physical sensations provided by a device when a user interacts with it.
+
+:::warning  
+For this api please make sure you have Vibration and System Haptics enabled on your phone.  
+:::
+
+Let’s expand an \`onTouchEvent\` function by adding vibration feedback whenever a 3D object is enabled:
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+onTouchEvent(normalizedPosition, touchId, timestampMs, phase) {
+  if (phase != MotionController.TouchPhase.Began) {
+    return;
+  }
+
+  this.childObject.enabled = !this.childObject.enabled;
+  if (this.childObject.enabled) {
+    const request = MotionController.HapticRequest.create();
+    request.hapticFeedback = MotionController.HapticFeedback.VibrationMedium;
+    request.duration = 1.0;
+    this.controller.invokeHaptic(request);
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+function onTouchEvent(normalizedPosition, touchId, timestampMs, phase) {
+  if (phase != MotionController.TouchPhase.Began) {
+    return;
+  }
+
+  script.childObject.enabled = !script.childObject.enabled;
+  if (script.childObject.enabled) {
+    const request = MotionController.HapticRequest.create();
+    request.hapticFeedback = MotionController.HapticFeedback.VibrationMedium;
+    request.duration = 1.0;
+    motionController.invokeHaptic(request);
+  }
+}
+```
+
+</TabItem>
+</Tabs>
+
+Please check out the full Motion Controller API documentation for more code snippets and detailed functionality description\!

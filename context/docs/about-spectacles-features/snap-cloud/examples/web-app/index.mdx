@@ -1,0 +1,63 @@
+---
+sidebar_position: 4
+sidebar_label: Lens & Web App
+description: 'Connect a Spectacles Lens to a companion web app using Snap Cloud for shared real-time data (Lens & Web App demo).'
+---
+
+# World Kindness Day Lens & Web App
+
+When a user chooses a balloon and speaks their pledge in the Lens, a record is written to the Snap Cloud database. The global pledge counter in the companion web app updates in real time - no page refresh needed.
+
+The web app below is a live demo connected to an internal Snap Cloud project and a sample World Kindness Day Lens that has already received pledges. The numbers you see come from that demo setup.
+
+<iframe
+  src="/examples/kindness-counter/"
+  style={{
+    width: '90%',
+    height: '700px',
+    border: '1px solid #ddd',
+    borderRadius: '8px',
+  }}
+  title="World Kindness Day: Lens & Web App Demo"
+/>
+
+## Why this pattern matters
+
+Many real Spectacles experiences need some form of persistence: saving user actions, syncing state across users, or displaying information outside the Lens. This demo keeps the integration minimal so you can treat it as a reference, a starting point, or a learning resource.
+
+Use this if you want to:
+
+- Understand how a Lens can securely write data to Snap Cloud.
+- Learn how to query that data back using RPC functions.
+- See how the Lens & Web App web client can read the same data in real time.
+- Have a working pattern to adapt for your own projects.
+
+## Setup
+
+The full setup is split across three guides. Start with the Snap Cloud project, then decide whether you want to run only the Lens, or the full Lens & Web App flow.
+
+| Step                                | Guide                                               |
+| ----------------------------------- | --------------------------------------------------- |
+| 1. Create tables + RPC functions    | [WKD Snap Cloud Setup Guide](./snapcloud-setup.mdx) |
+| 2. Connect the Lens in Lens Studio  | [WKD Lens Setup Guide](./lens-setup.mdx)            |
+| 3. Configure and deploy the Web App | [WKD Web App Setup Guide](./webapp-setup.mdx)       |
+
+### Option A: Lens only
+
+Open the `World Kindness Day` sample project from the Spectacles Sample Projects section in Lens Studio. Import your Supabase credentials and connect the Lens to your Snap Cloud backend following the [WKD Lens Setup Guide](./lens-setup.mdx). The Lens writes pledge data to your database, which you can inspect directly in the Supabase dashboard.
+
+### Option B: Lens & Web App
+
+Complete Option A first, then download the [Web App ZIP](https://storage.googleapis.com/snapchat-lens-assets/f1a09194-f02d-43ed-92b8-62e843179ff0/lensStudio/Spectacles/LensWebExample/kindness-counter.zip) and configure it with your Supabase URL and anon key as described in the [Web App Setup Guide](./webapp-setup.mdx). Once configured, the Web App will display the same global pledge total that the Lens updates in real time.
+
+## Tips
+
+:::tip Database writes from the Lens
+The Lens uses the same `signInWithIdToken` pattern as all other examples, then calls `.from('pledges').insert(...)` to write the user's pledge. The web app subscribes to changes on the same table using Supabase's Realtime `postgres_changes` listener.
+:::
+
+:::tip Reuse for your own projects
+The pattern here: Lens writes → Supabase stores → Web App reads in real time; applies to any experience that needs a live public counter, a shared map, a multiplayer leaderboard overlay, or any persistent cross-device state.
+:::
+
+[Snap Cloud]: https://cloud.snap.com/

@@ -1,0 +1,202 @@
+---
+sidebar_position: 4
+description: 'Create custom visual styles for Spectacles UI Kit components by overriding default materials and colors.'
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Custom Visual
+
+### How to create a custom visual
+
+<p>
+  You can swap out the default visual for a UI Kit component by creating a
+  custom visual. You can do this through TypeScript by setting the `visual`
+  property on your UI Kit element before you initialize it. Here is an example
+  of how to do this with a RectangleButton:
+</p>
+
+<video
+  src="/img/spectacles/spectacles-ui-kit/custom-visual-demo.webm"
+  style={{ borderRadius: '8px' }}
+  autoPlay
+  loop
+  muted
+  playsInline
+  style={{
+    maxWidth: '600px',
+    width: '100%',
+    margin: '0 auto',
+    display: 'flex',
+    borderRadius: '8px',
+  }}
+/>
+
+### Code Example
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+import { RectangleButton } from 'SpectaclesUIKit.lspkg/Scripts/Components/Button/RectangleButton';
+import {
+  RoundedRectangleVisual,
+  RoundedRectangleVisualState,
+} from 'SpectaclesUIKit.lspkg/Scripts/Visuals/RoundedRectangle/RoundedRectangleVisual';
+import { StateName } from 'SpectaclesUIKit.lspkg/Scripts/Components/Element';
+
+const COLORS = {
+  // More saturated yellow, black, white with rich tonal variations
+  lightYellow: new vec4(1.0, 0.99, 0.75, 1), // #FFFC40 - Rich cream yellow
+  yellow: new vec4(0.95, 0.88, 0.15, 1), // #F2E026 - Vibrant yellow
+  darkYellow: new vec4(0.8, 0.7, 0.0, 1), // #CCB300 - Deep golden yellow
+
+  white: new vec4(0.99, 0.99, 0.99, 1), // #FCFCFC - Bright white
+  lightGray: new vec4(0.88, 0.88, 0.88, 1), // #E0E0E0 - Light gray
+  darkGray: new vec4(0.2, 0.2, 0.2, 1), // #333333 - Dark gray
+  black: new vec4(0.02, 0.02, 0.02, 1), // #050505 - Rich black
+};
+
+/**
+ * ExampleButtonCustomVisual is a script that applies a custom visual to a button.
+ * It uses the RoundedRectangleVisual class to create a rounded rectangle with a custom visual.
+ */
+
+@component
+export class ExampleButtonCustomVisual extends BaseScriptComponent {
+  onAwake() {
+    const button = this.sceneObject.getComponent(
+      RectangleButton.getTypeName()
+    ) as RectangleButton;
+    const customStyle: Partial<Record<StateName, RoundedRectangleVisualState>> =
+      {
+        default: {
+          isBaseGradient: true,
+          hasBorder: true,
+          borderSize: 0.125,
+          borderType: 'Color',
+          borderColor: COLORS.lightGray,
+          baseGradient: {
+            enabled: true,
+            type: 'Rectangle',
+            stop0: { enabled: true, percent: 0, color: COLORS.white },
+            stop1: { enabled: true, percent: 0.3, color: COLORS.lightGray },
+            stop2: { enabled: true, percent: 0.7, color: COLORS.darkGray },
+            stop3: { enabled: true, percent: 1.0, color: COLORS.black },
+          },
+        },
+        hover: {
+          baseGradient: {
+            enabled: true,
+            type: 'Rectangle',
+            stop0: { enabled: true, percent: 0, color: COLORS.lightYellow },
+            stop1: { enabled: true, percent: 0.2, color: COLORS.yellow },
+            stop2: { enabled: true, percent: 0.6, color: COLORS.darkYellow },
+            stop3: { enabled: true, percent: 1.0, color: COLORS.darkGray },
+          },
+        },
+        triggered: {
+          baseGradient: {
+            enabled: true,
+            type: 'Rectangle',
+            stop0: { enabled: true, percent: 0, color: COLORS.yellow },
+            stop1: { enabled: true, percent: 0.3, color: COLORS.white },
+            stop2: { enabled: true, percent: 0.7, color: COLORS.lightGray },
+            stop3: { enabled: true, percent: 1.0, color: COLORS.black },
+          },
+        },
+      };
+    const customVisual = new RoundedRectangleVisual({
+      sceneObject: button.sceneObject,
+      style: customStyle,
+    });
+
+    button.visual = customVisual;
+    button.initialize();
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+// Import required modules
+const RectangleButton =
+  require('SpectaclesUIKit.lspkg/Scripts/Components/Button/RectangleButton').RectangleButton;
+const RoundedRectangleVisual =
+  require('SpectaclesUIKit.lspkg/Scripts/Visuals/RoundedRectangle/RoundedRectangleVisual').RoundedRectangleVisual;
+
+const COLORS = {
+  // More saturated yellow, black, white with rich tonal variations
+  lightYellow: new vec4(1.0, 0.99, 0.75, 1), // Rich cream yellow
+  yellow: new vec4(0.95, 0.88, 0.15, 1), // Vibrant yellow
+  darkYellow: new vec4(0.8, 0.7, 0.0, 1), // Deep golden yellow
+
+  white: new vec4(0.99, 0.99, 0.99, 1), // Bright white
+  lightGray: new vec4(0.88, 0.88, 0.88, 1), // Light gray
+  darkGray: new vec4(0.2, 0.2, 0.2, 1), // Dark gray
+  black: new vec4(0.02, 0.02, 0.02, 1), // Rich black
+};
+
+/**
+ * ExampleButtonCustomVisual is a script that applies a custom visual to a button.
+ * It uses the RoundedRectangleVisual class to create a rounded rectangle with a custom visual.
+ */
+
+function onAwake() {
+  const button = script.sceneObject.getComponent(RectangleButton.getTypeName());
+  const customStyle = {
+    default: {
+      isBaseGradient: true,
+      hasBorder: true,
+      borderSize: 0.125,
+      borderType: 'Color',
+      borderColor: COLORS.lightGray,
+      baseGradient: {
+        enabled: true,
+        type: 'Rectangle',
+        stop0: { enabled: true, percent: 0, color: COLORS.white },
+        stop1: { enabled: true, percent: 0.3, color: COLORS.lightGray },
+        stop2: { enabled: true, percent: 0.7, color: COLORS.darkGray },
+        stop3: { enabled: true, percent: 1.0, color: COLORS.black },
+      },
+    },
+    hover: {
+      baseGradient: {
+        enabled: true,
+        type: 'Rectangle',
+        stop0: { enabled: true, percent: 0, color: COLORS.lightYellow },
+        stop1: { enabled: true, percent: 0.2, color: COLORS.yellow },
+        stop2: { enabled: true, percent: 0.6, color: COLORS.darkYellow },
+        stop3: { enabled: true, percent: 1.0, color: COLORS.darkGray },
+      },
+    },
+    triggered: {
+      baseGradient: {
+        enabled: true,
+        type: 'Rectangle',
+        stop0: { enabled: true, percent: 0, color: COLORS.yellow },
+        stop1: { enabled: true, percent: 0.3, color: COLORS.white },
+        stop2: { enabled: true, percent: 0.7, color: COLORS.lightGray },
+        stop3: { enabled: true, percent: 1.0, color: COLORS.black },
+      },
+    },
+  };
+  const customVisual = new RoundedRectangleVisual({
+    sceneObject: button.sceneObject,
+    style: customStyle,
+  });
+
+  button.visual = customVisual;
+  button.initialize();
+}
+
+// Start the script
+onAwake();
+```
+
+</TabItem>
+
+</Tabs>

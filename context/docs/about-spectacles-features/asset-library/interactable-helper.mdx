@@ -1,0 +1,490 @@
+---
+description: 'Use Interactable Helper for prototyping by controlling Interaction Kit components via events without code.'
+---
+
+# Interactable Helper
+
+## Overview
+
+<video
+  src="/img/spectacles/interactable-helper/interactable-helper-image1.webm"
+  style={{ maxWidth: '300px', width: '100%', borderRadius: '8px' }}
+  autoPlay
+  loop
+  muted
+  playsInline
+></video>
+
+Interactable Helper allows you to achieve low to medium fidelity prototyping – controlling core components via Spectacles Interaction Kit Interactable Component events without code.
+
+## Getting Started
+
+### Prerequisites
+
+- Lens Studio v5.12.1 or higher
+
+### Setup Instructions
+
+**Project Setup**
+
+Start with Spectacles → Base Template or your current project with Spectacles Interaction Kit
+
+**Import Interactable Helper**
+
+1. Download the latest Interactable Helper package from the Asset Library.
+
+2. (Optional) Drag the **Examples** prefab into your scene to explore usage examples.
+
+### Basic Setup Flow
+
+- Create a SceneObject and add any visual component (e.g., RenderMesh, Image, Text).
+- Create a child SceneObject. Add a **PhysicsCollider** and **InteractableHelper** component to that child.
+  - If you don't add an **Interactable** and/or **PhysicsCollider** components, Interactable Helper adds them automatically during runtime.
+- In the Interactable Helper inspector, click **Add Value** for each Interactable Event you want to handle.
+- Assign a target SceneObject for the Event Response.
+- Configure the desired Event Response in Interactable Helper.
+
+## Types of Event Responses Deep Dive
+
+### Set State
+
+Use **Set State** to enable or disable the specified SceneObject. Optionally add a delay before the state change.
+
+<div
+  style={{
+    display: 'flex',
+    gap: '5px',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    flexWrap: 'wrap',
+  }}
+>
+  <img
+    src="/img/spectacles/interactable-helper/interactable-helper-image2.png"
+    style={{
+      width: '100%',
+      maxWidth: '300px',
+      flex: '1 1 200px',
+      borderRadius: '8px',
+    }}
+  />
+  <video
+    src="/img/spectacles/interactable-helper/interactable-helper-image3.webm"
+    style={{
+      width: '100%',
+      maxWidth: '300px',
+      flex: '1 1 200px',
+      borderRadius: '8px',
+    }}
+    autoPlay
+    loop
+    muted
+    playsInline
+  ></video>
+</div>
+
+### Toggle State
+
+Use **Toggle State** to switch the enabled state of the specified SceneObject when the event triggers.
+
+<div
+  style={{
+    display: 'flex',
+    gap: '5px',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    flexWrap: 'wrap',
+  }}
+>
+  <img
+    src="/img/spectacles/interactable-helper/interactable-helper-image4.png"
+    style={{
+      width: '100%',
+      maxWidth: '300px',
+      flex: '1 1 200px',
+      borderRadius: '8px',
+    }}
+  />
+  <video
+    src="/img/spectacles/interactable-helper/interactable-helper-image5.webm"
+    style={{
+      width: '100%',
+      maxWidth: '300px',
+      flex: '1 1 200px',
+      borderRadius: '8px',
+    }}
+    autoPlay
+    loop
+    muted
+    playsInline
+  ></video>
+</div>
+
+### Transform Animation
+
+Configure **Tween Animation** to animate a SceneObject's scale, rotation, or position. Specify:
+
+- **Play Option:**
+  - Play from current value
+  - Play everytime
+  - Toggle
+- **End Value** (target transform)
+
+- **Animation Duration** (seconds)
+
+- **Delay** (optional)
+
+- **Easing** (optional)
+
+You can also hook into animation start and end events and choose from these options:
+
+1. Reference a script and function name to invoke a callback.
+
+2. Enable or disable one or more SceneObjects at animation start or end.
+
+<div
+  style={{
+    display: 'flex',
+    gap: '5px',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    flexWrap: 'wrap',
+  }}
+>
+  <img
+    src="/img/spectacles/interactable-helper/interactable-helper-image6.png"
+    style={{
+      width: '100%',
+      maxWidth: '300px',
+      flex: '1 1 200px',
+      borderRadius: '8px',
+    }}
+  />
+  <video
+    src="/img/spectacles/interactable-helper/interactable-helper-image7.webm"
+    style={{
+      width: '100%',
+      maxWidth: '300px',
+      flex: '1 1 200px',
+      borderRadius: '8px',
+    }}
+    autoPlay
+    loop
+    muted
+    playsInline
+  ></video>
+</div>
+
+### Custom Animation
+
+Use **Custom Animation** to play clips on an **AnimationPlayer** component. You may:
+
+- Iterate through all clips in the referenced AnimationPlayer.
+
+- Specify a single clip to play when the Interactable Event triggers.
+
+<div
+  style={{
+    display: 'flex',
+    gap: '5px',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    flexWrap: 'wrap',
+  }}
+>
+  <img
+    src="/img/spectacles/interactable-helper/interactable-helper-image8.png"
+    style={{
+      width: '100%',
+      maxWidth: '300px',
+      flex: '1 1 200px',
+      borderRadius: '8px',
+    }}
+  />
+  <img
+    src="/img/spectacles/interactable-helper/interactable-helper-image9.png"
+    style={{
+      width: '100%',
+      maxWidth: '300px',
+      flex: '1 1 200px',
+      borderRadius: '8px',
+    }}
+  />
+  <video
+    src="/img/spectacles/interactable-helper/interactable-helper-image10.webm"
+    style={{
+      width: '100%',
+      maxWidth: '300px',
+      flex: '1 1 200px',
+      borderRadius: '8px',
+    }}
+    autoPlay
+    loop
+    muted
+    playsInline
+  ></video>
+</div>
+
+### Iteration
+
+Assign a parent SceneObject whose children will serve as items to iterate. Each time the chosen Interactable Event triggers, Interactable Helper advances to the next child.
+
+<div
+  style={{
+    display: 'flex',
+    gap: '5px',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    flexWrap: 'wrap',
+  }}
+>
+  <img
+    src="/img/spectacles/interactable-helper/interactable-helper-image11.png"
+    style={{
+      width: '100%',
+      maxWidth: '300px',
+      flex: '1 1 200px',
+      borderRadius: '8px',
+    }}
+  />
+  <img
+    src="/img/spectacles/interactable-helper/interactable-helper-image12.png"
+    style={{
+      width: '100%',
+      maxWidth: '300px',
+      flex: '1 1 200px',
+      borderRadius: '8px',
+    }}
+  />
+  <video
+    src="/img/spectacles/interactable-helper/interactable-helper-image13.webm"
+    style={{
+      width: '100%',
+      maxWidth: '300px',
+      flex: '1 1 200px',
+      borderRadius: '8px',
+    }}
+    autoPlay
+    loop
+    muted
+    playsInline
+  ></video>
+</div>
+
+### Material Property
+
+Animate a shader property on the referenced SceneObject's **RenderMeshVisual** material. Specify the property name, type start and end values.
+
+<div
+  style={{
+    display: 'flex',
+    gap: '5px',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    flexWrap: 'wrap',
+  }}
+>
+  <img
+    src="/img/spectacles/interactable-helper/interactable-helper-image14.png"
+    style={{
+      width: '100%',
+      maxWidth: '300px',
+      flex: '1 1 200px',
+      borderRadius: '8px',
+    }}
+  />
+  <img
+    src="/img/spectacles/interactable-helper/interactable-helper-image15.png"
+    style={{
+      width: '100%',
+      maxWidth: '300px',
+      flex: '1 1 200px',
+      borderRadius: '8px',
+    }}
+  />
+  <video
+    src="/img/spectacles/interactable-helper/interactable-helper-image16.webm"
+    style={{
+      width: '100%',
+      maxWidth: '300px',
+      flex: '1 1 200px',
+      borderRadius: '8px',
+    }}
+    autoPlay
+    loop
+    muted
+    playsInline
+  ></video>
+</div>
+
+### Material BaseColor
+
+Animate the baseColor property on Image, RenderMeshVisual, or Text components.
+
+<div
+  style={{
+    display: 'flex',
+    gap: '5px',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    flexWrap: 'wrap',
+  }}
+>
+  <img
+    src="/img/spectacles/interactable-helper/interactable-helper-image17.png"
+    style={{
+      width: '100%',
+      maxWidth: '300px',
+      flex: '1 1 200px',
+      borderRadius: '8px',
+    }}
+  />
+  <video
+    src="/img/spectacles/interactable-helper/interactable-helper-image18.webm"
+    style={{
+      width: '100%',
+      maxWidth: '300px',
+      flex: '1 1 200px',
+      borderRadius: '8px',
+    }}
+    autoPlay
+    loop
+    muted
+    playsInline
+  ></video>
+</div>
+
+### Callbacks
+
+Use **Callback** option to invoke a function in a referenced script when the chosen Interactable Event triggers. Specify the script and method name.
+
+<div
+  style={{
+    display: 'flex',
+    gap: '5px',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    flexWrap: 'wrap',
+  }}
+>
+  <img
+    src="/img/spectacles/interactable-helper/interactable-helper-image19.png"
+    style={{
+      width: '100%',
+      maxWidth: '300px',
+      flex: '1 1 200px',
+      borderRadius: '8px',
+    }}
+  />
+  <img
+    src="/img/spectacles/interactable-helper/interactable-helper-image20.png"
+    style={{
+      width: '100%',
+      maxWidth: '300px',
+      flex: '1 1 200px',
+      borderRadius: '8px',
+    }}
+  />
+  <video
+    src="/img/spectacles/interactable-helper/interactable-helper-image21.webm"
+    style={{
+      width: '100%',
+      maxWidth: '300px',
+      flex: '1 1 200px',
+      borderRadius: '8px',
+    }}
+    autoPlay
+    loop
+    muted
+    playsInline
+  ></video>
+</div>
+
+### Animate BlendShape
+
+Use **Animate BlendShape** option to control BlendShape value of a mesh. Configure animation parameters.
+
+<div
+  style={{
+    display: 'flex',
+    gap: '5px',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    flexWrap: 'wrap',
+  }}
+>
+  <img
+    src="/img/spectacles/interactable-helper/interactable-helper-image22.png"
+    style={{
+      width: '100%',
+      maxWidth: '300px',
+      flex: '1 1 200px',
+      borderRadius: '8px',
+    }}
+  />
+  <video
+    src="/img/spectacles/interactable-helper/interactable-helper-image23.webm"
+    style={{
+      width: '100%',
+      maxWidth: '300px',
+      flex: '1 1 200px',
+      borderRadius: '8px',
+    }}
+    autoPlay
+    loop
+    muted
+    playsInline
+  ></video>
+</div>
+
+### Audio Control
+
+Use **Play Audio Clip** option to play an AudioClip of an AudioComponent.
+
+Audio Control Behavior options:
+
+- **Play** (**Plays** audio clip from start each time Interactable event is triggered)
+- **Play / Stop** (The same Interactable alternates between playing and **stopping** AudioComponent (provided as SceneObject) each time Interactable event is triggered)
+- **Play / Pause** (The same Interactable alternates between playing and **pausing** AudioComponent (provided as SceneObject) each time Interactable event is triggered)
+
+<img
+  src="/img/spectacles/interactable-helper/interactable-helper-image24.png"
+  style={{ maxWidth: '300px', width: '100%', borderRadius: '8px' }}
+/>
+
+### Image Video Texture Control
+
+Use **Video Texture Control** to play videos. Assign a video file as texture to an Image Component. Choose play behavior: play once or play and loop.
+
+<div
+  style={{
+    display: 'flex',
+    gap: '5px',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    flexWrap: 'wrap',
+  }}
+>
+  <img
+    src="/img/spectacles/interactable-helper/interactable-helper-image25.png"
+    style={{
+      width: '100%',
+      maxWidth: '300px',
+      flex: '1 1 200px',
+      borderRadius: '8px',
+    }}
+  />
+  <video
+    src="/img/spectacles/interactable-helper/interactable-helper-image26.webm"
+    style={{
+      width: '100%',
+      maxWidth: '300px',
+      flex: '1 1 200px',
+      borderRadius: '8px',
+    }}
+    autoPlay
+    loop
+    muted
+    playsInline
+  ></video>
+</div>

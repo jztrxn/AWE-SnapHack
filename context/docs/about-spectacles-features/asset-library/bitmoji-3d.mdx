@@ -1,0 +1,258 @@
+---
+description: 'Install and use the Bitmoji 3D asset package to download and display 3D avatars in Spectacles Lenses, including multiplayer with Sync Kit.'
+---
+
+# Bitmoji 3D
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+The [Bitmoji 3D](/lens-studio/features/bitmoji-avatar/bitmoji-3d#bitmoji-3d-component) package downloads and displays 3D Bitmoji avatars in Spectacles Lenses.
+
+## Prerequisites
+
+- Lens Studio v5.15.0 or later
+- Spectacles OS v5.63.x or later
+- Bitmoji 3D package (available in Asset Library)
+
+## Installation
+
+1. Open your Spectacles project in Lens Studio
+2. Navigate to **Asset Library**
+3. Search for "**Bitmoji 3D**"
+4. Click "**Install**" to add the package to your project
+
+## Connected Lenses Usage
+
+Bitmoji 3D can be used with **Spectacles Sync Kit** to display avatars for users in a Connected Lens session. Retrieve the `SnapchatUser` object from the active session, then download and instantiate the Bitmoji avatar using the steps below.
+
+### Setup
+
+1. Install **Bitmoji 3D** and **Spectacles Sync Kit** from Asset Library
+2. Follow the [Spectacles Sync Kit documentation](/spectacles/spectacles-frameworks/spectacles-sync-kit/overview) to set up your multiplayer session
+3. Add a Bitmoji 3D component to your scene
+4. Configure it: Set **Bitmoji Type** to "None" and disable **Auto Download**
+5. Create a script and reference the Bitmoji component as an input
+
+<img
+  src="/img/spectacles/misc/spectacles-bitmoji-3d-connected-lenses-config.png"
+  style={{ maxWidth: '500px', width: '100%', borderRadius: '8px' }}
+/>
+
+### Code Example
+
+<Tabs>
+<TabItem value="TypeScript">
+
+**Step 1: Get SnapchatUser from Connection ID**
+
+```typescript
+import { SessionController } from "SpectaclesSyncKit.lspkg/Core/SessionController";
+
+private sessionController: SessionController = SessionController.getInstance();
+
+private getSnapchatUserByConnectionId(connectionId: string): Promise<SnapchatUser> {
+    return new Promise((resolve, reject) => {
+        const session = this.sessionController.getSession();
+        const matchingUserInfo = session.activeUsersInfo.find(
+            (userInfo) => userInfo && userInfo.connectionId === connectionId
+        );
+
+        if (matchingUserInfo) {
+            session.getSnapchatUser(matchingUserInfo, resolve);
+        } else {
+            reject(`User ${connectionId} not found in active users`);
+        }
+    });
+}
+```
+
+**Step 2: Download Avatar for User**
+
+```typescript
+import { Bitmoji3D } from "Bitmoji 3D.lsc/Bitmoji 3D.lsc/Bitmoji 3D";
+
+@input
+bitmojiComponent: Bitmoji3D;
+
+private async loadPlayerBitmoji(connectionId: string) {
+    try {
+        const user = await this.getSnapchatUserByConnectionId(connectionId);
+        await this.bitmojiComponent.downloadAvatarForUser(user);
+
+        const avatar = this.bitmojiComponent.getAvatar();
+        if (avatar) {
+            print('Bitmoji loaded successfully!');
+        }
+    } catch (e) {
+        print(`Error loading bitmoji: ${e}`);
+    }
+}
+```
+
+**Step 3: Full Example**
+
+```typescript
+import { SessionController } from 'SpectaclesSyncKit.lspkg/Core/SessionController';
+import { Bitmoji3D } from 'Bitmoji 3D.lsc/Bitmoji 3D.lsc/Bitmoji 3D';
+
+@component
+export class ConnectedLensBitmoji extends BaseScriptComponent {
+  private sessionController: SessionController =
+    SessionController.getInstance();
+  @input
+  bitmojiComponent: Bitmoji3D;
+
+  onAwake() {
+    this.sessionController.notifyOnReady(() => {
+      const connectionId = this.sessionController.getLocalConnectionId();
+      this.getSnapchatUserByConnectionId(connectionId);
+      this.loadPlayerBitmoji(connectionId);
+    });
+  }
+
+  private getSnapchatUserByConnectionId(
+    connectionId: string
+  ): Promise<SnapchatUser> {
+    return new Promise((resolve, reject) => {
+      const session = this.sessionController.getSession();
+      const matchingUserInfo = session.activeUsersInfo.find(
+        (userInfo) => userInfo && userInfo.connectionId === connectionId
+      );
+
+      if (matchingUserInfo) {
+        session.getSnapchatUser(matchingUserInfo, resolve);
+        print(
+          `Found user ${matchingUserInfo.displayName} for connection ID ${connectionId}`
+        );
+      } else {
+        reject(`User ${connectionId} not found in active users`);
+      }
+    });
+  }
+
+  private async loadPlayerBitmoji(connectionId: string) {
+    try {
+      const user = await this.getSnapchatUserByConnectionId(connectionId);
+      await this.bitmojiComponent.downloadAvatarForUser(user);
+      const avatar = this.bitmojiComponent.getAvatar();
+      if (avatar) {
+        print('Bitmoji loaded successfully!');
+      }
+    } catch (e) {
+      print(`Error loading bitmoji: ${e}`);
+    }
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+**Step 1: Get SnapchatUser from Connection ID**
+
+```javascript
+const SessionController =
+  require('SpectaclesSyncKit.lspkg/Core/SessionController').SessionController;
+const sessionController = SessionController.getInstance();
+
+function getSnapchatUserByConnectionId(connectionId, onSuccess, onError) {
+  const session = sessionController.getSession();
+  const matchingUserInfo = session.activeUsersInfo.find(function (userInfo) {
+    return userInfo && userInfo.connectionId === connectionId;
+  });
+
+  if (matchingUserInfo) {
+    session.getSnapchatUser(matchingUserInfo, onSuccess);
+  } else {
+    onError('User ' + connectionId + ' not found in active users');
+  }
+}
+```
+
+**Step 2: Download Avatar for User**
+
+```javascript
+// @input Component.ScriptComponent bitmojiComponent
+
+function loadPlayerBitmoji(connectionId) {
+  getSnapchatUserByConnectionId(
+    connectionId,
+    function (user) {
+      script.bitmojiComponent.downloadAvatarForUser(user);
+
+      const avatar = script.bitmojiComponent.getAvatar();
+      if (avatar) {
+        print('Bitmoji loaded successfully!');
+      }
+    },
+    function (error) {
+      print('Error loading bitmoji: ' + error);
+    }
+  );
+}
+```
+
+**Step 3: Full Example**
+
+```javascript
+const SessionController =
+  require('SpectaclesSyncKit.lspkg/Core/SessionController').SessionController;
+
+//@input Component.ScriptComponent bitmojiComponent
+
+script.sessionController = SessionController.getInstance();
+
+script.sessionController.notifyOnReady(function () {
+  var connectionId = script.sessionController.getLocalConnectionId();
+  getSnapchatUserByConnectionId(connectionId);
+  loadPlayerBitmoji(connectionId);
+});
+
+function getSnapchatUserByConnectionId(connectionId) {
+  return new Promise(function (resolve, reject) {
+    var session = script.sessionController.getSession();
+    var matchingUserInfo = session.activeUsersInfo.find(function (userInfo) {
+      return userInfo && userInfo.connectionId === connectionId;
+    });
+
+    if (matchingUserInfo) {
+      session.getSnapchatUser(matchingUserInfo, resolve);
+    } else {
+      reject('User ' + connectionId + ' not found in active users');
+    }
+  });
+}
+
+async function loadPlayerBitmoji(connectionId) {
+  try {
+    var user = await getSnapchatUserByConnectionId(connectionId);
+    await script.bitmojiComponent.downloadAvatarForUser(user);
+    var avatar = script.bitmojiComponent.getAvatar();
+    if (avatar) {
+      print('Bitmoji loaded successfully!');
+    }
+  } catch (e) {
+    print('Error loading bitmoji: ' + e);
+  }
+}
+```
+
+</TabItem>
+</Tabs>
+
+:::important
+
+**Privacy & Friendship**: If users are not Snapchat friends or have Bitmoji privacy restrictions enabled, a randomized Bitmoji will be loaded instead of their actual avatar.
+
+:::
+
+## Related Resources
+
+- [Spectacles Sync Kit](/spectacles/spectacles-frameworks/spectacles-sync-kit/overview)
+- [Bitmoji 3D Component (Lens Studio)](/lens-studio/features/bitmoji-avatar/bitmoji-3d#bitmoji-3d-component)
+- [Connected Lenses Overview](/spectacles/about-spectacles-features/connected-lenses/overview)
+
+```
+
+```

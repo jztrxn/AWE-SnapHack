@@ -1,0 +1,296 @@
+---
+sidebar_position: 2
+description: 'Commerce Kit APIs include product catalog, purchases, and ownership validation.'
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# API Reference
+
+The Commerce Kit API provides a comprehensive set of tools for managing in-app purchases for non-consumable items in Spectacles. This reference covers all public classes, methods, and types available in the Commerce Kit framework.
+
+Commerce Kit extends and builds upon the core CommerceKitModule functionality. For additional low-level commerce operations, refer to:
+
+- **[CommerceKitModule API](https://developers.snap.com/lens-studio/api/editor-scripting/classes/Built-In.CommerceKitModule.html)** - Core commerce module functionality
+- **[Commerce API](https://developers.snap.com/lens-studio/api/lens-scripting/modules/Built-In.Commerce.html)** - Base commerce types and enums
+
+## CommerceKit
+
+The main singleton class that handles all commerce operations.
+
+**Scripting Name:** `CommerceKit`  
+**Inherits from:** `Singleton`
+
+### Static Methods
+
+#### getInstance(): CommerceKit
+
+Returns the singleton instance of CommerceKit.
+
+**Returns:** The shared CommerceKit instance
+
+```typescript
+const commerceKit = CommerceKit.getInstance();
+```
+
+### Methods
+
+#### initializeCatalog(productCatalog)
+
+Initializes the product catalog and validates price formats. This method must be called before making any purchases.
+
+**Parameters:**
+
+- `productCatalog`: `CommerceProduct[]` - Array of CommerceProduct objects to initialize
+
+**Returns:** `Promise<void>`
+
+**Throws:** Error if catalog price validation fails
+
+```typescript
+const products = [
+  {
+    id: 'premium_upgrade',
+    type: 'NonConsumable',
+    displayName: 'Premium Features',
+    price: { price: 4.99, currency: 'USD' },
+  },
+];
+await commerceKit.initializeCatalog(products);
+```
+
+---
+
+#### purchaseProduct(productId)
+
+Initiates the purchase flow for a product.
+
+**Parameters:**
+
+- `productId`: `String` - The unique identifier of the product to purchase
+
+**Returns:** `Promise<{success: Boolean, cancelled?: Boolean}>` - Purchase result object
+
+- `success` - Boolean indicating if the purchase was successful
+- `cancelled` - Optional boolean indicating if the user cancelled the purchase
+
+**Throws:** Error if the purchase acknowledgment fails or if the purchase flow fails to launch
+
+```typescript
+try {
+  const result = await commerceKit.purchaseProduct('premium_upgrade');
+  if (result.success) {
+    console.log('Purchase successful!');
+  } else if (result.cancelled) {
+    console.log('Purchase was cancelled');
+  }
+} catch (error) {
+  console.error('Purchase failed:', error);
+}
+```
+
+---
+
+#### isProductOwned(productId)
+
+Checks if a product is already owned by the user.
+
+**Parameters:**
+
+- `productId`: `String` - The unique identifier of the product to check
+
+**Returns:** `Boolean` - `true` if the product is owned, `false` otherwise
+
+```typescript
+if (commerceKit.isProductOwned('premium_upgrade')) {
+  // Enable premium features
+}
+```
+
+---
+
+#### getProductInfo(productId)
+
+Retrieves detailed information about a product. In editor mode, returns from local catalog. In runtime mode, queries the commerce client.
+
+**Parameters:**
+
+- `productId`: `String` - The unique identifier of the product
+
+**Returns:** `Promise<CommerceProduct>` - Product details
+
+**Throws:** Error if the product is not found
+
+```typescript
+try {
+  const product = await commerceKit.getProductInfo('premium_upgrade');
+  console.log(`Product: ${product.displayName}, Price: ${product.price.price}`);
+} catch (error) {
+  console.error('Product not found:', error);
+}
+```
+
+---
+
+#### checkPurchaseStatus(productId)
+
+Checks the current purchase status of a product.
+
+**Parameters:**
+
+- `productId`: `String` - The unique identifier of the product to check
+
+**Returns:** `Promise<Commerce.PurchaseState>` - The purchase state of the product
+
+```typescript
+const status = await commerceKit.checkPurchaseStatus('premium_upgrade');
+if (status === Commerce.PurchaseState.Purchased) {
+  // Product is owned
+}
+```
+
+---
+
+#### client()
+
+Returns the commerce client instance.
+
+**Returns:** `Promise<Commerce.Client>` - The Commerce.Client instance
+
+**Throws:** Error if the client failed to initialize
+
+## CommerceProduct
+
+Represents a complete product definition for commerce catalogs. Contains all necessary information to display and process product purchases.
+
+**Scripting Name:** `CommerceProduct`
+
+### Properties
+
+#### id: String
+
+Unique identifier for the product. This ID will be used to reference the product in commerce operations.
+
+---
+
+#### type: String
+
+The type of product (e.g., "NonConsumable"). Determines how the product behaves after purchase.
+
+**Default:** `"NonConsumable"`
+
+---
+
+#### displayName: String
+
+The human-readable name displayed to users.
+
+---
+
+#### category: String
+
+Category description of the product for users.
+
+---
+
+#### price: CommercePrice
+
+Pricing information for this product.
+
+---
+
+#### iconUri: String _(Optional)_
+
+URI pointing to the product's icon image.
+
+---
+
+#### extras: String _(Optional)_
+
+Additional metadata or configuration for the product in JSON format.
+
+### Example
+
+```typescript
+const product = new CommerceProduct();
+product.id = 'premium_upgrade';
+product.type = 'NonConsumable';
+product.displayName = 'Premium Features';
+product.category = 'Upgrades';
+product.price = new CommercePrice();
+```
+
+## CommercePrice
+
+Represents a price structure for commerce products. Handles pricing information including amount and currency with automatic formatting capabilities.
+
+**Scripting Name:** `CommercePrice`
+
+### Properties
+
+#### price: Number _(readonly)_
+
+The price amount as a decimal number (e.g., 1.99 for $1.99).
+
+**Default:** `1.99`  
+**Range:** $1.99 - $99.99
+
+---
+
+#### currency: String _(readonly)_
+
+The currency code for this price. Currently supports USD with automatic formatting.
+
+**Default:** `"USD"`  
+**Supported Values:** `"USD"`
+
+### Example
+
+```typescript
+const price = new CommercePrice();
+price.price = 4.99;
+price.currency = 'USD';
+```
+
+## ProductCatalog
+
+A component that manages the product catalog configuration and automatically initializes CommerceKit.
+
+**Scripting Name:** `ProductCatalog`  
+**Inherits from:** `BaseScriptComponent`
+
+### Properties
+
+#### productCatalog: CommerceProduct[] _(readonly)_
+
+Array of products that make up the commerce catalog. Configure these products through the Lens Studio component interface.
+
+### Methods
+
+#### onAwake(): void
+
+Automatically called when the component awakens. Initializes the CommerceKit with the configured product catalog.
+
+### Usage
+
+1. Add the ProductCatalog component to your scene
+2. Configure products in the Lens Studio interface
+3. The catalog will automatically initialize on scene start
+
+## Types and Enums
+
+### Commerce.PurchaseState
+
+Enum representing the possible states of a product purchase:
+
+- `Unset` - No purchase state information available
+- `Purchased` - Product has been successfully purchased
+- `Pending` - Purchase is in progress
+
+### Commerce.ResponseCode
+
+Enum representing response codes from commerce operations:
+
+- `Success` - Operation completed successfully
+- `UserCanceled` - User cancelled the operation

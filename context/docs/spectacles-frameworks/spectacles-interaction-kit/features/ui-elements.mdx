@@ -1,0 +1,85 @@
+---
+sidebar_position: 8
+description: "Build interactive UI elements for Spectacles like buttons, sliders, and toggles using the Spectacles Interaction Kit's prefab components."
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# UI Elements
+
+Spectacles Interaction Kit provides various UI elements you can add to your AR scenes to create interactive experiences. These elements include **PinchButton**, **ToggleButton**, **Slider**, and **ScrollBar**. Each element is designed to be intuitive and responsive. You can customize them with helper components to add audio and visual feedback, making their states clear to users. Use event callbacks to connect user interactions with specific behaviors and outcomes. These UI elements extend the **Interactable** component, ensuring compatibility with any **Interactor** and interaction modality supported by SIK.
+
+By using the pre-built UI elements in SIK, you can focus on designing unique user experiences rather than managing technical implementation details.
+
+## Relevant Components
+
+**PinchButton** allows an **Interactable** to be triggered, and it broadcasts the **onButtonPinched** event for lens-specific callback logic.
+
+**ToggleButton** allows an **Interactable** to be triggered, and it broadcasts the **onStateChanged** event. Unlike **PinchButton**, this component maintains a stored state that toggles and is sent via the event payload when triggered.
+
+**Slider** enables an **Interactable** to be moved along a track and broadcasts the **onValueUpdate** event whenever it is adjusted. This is useful for setting values such as volume.
+
+### Code Example
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+import { ToggleButton } from 'SpectaclesInteractionKit.lspkg/Components/UI/ToggleButton/ToggleButton';
+
+@component
+export class ExampleUIScript extends BaseScriptComponent {
+  onAwake() {
+    this.createEvent('OnStartEvent').bind(() => {
+      this.onStart();
+    });
+  }
+
+  onStart() {
+    // This script assumes that a ToggleButton (and Interactable + Collider) component have already been instantiated on the SceneObject.
+    let toggleButton = this.sceneObject.getComponent(
+      ToggleButton.getTypeName()
+    );
+
+    let onStateChangedCallback = (state: boolean) => {
+      print(`The toggle button has been triggered, setting to state: ${state}`);
+    };
+
+    toggleButton.onStateChanged.add(onStateChangedCallback);
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+const SIK = require('SpectaclesInteractionKit.lspkg/SIK').SIK;
+const interactionConfiguration = SIK.InteractionConfiguration;
+
+function onAwake() {
+  // Wait for other components to initialize by deferring to OnStartEvent.
+  script.createEvent('OnStartEvent').bind(() => {
+    onStart();
+  });
+}
+
+function onStart() {
+  // This script assumes that a ToggleButton (and Interactable + Collider) component have already been instantiated on the SceneObject.
+  var toggleButton = script.sceneObject.getComponent(
+    interactionConfiguration.requireType('ToggleButton')
+  );
+
+  var onStateChangedCallback = (state) => {
+    print(`The toggle button has been triggered, setting to state: ${state}`);
+  };
+
+  toggleButton.onStateChanged.add(onStateChangedCallback);
+}
+
+onAwake();
+```
+
+</TabItem>
+</Tabs>

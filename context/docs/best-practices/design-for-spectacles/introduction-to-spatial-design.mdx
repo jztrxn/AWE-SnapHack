@@ -1,0 +1,96 @@
+---
+sidebar_position: 1
+description: 'Learn the fundamentals of spatial design for Spectacles including depth, scale, and how to create comfortable AR experiences.'
+---
+
+import Player from '@site/src/components/Player';
+
+# Introduction to Spatial Design
+
+<div style={{ display: 'flex', justifyContent: 'center' }}>
+  <Player url="https://www.youtube.com/watch?v=df6gQHl17eE" />
+</div>
+
+<br />
+
+:::tip Design Kit Available
+Use the [Snap OS 2.0 Design Kit](./snap-os-design-kit.mdx) to build UX flows for Spectacles. This Figma component library includes tokens, styles, components, and reference screens to help you design consistent AR interfaces.
+:::
+
+## Embrace New Capabilities
+
+Designing Lenses for Spectacles offers all-new possibilities to rethink user interaction with digital spaces and the physical world.
+
+Lenses on Spectacles can:
+
+- **Be Spatial and Unbounded**: Design Lenses in 3D, without the constraints of small flat screens, that exist directly in the real world.
+- **Enhance the World**: Map spaces and track real-world objects using Snap ML to augment the environment and reimagine user experiences.
+- **Involve Free Movement:** Spectacles are untethered and are bright enough for outdoor use, enabling wearers to freely move around the real world. Design experiences that span various environments, user movements and natural body postures.
+- **Involve Natural Interactions**: Combine multimodal inputs, such as hands, voice, or a custom mobile controller, to create intuitive and expressive interactions.
+- **Be Hands-Free**: Users do not need to hold their phones, allowing hands-free interaction with Lenses and the real world. Consider using inputs like voice, object tracking, and body tracking to enable contextual experiences without requiring active digital interaction.
+
+## AR in the World
+
+Augmented Reality (AR) content positioned in the physical world introduces new challenges. AR content that has been placed in the real world might intersect with real-world obstacles. Users may need to adjust the position of AR content to coordinate around these obstacles. In a six degrees of freedom (6DOF) space, users can move and view content from all angles. This freedom eliminates the constraints of controlled views such as screen space or fixed phone edges. The optimal placement of AR content varies based on the specific needs of the experience, making the positioning of AR content a critical design decision.
+
+<img
+  src="/img/spectacles/misc/design-ar-in-world.png"
+  style={{ maxWidth: '900px', width: '100%', borderRadius: '8px' }}
+/>
+
+## Wearable and Personal
+
+Spectacles enable Lenses to engage multiple human senses. With Spectacles, users can see via the AR display system, hear through integrated speakers and spatial audio, and interact through hand gestures. Combining visual and audio cues can create the perception of touch.
+
+Given that Spectacles are worn by the user, it is necessary to account for varying physical proportions. Differences in arm lengths, hand sizes, and head heights affect the positioning of content. Hand interactions are particularly unique due to the variability in hand and limb sizes. Design for adjustable and adaptive interfaces to accommodate a range of users.
+
+## Unique to Spectacles
+
+To design comfortable experiences on Spectacles, it’s important to understand the fundamentals of the Spectacles AR display system. Unlike mobile phone screens, the Spectacles display varies with distance and user fit.
+
+<div
+  style={{
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gap: '16px',
+  }}
+>
+  <img
+    src="/img/spectacles/misc/unique-to-spectacles-1.png"
+    style={{ maxWidth: '900px', width: '100%', borderRadius: '8px' }}
+  />
+  <img
+    src="/img/spectacles/misc/unique-to-spectacles-2.png"
+    style={{ maxWidth: '900px', width: '100%', borderRadius: '8px' }}
+  />
+  <img
+    src="/img/spectacles/misc/unique-to-spectacles-3.png"
+    style={{ maxWidth: '900px', width: '100%', borderRadius: '8px' }}
+  />
+  <img
+    src="/img/spectacles/misc/unique-to-spectacles-4.png"
+    style={{ maxWidth: '900px', width: '100%', borderRadius: '8px' }}
+  />
+</div>
+
+<br />
+
+- The display projects content in a **portrait aspect ratio**, approximately 3:4 proportions. The term "field of view" (FOV) describes the possible area for AR display, indicating the size of the AR content that the Spectacles wearer can see.
+- The focus plane is set at a distance of 1 meter from the user, making it most comfortable to view highly detailed content at approximately this distance.
+- Each display projector creates an image for each eye, which the wearer's brain combines into a single overlapping image. The size of this overlapping area changes based on the distance from the user. The **visible display area is smaller when closer** to the user and larger when farther away.
+- The displays achieve complete overlap at a distance of 1.1 meters from the user. At this distance, the visible content area is approximately 1000px x 1397px or 53cm x 77cm. For more information, refer to [Positioning & Sizing Content](./positioning-sizing-content.mdx).
+
+## Unique to Snap OS
+
+### Space on the Hand
+
+<img
+  src="/img/spectacles/misc/design-for-specs-space-on-hands.png"
+  style={{ maxWidth: '900px', width: '100%', borderRadius: '8px' }}
+/>
+
+For Snap OS, hands serve as the primary interface. While your Lens is running, the OS persistently renders a small button on the user's hand, providing consistent access to system controls. The rest of the space on the hand is reserved for your Lens to use for actions or immersive effects. **Within your Lens, you have control**. Utilize the space on the hands for immersive visual effects and simple actions that do not require continuous visibility. For example, the Beat Boxer Lens applies boxing gloves to the user's hands as part of its game mechanics, while the Crickets Lens simulates a bug's life by applying cricket wings to the user's hands.
+
+### Standard System Menu
+
+While your Lens is running, the system button opens a standard system menu, allowing users to view Lens information, access System Settings, and exit back to Lens Explorer. As a Lens Developer, you do not need to manage these behaviors.

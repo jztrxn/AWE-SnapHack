@@ -1,0 +1,225 @@
+---
+sidebar_position: 1
+sidebar_label: Snap Cloud Setup Guide
+description: 'Configure Snap Cloud database tables, triggers, and RPC functions for WKD Lens & Web App demo that connects a Spectacles Lens to a companion web app.'
+---
+
+# WKD Snap Cloud Setup Guide
+
+This guide explains how to set up your own Snap Cloud backend so the World Kindness Day Lens & Web App demo can read/write shared data.
+
+:::note
+This backend setup is shared by both the [WKD Lens](./lens-setup.mdx) and the [WKD Web App](./webapp-setup.mdx).
+You only create the Snap Cloud project, tables, and functions a single time, then both clients use it.
+:::
+
+## Why Do We Need Snap Cloud for This Project?
+
+Most Lenses run entirely on-device and do not require a backend.
+However, this project must store and share data across all users, such as:
+
+- Whether a user has already pledged.
+- The global total number of pledges.
+- Balloon counts shown in both the Lens and the Web App.
+
+To make this possible, we use [Snap Cloud](../../overview.mdx), which is powered by **Supabase** for its database, authentication, and server-side logic.
+
+### Snap Cloud provides:
+
+- A database that stores pledge records.
+- RPC functions (SQL functions) that securely update and return totals.
+- Authentication, so each Spectacles user has a unique `user_id`.
+- Realtime events, which allow the Web App to update the counter instantly.
+
+The Lens and Web App both read from and write to this same backend.
+
+### Where Do These Steps Happen?
+
+All database setup; creating tables, writing SQL functions (RPCs), running queries, happens inside your Snap Cloud dashboard, not in Lens Studio.
+
+#### In Supabase:
+
+You create the tables, add functions, set permissions, and optionally insert test data.
+
+#### In Lens Studio:
+
+You import the Supabase project credentials (via the Supabase Plugin) and then call those RPCs from your Lens scripts, such as `pledge_and_total_once` or `get_kindness_total_all`.
+
+#### In the Web App:
+
+The Web App connects to Supabase using your project's URL and anon (public) API key.
+These credentials allow the app to call RPCs such as `get_kindness_total_all` and display the live global pledge total.
+
+Both the Lens and Web App depend on this backend configuration.
+Once it is set up correctly, the entire system works seamlessly together.
+
+## Create a New Supabase Project
+
+In **Snap Cloud** set up your project as per the [Getting Started](../../getting-started.mdx) guide.
+
+## Open the SQL Editor
+
+Inside Snap Cloud - Supabase dashboard, open **SQL Editor** from the left sidebar.
+
+<img
+  src="/img/spectacles/supabase/wkd/sqlEditor.png"
+  style={{ maxWidth: '300px', width: '50%', borderRadius: '5px' }}
+/>
+
+### 1. Create Table: `kindness_pledges`
+
+This table stores who have pledged. It stores one row per user.
+
+We enforce this by making `user_id` the `PRIMARY KEY`, which ensures each user can appear only once. The RPC uses `ON CONFLICT DO NOTHING`, so repeat pledges are ignored.
+
+```sql
+create table public.kindness_pledges (
+  user_id uuid primary key,
+  pledged_at timestamptz default now()
+);
+
+grant select, insert on public.kindness_pledges to anon, authenticated;
+```
+
+### 2. Create Table: `kindness_totals`
+
+This table stores daily pledge totals, which are used by the RPC functions in this project.
+
+```sql
+create table public.kindness_totals (
+  pledge_date date primary key,
+  total bigint default 0
+);
+
+grant select, insert, update on public.kindness_totals to anon, authenticated;
+```
+
+### 3. Create Trigger: `Increment Daily Totals`
+
+This trigger fires only when a new pledge row is created. It automatically increments the daily total inside the database.
+
+```sql
+create or replace function public.bump_total_after_pledge()
+returns trigger
+language plpgsql
+as $$
+begin
+  insert into public.kindness_totals (pledge_date, total)
+  values (current_date, 1)
+  on conflict (pledge_date)
+  do update set total = public.kindness_totals.total + 1;
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_bump_total on public.kindness_pledges;
+
+create trigger trg_bump_total
+after insert on public.kindness_pledges
+for each row execute procedure bump_total_after_pledge();
+```
+
+### 4. RPC: `pledge_and_total_once`
+
+Inserts the user's pledge only if not pledged before, and returns the total pledges (all time).
+
+```sql
+create or replace function public.pledge_and_total_once()
+returns bigint
+language plpgsql
+as $$
+declare
+  t bigint := 0;
+begin
+  insert into public.kindness_pledges (user_id)
+  values (auth.uid())
+  on conflict (user_id) do nothing;
+
+  select coalesce(sum(total), 0) into t
+  from public.kindness_totals;
+
+  return t;
+end;
+$$;
+
+grant execute on function public.pledge_and_total_once() to anon, authenticated;
+```
+
+### 5. RPC: `get_kindness_total_all`
+
+Returns total pledges across all days.
+
+```sql
+create or replace function public.get_kindness_total_all()
+returns bigint
+language sql
+stable
+as $$
+  select coalesce(sum(total), 0)
+  from public.kindness_totals;
+$$;
+
+grant execute on function public.get_kindness_total_all() to anon, authenticated;
+```
+
+### 6. RPC: `has_pledged_ever`
+
+Checks if the current user already pledged before.
+
+```sql
+create or replace function public.has_pledged_ever()
+returns boolean
+language sql
+as $$
+  select exists(
+    select 1
+    from public.kindness_pledges
+    where user_id = auth.uid()
+  );
+$$;
+
+grant execute on function public.has_pledged_ever() to anon, authenticated;
+```
+
+## Get Your Project Keys for the Web App
+
+The web app needs your Supabase Project URL and Public Anon Key to read the total pledge count from your database.
+
+In the Supabase Dashboard, go to Project Settings:
+
+1. Data API to copy your project URL.
+2. API Keys to find the anon public key.
+
+Open your web app folder and edit `config.js`. Replace the placeholders with your real values:
+
+```js
+export const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+export const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_PUBLIC_ANON_KEY';
+```
+
+## Add Test Data Manually
+
+Before running the web app or opening the Lens, insert sample pledge data so you can verify that your setup is working correctly.
+
+In the Supabase SQL Editor, run:
+
+```sql
+insert into public.kindness_pledges (user_id)
+values ('11111111-1111-1111-1111-111111111111');
+```
+
+#### What should happen?
+
+- A row is added to `kindness_pledges`
+
+  <img
+    src="/img/spectacles/supabase/wkd/row-kindness-table.png"
+    style={{ maxWidth: '500px', width: '50%', borderRadius: '5px' }}
+  />
+
+- The trigger `bump_total_after_pledge` automatically increments today's count in `kindness_totals`
+
+  <img
+    src="/img/spectacles/supabase/wkd/bump-total.png"
+    style={{ maxWidth: '500px', width: '50%', borderRadius: '5px' }}
+  />

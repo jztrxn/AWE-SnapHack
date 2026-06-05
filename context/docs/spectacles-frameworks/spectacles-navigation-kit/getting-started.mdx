@@ -1,0 +1,44 @@
+---
+sidebar_position: 1
+sidebar_label: 'Get Started'
+description: 'Set up and integrate the Spectacles Navigation Kit to add waypoint navigation and spatial guidance to your Lens.'
+---
+
+# Get Started with Navigation Kit
+
+### Prerequisites
+
+- Lens Studio v.5.10 or later
+- Spectacles SnapOS v.5.62 or later
+
+### About Spectacles Navigation Kit
+
+Spectacles Navigation Kit enables low-code development of guided experiences in Lens Studio. The package includes scripts and components to enable navigation between places of interest, and APIs to calculate direction and distance from the user's current position.
+
+To start building navigation Lenses using Spectacles Navigation Kit, follow the instructions below to [start a new project](#starting-a-new-project) or [update an existing project](#updating-an-existing-project) in Lens Studio.
+
+#### Package Resources
+
+Spectacles Navigation Kit depends on [Spectacles Interaction Kit](https://developers.snap.com/spectacles/spectacles-frameworks/spectacles-interaction-kit/get-started), which will automatically be added and does not need to be installed separately.
+
+### Starting a New project
+
+There are two options available for starting a new navigation project:
+
+To add Spectacles Navigation Kit to a new or existing project, search the Asset Library for SpectaclesNavigationKit and download. This will add the scripts, components, and dependencies (Spectacles Interaction Kit) to the Packages folder. Once complete, drag the `Navigation Kit` prefab from the Package root into the Scene. You will be presented with a menu allowing for the selection of 3 sample places. Next, drag the navigation arrow prefab `ARNavigationPrefab [PUT_IN_SCENE]` into the Scene from the `ARNavigationComponent` folder. Selecting a place from the list in the Preview Panel will now update the ARNavigation arrow to point to the selected place. When deployed to Spectacles, the direction and distance will be relative to the user's position. From here, you can start building a complete navigation experience.
+
+Alternatively, we provide a feature rich template that can serve as a more complete starting point. This can be found in the Snap Sample repository's [Navigation Template](https://github.com/specs-devs/samples/tree/main/Navigation%20Template) folder. The template provides a selection menu, map, and sample content anchored to [Custom Locations](https://developers.snap.com/spectacles/about-spectacles-features/apis/custom-locations).
+
+A `README` is included in the kit and the template, with instructions on how to setup the project and add new locations.
+
+### Updating an Existing Project
+
+To add Spectacles Navigation Kit to an existing project, search the Asset Library for SpectaclesNavigationKit and download, as above. You may find it useful to familiarize yourself with the template, and copy over scripts and prefabs as needed -- this will jump start development of your own custom components.
+
+## Indoors vs Outdoors
+
+The template allows for the creation of navigation experiences that are either indoors or outdoors. Transitions between indoors and outdoors are not currently supported.
+
+Medium to large outdoor experiences should be assembled from individual Custom Locations and geocoordinates; the scale of these experiences is not a good fit for Custom Location Groups. It should be noted that users may launch the Lens far away from any place of interest, so navigation will need to be provided from launch.
+
+Indoor experiences should be built on top of a single Custom Location Group. Geopositioning is not reliable indoors; therefore, experiences should not provide arrow-based navigation until a member of the group has been localized. Following localization, Spectacles Navigation Kit is capable of calculating the relative position of the other members of the group.

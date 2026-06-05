@@ -1,0 +1,37 @@
+---
+sidebar_position: 2
+sidebar_label: 'Architecture'
+description: 'Understand the VisualElement architecture of Spectacles UI Kit components with Visual and Element separation.'
+---
+
+# UI Kit Architecture
+
+<img
+  src="/img/spectacles/spectacles-ui-kit/uikit-element-architecture.png"
+  style={{
+    maxWidth: '600px',
+    width: '100%',
+    margin: '0 auto',
+    display: 'flex',
+    borderRadius: '8px',
+  }}
+/>
+
+### Typical UI Kit Element Architecture
+
+<p>
+  UI Kit components are often a combination of a Visual and an Element. The
+  Visual is the graphical representation of the component, while the Element is
+  the logic for the component. The Element handles stuff like creating the
+  underlying Colliders and Interactables, and hooks into SIK events to handle
+  interactions. The Visual handles animations based on events from the Element.
+  The combination of the two is called a VisualElement. The VisualElement fuses
+  the Visual and the Element together, and handles the connections between the
+  two sides.
+</p>
+<p>
+  The following diagram outlines the typical architecture of a UI Kit element by
+  using a RectangleButton as an example. Here you can see that the VisualElement
+  for a button is called a BaseButton. The RectangleButton is a specific
+  instance of a BaseButton that creates a RoundedRectangleVisual as a default.
+</p>

@@ -1,0 +1,146 @@
+---
+sidebar_position: 1
+sidebar_label: 'Getting Started'
+description: 'Set up and integrate the Spectacles Interaction Kit into your Lens project for hand tracking, gestures, and spatial interactions.'
+---
+
+# Get Started with Interaction Kit
+
+<img
+  src="/img/spectacles/misc/spectacles-interaction-kit-splash.png"
+  style={{ maxWidth: '1000px', width: '100%', borderRadius: '8px' }}
+/>
+
+Spectacles Interaction Kit (SIK) is a collection of code components, modules, and assets for Lens Studio. SIK simplifies development for the Spectacles platform by providing common building blocks that facilitate the creation of interactive augmented reality experiences.
+
+[Download](https://ar.snap.com/download) the latest compatible version of Lens Studio 5.
+
+For the most recent updates, please refer to the [release notes](./release-notes.mdx).
+
+## Starting a New Spectacles Project
+
+In the Lens Studio home, select **Spectacles > Base Template** under Build with Starter Templates.
+
+<img
+  src="/img/spectacles/setup/project-select.png"
+  style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+/>
+
+Your new project will already be preconfigured with Spectacles Interaction Kit and other essential configurations for Spectacles development.
+
+## Importing Spectacles Interaction Kit into a new Lens Studio Project
+
+To configure a new project from scratch using the Spectacles Interaction Kit, follow these steps:
+
+1. Create a new project in Lens Studio.
+
+2. Add the TypeScript Status panel to the Lens Studio UI by navigating to **Window \> TypeScript Status**.
+
+   <img
+     src="/img/spectacles/setup/typescript-status.png"
+     style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+   />
+
+3. Add a Device Tracking component to your Camera and set tracking mode to **World**.
+
+   <img
+     src="/img/spectacles/setup/device-tracking-1.png"
+     style={{ maxWidth: '300px', width: '100%', borderRadius: '8px' }}
+   />
+   <img
+     src="/img/spectacles/setup/device-tracking-2.png"
+     style={{ maxWidth: '300px', width: '100%', borderRadius: '8px' }}
+   />
+
+4. Set Platform Settings to **Lens Is Made For \> Spectacles**.
+
+   <img
+     src="/img/spectacles/setup/spectacles-project-info-settings.png"
+     style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+   />
+
+5. In the Preview panel, set **Device Type Override** to **Spectacles**.
+
+   <img
+     src="/img/spectacles/setup/preview-panel-device-override.png"
+     style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+   />
+
+6. Install the latest Spectacles Interaction Kit version from the Asset Library via **Window \> Asset Library \> Spectacles \> Spectacles Interaction Kit**.
+
+   <img
+     src="/img/spectacles/asset-library/asset-library-spectacles.png"
+     style={{ maxWidth: '200px', width: '100%', borderRadius: '8px' }}
+   />
+
+7. Import Spectacles Interaction Kit by clicking the \+ symbol on the Asset Browser. Under the **Installed Packages** tab, select **SpectaclesInteractionKit**.
+
+   <img
+     src="/img/spectacles/setup/installed-sik-package.png"
+     style={{ maxWidth: '400px', width: '100%', borderRadius: '8px' }}
+   />
+
+8. After the TypeScript Status panel confirms that compilation is complete, click the Refresh button on the Preview panel.
+
+   <img
+     src="/img/spectacles/setup/refresh-preview-panel.jpg"
+     style={{ maxWidth: '800px', width: '100%', borderRadius: '8px' }}
+   />
+
+   :::tip
+
+   You can also unpack the Spectacles Interaction Kit package by right-clicking
+   and selecting **Unpack**. Unpacking enables direct editing of SIK but may complicate future upgrades to newer versions.
+
+   <img
+     src="/img/spectacles/spectacles-interaction-kit/sik-unpack-for-editing.png"
+     style={{ maxWidth: '800px', width: '100%', borderRadius: '8px' }}
+   />
+
+   :::
+
+9. From the Asset Browser, drag **Assets/SpectaclesInteractionKit/Prefabs/SpectaclesInteractionKit.prefab** into the scene hierarchy.
+
+   <img
+     src="/img/spectacles/spectacles-interaction-kit/sik-package-prefab.png"
+     style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+   />
+
+   :::warning
+
+   Instantiating the prefab before TypeScript compilation is complete
+   may result in a corrupt prefab with missing links to TypeScript script
+   components. Ensure that TypeScript compilation is fully complete before
+   adding a prefab instance to the scene hierarchy.
+
+   :::
+
+10. If the Examples are no longer needed, disable or delete the **\[EXAMPLES\]** scene objects from the scene hierarchy.
+
+    <img
+      src="/img/spectacles/spectacles-interaction-kit/sik-prefab-scene-hierarchy.png"
+      style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+    />
+
+11. Save your project, and you’re all finished\!
+
+## Upgrading Spectacles Interaction Kit within a Project
+
+Open your project. After TypeScript compilation is complete, right-click the SpectaclesInteractionKit package in the Asset Browser. If **Pull Update from Library** is available, select it.
+
+{' '}
+
+<img
+  src="/img/spectacles/setup/package-pull-update.png"
+  style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+/>
+
+To manually check for updates, navigate to **Asset Library \> Spectacles \> SpectaclesInteractionKit** and verify if a new version is available for installation. You can also select a specific version to install. After updating, right-click the SpectaclesInteractionKit package in the Asset Browser and select **Pull Update from Library**.
+
+Now your project is updated\!
+
+:::tip
+
+Compilation errors may result after updates from changes in the API. Review the release notes for any updates on new APIs and make the necessary edits.
+
+:::

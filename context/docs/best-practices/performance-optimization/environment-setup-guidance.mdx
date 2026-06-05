@@ -1,0 +1,110 @@
+---
+sidebar_position: 2
+description: 'Set up physical environments for optimal VIO, SLAM, and scene understanding on Spectacles with lighting, visual features, and layout guidance.'
+---
+
+# Environment Setup Guidance
+
+This guide provides environmental requirements and recommendations for optimal VIO, SLAM and Scene Understanding performance on Spectacles.
+
+## Understanding Environmental Requirements
+
+Visual tracking systems rely on environmental features and stable lighting to function effectively. The quality of your environment directly impacts tracking stability, power consumption, and user experience.
+
+### Key Systems
+
+- **VIO (Visual-Inertial Odometry)**: Tracks position and rotation (trajectory) over time by identifying features in the surrounding area
+- **SLAM (Simultaneous Localization and Mapping)**: Builds a map of the environment while simultaneously determining Spectacles' position within that map, enabling spatial awareness and persistent anchoring
+- **Scene Understanding**: Determines depth and surfaces in the environment
+
+### Why Environment Matters
+
+- **Feature Detection**: The system identifies unique visual points (corners, edges, textures) to establish spatial reference
+- **Light Dependency**: Insufficient lighting forces longer camera exposure times, increasing motion blur and power usage
+- **Pattern Recognition**: Repetitive or uniform patterns confuse the system, leading to tracking drift
+- **Thermal Impact**: Environmental temperature affects device thermals, which directly influence runtime and performance throttling
+
+## Reference Specifications
+
+### Lighting
+
+| Parameter                | Specification                                                                                         |
+| ------------------------ | ----------------------------------------------------------------------------------------------------- |
+| **Minimum LUX**          | 100 LUX is recommended (some tracking possible below this)                                            |
+| **Measurement Point**    | Reflected light from walls and floors, not direct light sources                                       |
+| **Impact Below Minimum** | Degraded tracking quality, increased power usage, especially during fast motion (rotating or running) |
+
+:::tip
+Add overhead or diffused lighting to maintain consistent levels across the space.
+:::
+
+### Visual Features
+
+| Parameter                  | Specification                                                                                                                                      |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Features per Viewpoint** | Several unique and corner-rich features                                                                                                            |
+| **Feature Distribution**   | Every viewing direction should contain distinct visual markers                                                                                     |
+| **Issues**                 | Insufficient features or repetitive uniform patterns that have fewer than 2 unique features per view can result in mapping drift and tracking loss |
+
+:::tip
+Add stickers, posters, decals, or textured props on walls and floors to enhance feature richness.
+:::
+
+<p align="center">
+  <img
+    src="/img/spectacles/performance-optimization/env-features.png"
+    style={{ maxWidth: '800px', width: '100%', borderRadius: '8px' }}
+  />
+</p>
+
+## Recommended Environmental Elements
+
+#### Effective Items
+
+| Surface    | Recommended Items                                                                |
+| ---------- | -------------------------------------------------------------------------------- |
+| **Walls**  | Posters with bold designs, geometric decals, 3D textured panels                  |
+| **Floors** | Contrasting rugs, floor stickers (shapes, arrows, checkerboards), geometric mats |
+| **Props**  | Small cubes, stools, plinths, textured display objects                           |
+| **Plants** | Cactuses, succulents (static geometry, corner-rich)                              |
+
+#### Items to Avoid
+
+| Item                       | Reason                                                       |
+| -------------------------- | ------------------------------------------------------------ |
+| **Tape lines**             | Only 2–4 corners and repetitive which can confuse the system |
+| **Leafy plants**           | Move with airflow, disrupting tracking                       |
+| **Duplicate graphics**     | Repetitive patterns cause system confusion                   |
+| **Large uniform surfaces** | Provide insufficient feature differentiation                 |
+
+## Spatial Layout Guidelines
+
+- Break up large open spaces with distinct markers or props
+- Place features at varied heights and angles
+- Ensure every direction has visually distinct characteristics
+- Avoid environments where multiple viewpoints look identical
+
+## Temperature and Cooling
+
+| Parameter                          | Impact                                                                                         |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------- |
+| **Ambient Temperature**            | Directly affects thermal performance and runtime                                               |
+| **Higher Temperature Environment** | Accelerates device heating and can cause earlier throttling, thermal standby mode, or shutdown |
+| **Lens Power Budget**              | Over-budget lenses and high ambient temp will reduced device runtime                           |
+
+:::tip
+Ensure good airflow, minimize direct sunlight exposure and maintain cooler ambient conditions to maximize device runtime and stability. For Lens optimization, see [performance-optimization](./optimizing-lens-performance.mdx) for lens optimization guidance.
+:::
+
+## Quick Reference Checklist
+
+Use this checklist when setting up or troubleshooting your environment:
+
+- [ ] Lighting measures 100+ LUX on walls and floors
+- [ ] Each viewpoint contains several unique and corner-rich features
+- [ ] Removed or replaced tape lines with varied graphics or 3D props
+- [ ] Added non-repetitive visual elements (posters, decals, props)
+- [ ] Using static plants only (cactuses/succulents, not leafy plants)
+- [ ] Large spaces broken up with distinct markers at varied heights
+- [ ] Good airflow and ambient temperature control in place
+- [ ] Validated environment with Point Cloud Lens (abundant green points)

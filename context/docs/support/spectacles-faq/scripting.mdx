@@ -1,0 +1,178 @@
+---
+sidebar_position: 3
+description: 'Frequently asked questions about scripting in Spectacles Lenses including TypeScript, lifecycle events, and common coding patterns.'
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Scripting
+
+Lens Studio provides a [scripting](/lens-studio/features/scripting/script-overview) engine for creating rich interactive experiences. With scripts, your Lenses can respond to touch input, play animation and audio, modify Scene Objects, and more.
+
+import Collapsible from './Collapsible.tsx';
+
+<Collapsible title="Is there a way to get either local or world space (axis aligned) XYZ visual bounds of an object?">
+  <br />
+  [worldAabbMax](https://developers.snap.com/api/lens-studio/Classes/Components#BaseMeshVisual--worldAabbMax) or [worldAabbMin](https://developers.snap.com/api/lens-studio/Classes/Components#BaseMeshVisual--worldAabbMin) should provide the bounds of an object.
+
+</Collapsible>
+
+<Collapsible title="Is there a way to print stacktrace?">
+  <br />
+  You can add the following script anywhere you would like to get stacktrace
+
+```ts
+print(`${Error().stack}`);
+```
+
+</Collapsible>
+
+<Collapsible title="Is there a way to load textures from a local path instead of defining them as an input?">
+  <br />
+  You can use `requireAsset` to reference assets such as Textures, Materials, or
+  Meshes within your script without needing to use `//@input`. Please follow the
+  [guidelines](https://developers.snap.com/lens-studio/features/scripting/script-modules)
+  on properly using `requireAsset` by file path.
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+let material = requireAsset('../Materials/Dartboard.mat') as Material;
+let texture = requireAsset('../Textures/Dartboard.png') as Texture;
+let mesh = requireAsset('../Meshes/Dartboard.mesh') as RenderMesh;
+
+this.renderMeshVisual.mainMaterial = material;
+this.renderMeshVisual.mainPass.baseTex = texture;
+this.renderMeshVisual.mesh = mesh;
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+const material = requireAsset('../Materials/Dartboard.mat');
+const texture = requireAsset('../Textures/Dartboard.png');
+const mesh = requireAsset('../Meshes/Dartboard.mesh');
+
+script.renderMeshVisual.mainMaterial = material;
+script.renderMeshVisual.mainPass.baseTex = texture;
+script.renderMeshVisual.mesh = mesh;
+```
+
+</TabItem>
+</Tabs>
+
+</Collapsible>
+
+<Collapsible title="What is persistent storage limit on Spectacles?">
+  <br />
+  Persistent storage limit on Spectacles is 125MB. It's using
+  [GeneralDataStore](https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built-In.GeneralDataStore.html)
+  for storing and retrieving data based on keys.
+</Collapsible>
+
+<Collapsible title="Is there a way to download an image using Fetch and turn it into a texture?">
+  <br />
+  Once the image has been fetched, [Base64](https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built-In.Base64.html) can be used to handle encoding and decoding, converting the images into a texture that can be applied to materials.
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+@component
+export class FetchImageToTexture extends BaseScriptComponent {
+  // Using InternetModule to fetch images and turn it into a texture
+  @input
+  internetModule: InternetModule;
+
+  // Using RenderMeshVisual to display the texture
+  @input
+  renderMeshVisual: RenderMeshVisual;
+
+  // Method called when the script is awake
+  async onAwake() {
+    let request = new Request(
+      'https://developers.snap.com/img/spectacles/misc/spectacles-2024-hero.png',
+      { method: 'GET' }
+    );
+    let response = await this.internetModule.fetch(request);
+    print('Response: ' + response);
+    if (response.status === 200) {
+      let bytes = await response.bytes();
+      // Convert bytes to a base64 string
+      let base64 = Base64.encode(bytes);
+      // Decode the base64 string to a texture
+      this.decodeBase64ToTexture(base64).then(this.displayTexture.bind(this));
+    }
+  }
+
+  decodeBase64ToTexture(base64: string) {
+    // Decode the base64 string to a texture using Base64.decodeTextureAsync
+    return new Promise((resolve, reject) => {
+      Base64.decodeTextureAsync(base64, resolve, reject);
+    });
+  }
+
+  displayTexture(texture: Texture) {
+    if (this.renderMeshVisual) {
+      // Set the texture to the main material of the RenderMeshVisual
+      this.renderMeshVisual.mainMaterial.mainPass.baseTex = texture;
+    }
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+// @input Component.ScriptComponent internetModule {"hint": "InternetModule"}
+// @input Component.RenderMeshVisual renderMeshVisual
+
+async function onAwake() {
+  const request = new Request(
+    'https://developers.snap.com/img/spectacles/misc/spectacles-2024-hero.png',
+    { method: 'GET' }
+  );
+  const response = await script.internetModule.fetch(request);
+  print('Response: ' + response);
+  if (response.status === 200) {
+    const bytes = await response.bytes();
+    // Convert bytes to a base64 string
+    const base64 = Base64.encode(bytes);
+    // Decode the base64 string to a texture
+    decodeBase64ToTexture(base64).then(displayTexture);
+  }
+}
+
+function decodeBase64ToTexture(base64) {
+  // Decode the base64 string to a texture using Base64.decodeTextureAsync
+  return new Promise(function (resolve, reject) {
+    Base64.decodeTextureAsync(base64, resolve, reject);
+  });
+}
+
+function displayTexture(texture) {
+  if (script.renderMeshVisual) {
+    // Set the texture to the main material of the RenderMeshVisual
+    script.renderMeshVisual.mainMaterial.mainPass.baseTex = texture;
+  }
+}
+
+// Initialize
+onAwake();
+```
+
+</TabItem>
+</Tabs>
+
+</Collapsible>
+
+<Collapsible title="How do you communicate between JavaScript and TypeScript files? Also, can JavaScript globals be accessed from TypeScript?">
+  <br />
+  Script Components in Lens Studio are able to reference one another whether they have been created with JavaScript, TypeScript or Custom Component.
+  Please take a look at [Accessing Components](https://developers.snap.com/lens-studio/features/scripting/accessing-components) for various examples.
+
+</Collapsible>

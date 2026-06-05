@@ -1,0 +1,58 @@
+---
+sidebar_position: 1
+description: 'Techniques for optimizing Spectacles Lens performance including draw calls, texture memory, script efficiency, and frame budgets.'
+---
+
+# Optimizing Lens Performance
+
+If your lens is running slowly or dropping frames, it may need optimization. This document provides guidance for optimizing lenses specifically for Spectacles. Note that while general optimization guidelines from Snap are available [here](/lens-studio/publishing/optimization/performance-optimization-guide#best-practices-for-lens-optimization), some specifics for Spectacles may contradict these general guidelines. Always verify optimizations after making them.
+
+### Lens Developer Sandbox
+
+When Lenses consume excessive power and generate high thermal output, Spectacles throttles performance elements such as rendering and FPS to maintain a consistent runtime experience across various Lens workloads. This feature provides guardrails to quickly indicate when Lenses require optimization.
+
+### Identifying the Need for Optimization
+
+First, check your lens performance metrics using either the on-device Performance Overlay or the Lens Studio Spectacles Monitor Panel.
+
+- [Setup for Performance Overlay](../profiling/lens-performance-overlay.mdx)
+
+- [Setup for Spectacles Monitor Panel](../profiling/spectacles-monitor.mdx)
+
+With your lens running on the device, observe Lens Power (LP) on the overlay or Power Usage in the monitor panel. Both readings measure overall power on a scale from 0 to 100, where "0" represents an empty lens and "100" represents the maximum recommended power for smooth performance. Ideally, your lens consumes the least amount of power necessary to achieve your goals. If the reading exceeds 100, your lens will perform poorly.
+
+### Pinpointing Unoptimized Elements
+
+While running the above setup, position your device to face various elements of your lens and observe the power measurements. Compare these to measurements taken when not looking at that element. If power increases significantly with a specific element in view, that element likely needs rendering optimizations.
+
+If your lens runs high power regardless of the view or chugs when engaging specific logic, scripting optimizations are likely needed.
+
+## Rendering Optimizations
+
+Rendering optimizations focus on reducing the quantity and quality of rendered elements to save power.
+
+- Disable Invisible or Unused Meshes: Even invisible meshes render. Disable or move them out of the frustum until necessary. Destroy them if they won't be used again.
+
+- Reduce Draw Calls and Materials: Use instancing for drawing the same mesh multiple times and split textures into atlases to use one material with different UVs for texturing different meshes.
+
+- Avoid Expensive Materials and Lighting: Avoid PBR materials, reduce lights, and avoid special graphics effects like reflections, shadows, and environment maps.
+
+- Reduce Complexity: Minimize vertices in meshes, calculations in shaders, number and size of textures (recommended size: 512px x 512px or smaller), and consider turning off MSAA if enabled.
+
+## Scripting Optimizations
+
+For CPU optimization, run a [Perfetto Trace](../profiling/spectacles-monitor.mdx#perfetto) and analyze functions that take significant time to execute. Optimize these functions by considering the following:
+
+- Limit UpdateEvents: Only use UpdateEvents when necessary and avoid expensive operations within them.
+
+- Minimize Resource Creation: Create only the necessary number of Events, SceneObjects, Assets, and Components. Reuse existing resources.
+
+- Reduce Physics Usage: Add PhysicsBodies only to necessary SceneObjects and perform broad-phase checks before complex calculations.
+
+- Optimize Calculations: Precompute cacheable values, offload calculations to the GPU if possible, and avoid complex trigonometry and large dataset operations in JS/TS.
+
+- Manage Data and Logs Efficiently: Avoid repeatedly saving large data and excessive logging. Use WAV files when you can instead of mp3 for sounds on Spectacles and limit the number of simultaneous sounds.
+
+## Additional Considerations
+
+While the above tips and techniques help optimize many lenses, no single method applies to every lens. Optimization requires examination and analysis. Consider these recommendations holistically and explore similar or parallel opportunities if these techniques do not yield the desired results. Optimization rewards persistence.

@@ -1,0 +1,105 @@
+---
+sidebar_position: 8
+sidebar_label: Limits
+description: 'Review Snap Cloud service limits and quotas for databases, edge functions, storage, and realtime channels to plan your architecture.'
+---
+
+import ThemedImage from '@theme/ThemedImage';
+
+<ThemedImage
+  alt="Supabase Logo"
+  sources={{
+    light: '/img/spectacles/supabase/logo-small-light.svg',
+    dark: '/img/spectacles/supabase/logo-small-dark.svg',
+  }}
+  style={{
+    maxWidth: '1000px',
+    width: '20%',
+    borderRadius: '5px',
+    float: 'right',
+  }}
+/>
+
+# Known Issues
+
+Due to an issue with realtime connectivity, before creating the `SupabaseClient` in your Lens Studio script, set the heartbeat as follows:
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+const options = {
+  realtime: {
+    // Temporary fix due to a known alpha limitation, set the heartbeatIntervalMs to 2500
+    heartbeatIntervalMs: 2500,
+  },
+};
+this.client = createClient(
+  this.supabaseProject.url,
+  this.supabaseProject.publicToken,
+  options
+);
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+const options = {
+  realtime: {
+    // Temporary fix due to a known alpha limitation, set the heartbeatIntervalMs to 2500
+    heartbeatIntervalMs: 2500,
+  },
+};
+const client = createClient(
+  script.supabaseProject.url,
+  script.supabaseProject.publicToken,
+  options
+);
+```
+
+</TabItem>
+</Tabs>
+
+# Usage Limits
+
+[Snap Cloud] Platform Limits are as follows. If you'd like to increase your limits, send a [support request](https://cloud.snap.com/dashboard/support/new) to [Snap Cloud].
+
+:::warning
+
+Currently, Lenses using [Snap Cloud] are able to access user-sensitive data so long as the end user grants permission. This may change with future releases: some types of user-sensitive data may be blocked irrespective of whether user permission is granted.
+
+:::
+
+### General
+
+- 2 projects
+- Unlimited total users
+- 50,000 MAU
+
+### Databases
+
+- Unlimited API requests
+- 500 MB database size per project
+- 5 GB egress
+
+### Edge Functions
+
+- 500,000 invocations
+
+### Storage
+
+- 1 GB total space
+- 50 MB maximum file upload size
+- Basic CDN content delivery
+
+### Realtime
+
+- 200 peak concurrent connections
+- 2 million messages per month
+- 250 KB max message size
+
+[Snap Cloud]: https://cloud.snap.com/

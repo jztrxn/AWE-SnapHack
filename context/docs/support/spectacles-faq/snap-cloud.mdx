@@ -1,0 +1,41 @@
+---
+sidebar_position: 4
+description: 'Frequently asked questions about using Snap Cloud storage with Spectacles Lenses.'
+---
+
+# Snap Cloud
+
+[Snap Cloud](https://cloud.snap.com/) provides backend services for Spectacles including storage, databases, edge functions, and realtime features.
+
+import Collapsible from './Collapsible.tsx';
+
+<Collapsible title="Why is my Lens downloading old images after I replaced them in the storage bucket?">
+  <br />
+  When you upload new images to a storage bucket using the same filenames as
+  previously deleted images, the Smart CDN may serve cached versions of the old
+  assets to your Lens even though the stirage preview shows the updated files.
+  This occurs because the CDN caches assets at the edge for optimal performance,
+  and browsers may not refresh their cache even after the CDN invalidates the
+  asset (which can take up to 60 seconds to propagate globally). To resolve this
+  issue, either upload new assets to different file paths instead of reusing the
+  same names, set a shorter browser cache TTL using the `cacheControl` option
+  when uploading (the default is 1 hour), or bypass the cache by appending a
+  unique query string to your asset URLs (e.g., `image.png?version=2`) which
+  forces the CDN to treat it as a new object and fetch the latest version from
+  the origin. For more details, see the [Smart CDN
+  documentation](https://supabase.com/docs/guides/storage/cdn/smart-cdn#cache-duration).
+</Collapsible>
+
+<Collapsible title="Why can't I upload files to my storage bucket?">
+  <br />
+  If you're unable to upload files to your storage bucket, the most likely cause
+  is that you haven't set up the required policies for your bucket. Storage
+  buckets use Row Level Security (RLS) policies to control access permissions.
+  Without proper policies configured, operations like uploading, downloading, or
+  deleting files will be blocked. To resolve this, check your bucket's policy
+  configuration in the [Snap Cloud Dashboard](https://cloud.snap.com/) under
+  Storage > Configuration > Policies, and ensure you have the appropriate
+  policies set up for your use case. For more information about configuring
+  policies, refer to the [Supabase Row Level Security
+  documentation](https://supabase.com/docs/guides/database/postgres/row-level-security#policies).
+</Collapsible>

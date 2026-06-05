@@ -1,0 +1,51 @@
+---
+sidebar_position: 6
+description: 'A comprehensive checklist of spatial design best practices for building polished, comfortable, and accessible Spectacles experiences.'
+---
+
+# Design Best Practices
+
+## UX Recommendations
+
+Avoid common issues by following these best practices:
+
+1. **Consider User Movement and Postures:** Account for different postures and movements during your experience. Provide adjustable controls where possible and ensure users can recall or summon any critical UI.
+2. **Guide Users for Out-of-View Elements:** Provide hints to look down or around to find hand menus, elements on the floor, or elements outside the field of view.
+3. **Explain Divergent Interactions:** Clearly explain any interactions that differ from typical system patterns. Only use diverging patterns if they add value to the experience. Leverage system patterns as much as possible to reduce learning curves for users.
+4. **Show Targeting Feedback:** Ensure all interactive elements display targeting feedback.
+5. **Follow [Target Sizing Guidelines](../design-for-spectacles/positioning-sizing-content.mdx#button-sizing--spacing):** Adhere to the recommended target sizing for interactive elements.
+6. **Design for [Visual Comfort](../design-for-spectacles/design-best-practices.mdx#visual-comfort):** Follow visual comfort guidelines to improve the user experience.
+
+## Designing for Comfort
+
+### Visual Comfort
+
+- **Avoid Non-Overlapping Monocular Side Regions:** Avoid positioning content in the non-overlapping, monocular side regions of the display. Review the [X Axis & Binocular Overlap](../design-for-spectacles/positioning-sizing-content.mdx#x-axis--binocular-overlap) section
+- **Optimal Viewing Distance:** Detailed content is most comfortable to view at approximately 1 meter away in Z-depth. Avoid prolonged viewing of detailed content close to the user.
+- **Single Focus:** Do not require users to simultaneously focus on both virtual and real objects in two very different depths.Allow focus on one depthor the other.
+- **Consistent Depth Cues:** Keep depth cues between the real world and virtual content consistent with reality. Avoid setting high render order in Lens Studio for virtual objects positioned far from the user. This digital override can cause far-field virtual content to appear closer than near-field virtual content. This mismatch conflicts with real world depth cues and may cause visual discomfort.
+- **Center Content:** Center content in the field of view to minimize color variation near the display edges.
+- **Avoid Dark Content with Pure White Backgrounds:** This combination can cause visual discomfort. Review the [Color & Material](../design-for-spectacles/ui-design.mdx#color--material) section.
+- **Legible Text:** Provide a background behind text to maintain legibility against varying real-world colors and other virtual objects. Possible solutions include gradient color panels or occluding materials.
+- **Consider User Breaks:** Some users may take periodic breaks from wearing Spectacles. Consider self-paced experiences and content that allows for pausing or saving progress.
+
+### Physical Comfort
+
+- **Reduce Arm Effort:** Position elements lower in the Y position to reduce the arm effort required for hand targeting.
+- **Minimize Travel Distance:** For lower effort hand targeting, plan layouts to reduce travel distance between interactions. Avoid sequential user actions that are far apart.
+- **Design Custom Hand Gestures for Comfort:** If you’re creating custom hand interactions, , design for neutral hand and wrist positions, in line with natural resting poses. Avoid awkward grasping or extreme angles. Allow a range of acceptable poses to provide greater user flexibility, rather than expecting users to perform a single precise semantic pose.
+- **Avoid Steep Neck Angles:** Position content neutrally and centered in the field of view to avoid steep, sustained neck angles, whether dramatically down or up.
+
+### Cognitive Comfort
+
+Design for Reduced Cognitive Load and Enhanced Understanding.
+
+- **Match Real-World Conventions and Human Behavior:** Design interfaces and experiences that mirror real-world conventions and human behavior. This makes them intuitive and easy to navigate, leveraging users' pre-existing knowledge and reducing the cognitive load required to interact with a new system.
+- **Recognition Over Recall:** Design systems that minimize the need for users to recall information from memory. Make options visible so users can recognize what they need from available cues, which is less cognitively demanding than recalling options from memory.
+- **Provide a First-Run Experience:** Implement guided introductions, tutorials, or tooltips for first-time users. This helps users understand how to navigate and use the system efficiently, building a solid foundation, reducing frustration, and enhancing user satisfaction.
+- **Avoid Overwhelming the User:** Be mindful of completely filling the user’s field of view. Size content to have margins on all sides. Avoid asking users to navigate across multiple windows; navigating more than three windows at once can feel overwhelming. To this end, avoid lists longer than seven elements, as this also may overwhelm the user.
+
+## Resources
+
+- [Snap OS 2.0 Design Kit](./snap-os-design-kit.mdx) - Figma component library with tokens, styles, components, and reference screens
+- Recommended Display & Button Sizing: [SizeTemplate.fbx](https://storage.googleapis.com/snapchat-lens-assets/f1a09194-f02d-43ed-92b8-62e843179ff0/lensStudio/Spectacles/SizingReference.fbx)

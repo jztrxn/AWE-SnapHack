@@ -1,0 +1,64 @@
+---
+description: 'Measure power usage and thermal performance of Lenses on Spectacles using the Spectacles Monitor tool in Lens Studio.'
+---
+
+# Spectacles Monitor
+
+Spectacles Monitor is a tool designed to help you identify areas for performance improvement in your Lens. For detailed guidance on utilizing performance data, refer to the [Performance Optimization](../performance-optimization/optimizing-lens-performance.mdx).
+
+To launch the monitor go to Window \-\> Utilities \-\> Spectacles Monitor.
+
+<img
+  src="/img/spectacles/misc/open-spectacles-monitor.png"
+  style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+/>
+
+## Measuring Power and Thermals
+
+Lens Studio provides a Spectacles Monitor window for assessing the power and thermal performance of your Lenses on the Spectacles device.
+
+For monitoring to begin, Spectacles must first be [connected](../../get-started/start-building/connecting-lens-studio-to-spectacles.mdx#connect-spectacles-directly-to-lens-studio) to Lens Studio. Once connected, baseline values for power and thermal will be displayed on the monitor: these include the Logic Touch (left) and Tracker Touch (right) temperatures, and the Tracker power usage.
+
+_(You can also open more than one Spectacles Monitor if you’d like to have one focus only on power and the other only on temperature)_
+
+<img
+  src="/img/spectacles/spectacles-monitor/spectacles-monitor-default.png"
+  style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+/>
+
+Once you start a lens by sending it to Spectacles, an additional entry named Lens will appear under Power Usage, along with an additional line representing your lens on the power graph. You can use this entry to monitor the specific power usage of your lens. To monitor the thermal impact of your lens, observe the changes in temperature of the Logic Touch and Tracker Touch as your lens runs.
+
+(_If the lens information does not appear, try restarting your device)._
+
+<img
+  src="/img/spectacles/spectacles-monitor/spectacles-monitor-lens-tracker.png"
+  style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+/>
+
+You can analyze the trends on the graph by pausing the monitor using the pause button. Once paused, click and drag to show the average temperature and power in the selected timespan.
+
+<img
+  src="/img/spectacles/spectacles-monitor/spectacles-monitor-analyze-trend.png"
+  style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+/>
+
+Finally, you can clear both graphs by clicking on the broom icon on the top right of the monitor.
+
+## Perfetto
+
+Perfetto is an open-source project that provides performance tracing and visualization tools compatible with Spectacles. It enables detailed analysis of system and application performance by capturing and displaying trace events in a graphical interface. Perfetto is used for identifying performance bottlenecks and debugging complex issues.
+
+To begin a Perfetto Trace, ensure that Spectacles are connected to Lens Studio and in an active session with a Draft Lens. Refer to the [Connection Guide](../../get-started/start-building/connecting-lens-studio-to-spectacles.mdx#connect-spectacles-directly-to-lens-studio) for instructions. Once connected and the Draft Lens is open, select "Start Spectacles Profiling" to initiate the Perfetto Trace. You can specify where the Perfetto Trace data will be stored on your local machine.
+
+To stop the Perfetto Trace, select "Stop Spectacles Profiling".
+
+If you're on macOS and the Perfetto Trace completes successfully, the Perfetto interface opens right inside Spectacles Monitor. You can also open the exported HTML trace file from your computer at any time.
+
+If you're on Windows, open the `.pftrace` file with a Perfetto GUI like the [Perfetto UI](https://ui.perfetto.dev/). This web tool runs entirely in your browser and keeps your data local.
+
+<img
+  src="/img/spectacles/misc/perfetto-ui.png"
+  style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+/>
+
+For more information and guidance on navigating through Perfetto, visit the main website: [Perfetto Documentation](https://perfetto.dev/docs/).

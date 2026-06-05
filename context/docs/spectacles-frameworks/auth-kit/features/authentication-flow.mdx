@@ -1,0 +1,120 @@
+---
+sidebar_position: 1
+description: "Implement OAuth2 authentication in Spectacles Lenses using Auth Kit's Authorization Code and Implicit flows with deep link redirects."
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Authentication Flow
+
+Auth Kit provides two OAuth2 authentication flows: Authorization Code Flow and Implicit Flow. Both flows integrate seamlessly with Spectacles' deep linking system for secure authentication.
+
+## Overview
+
+The Auth Kit handles the complete OAuth2 authentication process, including:
+
+- Generating secure authorization URLs
+- Managing OAuth2 state parameters for security
+- Handling deep link redirects from OAuth2 providers
+- Exchanging authorization codes for access tokens
+- Storing and managing tokens securely
+
+## Authorization Code Flow
+
+### Configuration
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```typescript
+import { OAuth2 } from 'AuthKit.lspkg/Core/OAuth2';
+
+const oauth = new OAuth2({
+  clientId: 'your-client-id',
+  authorizationUri: 'https://provider.com/oauth/authorize',
+  tokenUri: 'https://provider.com/oauth/token',
+  refreshUri: 'https://provider.com/oauth/token', // Optional, defaults to tokenUri
+  clientSecret: 'your-client-secret', // Optional, for confidential clients
+  authenticationType: 'code',
+});
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+var OAuth2 = require('AuthKit.lspkg/Core/OAuth2').OAuth2;
+
+var oauth = new OAuth2({
+  clientId: 'your-client-id',
+  authorizationUri: 'https://provider.com/oauth/authorize',
+  tokenUri: 'https://provider.com/oauth/token',
+  refreshUri: 'https://provider.com/oauth/token', // Optional, defaults to tokenUri
+  clientSecret: 'your-client-secret', // Optional, for confidential clients
+  authenticationType: 'code',
+});
+```
+
+</TabItem>
+</Tabs>
+
+### Authentication Process
+
+```typescript
+try {
+  // Start OAuth2 authorization with specified scopes
+  const token = await oauth.authorize('read write profile');
+
+  if (token) {
+    print('Authorization successful!');
+
+    // Token is automatically stored and can be retrieved
+    const accessToken = await oauth.getAccessToken();
+
+    // Make authenticated API requests
+    const response = await fetch('https://api.provider.com/user', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    const userData = await response.json();
+    print(`Welcome, ${userData.name}!`);
+  }
+} catch (error) {
+  print(`Authorization failed: ${error.message}`);
+}
+```
+
+## Implicit Flow
+
+The Implicit Flow is a simpler OAuth2 flow that returns access tokens directly. Use this for providers that don't support the Authorization Code Flow.
+
+### Configuration
+
+```typescript
+const oauth = new OAuth2({
+  clientId: 'your-client-id',
+  authorizationUri: 'https://provider.com/oauth/authorize',
+  tokenUri: 'https://provider.com/oauth/token', // Not used in implicit flow
+  authenticationType: 'implicit',
+});
+```
+
+### Authentication Process
+
+```typescript
+try {
+  // Implicit flow returns token directly
+  const token = await oauth.authorize('read write');
+
+  if (token) {
+    print('Authorization successful!');
+    const accessToken = await oauth.getAccessToken();
+    // Use access token for API calls
+  }
+} catch (error) {
+  print(`Authorization failed: ${error.message}`);
+}
+```

@@ -1,0 +1,1230 @@
+---
+description: 'Create and manage leaderboards in Spectacles Lenses so users can submit scores and compare rankings with friends and other players.'
+---
+
+# Leaderboard
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import CollapsibleScript from '@site/src/components/CollapsibleScriptProps';
+import CardList from '@site/src/components/CardList';
+
+Spectacles offers APIs to create Leaderboards so users of your Lens can track their progress and compare scores with friends and users worldwide.
+
+:::note
+
+_Privacy Note: Leaderboards protect user privacy and require each user to opt in to share scores._
+
+:::
+
+:::note
+
+For Spectacles we only support the Leaderboard Module, not the [Leaderboard Component](https://developers.snap.com/lens-studio/features/user-context/leaderboard) that's used by mobile Snapchat. The Leaderboard Module provides access to raw Leaderboard data, but unlike the Leaderboard Component it does not provide any UI.
+
+:::
+
+## Usage
+
+<img
+  src="/img/spectacles/misc/leaderboard-example.png"
+  style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+/>
+
+### Prerequisites
+
+- Lens Studio v5.7.0 or later
+- Spectacles OS v5.60.x or later
+
+### Creating Leaderboards
+
+To create a new Leaderboard add the [LeaderboardModule] to your project and include it in your scripts. The [LeaderboardModule] enables you to create or retrieve a [Leaderboard] through the [getLeaderboard] method, which takes a [CreateOptions] parameter where you can set:
+
+- **name**: The name of the Leaderboard. Your Leaderboard is uniquely determined by the combination of your Lens ID and this leaderboard name. If a Leaderboard with this name does not exist, it will be created for this lens. If the Leaderboard with this name does exist, it will simply be returned.
+- **orderingType**: Ascending or Descending.
+- **ttlSeconds**: The number of seconds this leaderboard should exist before being reset.
+
+Once the [Leaderboard] is created, you can submit scores to it, or retrieve it for display.
+
+### Submitting Scores
+
+To submit a score to the leaderboard, simply call the [submitScore] method, as shown in the example below, where we retrieve a Leaderboard and immediately submit a random score between 1 and 1000.
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+@component
+export class LeaderboardExample extends BaseScriptComponent {
+  private leaderboardModule = require('LensStudio:LeaderboardModule');
+
+  onAwake() {
+    this.updateLeaderboard();
+  }
+
+  updateLeaderboard(): void {
+    const leaderboardCreateOptions = Leaderboard.CreateOptions.create();
+    leaderboardCreateOptions.name = 'TEST_NAME';
+    leaderboardCreateOptions.ttlSeconds = 800000;
+    leaderboardCreateOptions.orderingType = 1;
+
+    this.leaderboardModule.getLeaderboard(
+      leaderboardCreateOptions,
+      (leaderboardInstance) => {
+        let randomInt = MathUtils.randomRange(1, 1000);
+        leaderboardInstance.submitScore(
+          randomInt,
+          this.submitScoreSuccessCallback,
+          (status) => {
+            print('[Leaderboard] Submit failed, status: ' + status);
+          }
+        );
+      },
+      (status) => {
+        print('[Leaderboard] getLeaderboard failed, status: ' + status);
+      }
+    );
+  }
+
+  submitScoreSuccessCallback(currentUserInfo): void {
+    print('[Leaderboard] submitScore success callback');
+    if (!isNull(currentUserInfo)) {
+      print(
+        `[Leaderboard] Current User info: ${
+          currentUserInfo.snapchatUser.displayName
+            ? currentUserInfo.snapchatUser.displayName
+            : ''
+        } score: ${currentUserInfo.score}`
+      );
+    }
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+const leaderboardModule = require('LensStudio:LeaderboardModule');
+
+function updateLeaderboard() {
+  const leaderboardCreateOptions = Leaderboard.CreateOptions.create();
+  leaderboardCreateOptions.name = 'TEST_NAME';
+  leaderboardCreateOptions.ttlSeconds = 800000;
+  leaderboardCreateOptions.orderingType = 1;
+
+  leaderboardModule.getLeaderboard(
+    leaderboardCreateOptions,
+    (leaderboardInstance) => {
+      let randomInt = MathUtils.randomRange(1, 1000);
+      leaderboardInstance.submitScore(
+        randomInt,
+        submitScoreSuccessCallback,
+        (status) => {
+          print('[Leaderboard] Submit failed, status: ' + status);
+        }
+      );
+    },
+    (status) => {
+      print('[Leaderboard] getLeaderboard failed, status: ' + status);
+    }
+  );
+}
+
+function submitScoreSuccessCallback(currentUserInfo) {
+  print('[Leaderboard] submitScore success callback');
+  if (!isNull(currentUserInfo)) {
+    print(
+      `[Leaderboard] Current User info: ${
+        currentUserInfo.snapchatUser.displayName
+          ? currentUserInfo.snapchatUser.displayName
+          : ''
+      } score: ${currentUserInfo.score}`
+    );
+  }
+}
+
+updateLeaderboard();
+```
+
+</TabItem>
+</Tabs>
+
+### Displaying Leaderboards
+
+To load a Leaderboard's entries, call [getLeaderboardInfo] with [RetrievalOptions]. The [RetrievalOptions] allow you to specify:
+
+1. **usersLimit**: How many user entries to return.
+2. **usersType**: Whether to return the [Global] Leaderboard or the [Friends] Leaderboard. The Global Leaderboard returns scores of all users of the Lens, while the Friends Leaderboard only ranks and returns the scores of the current user's friends.
+
+The leaderboard entries are returned in the success callback as an array of [UserRecord] objects. Below is an example demonstrating how to print the leaderboard entries.
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+@component
+export class LeaderBoardInfo extends BaseScriptComponent {
+  private leaderboardModule = require('LensStudio:LeaderboardModule');
+
+  onAwake() {
+    this.updateLeaderboard();
+  }
+
+  updateLeaderboard(): void {
+    const leaderboardCreateOptions = Leaderboard.CreateOptions.create();
+    leaderboardCreateOptions.name = 'TEST_NAME';
+    leaderboardCreateOptions.ttlSeconds = 800000;
+    leaderboardCreateOptions.orderingType = 1;
+
+    this.leaderboardModule.getLeaderboard(
+      leaderboardCreateOptions,
+      (leaderboardInstance) => {
+        let leaderboardRetrievalOptions = Leaderboard.RetrievalOptions.create();
+        leaderboardRetrievalOptions.usersLimit = 10;
+        leaderboardRetrievalOptions.usersType = Leaderboard.UsersType.Global;
+        leaderboardInstance.getLeaderboardInfo(
+          leaderboardRetrievalOptions,
+          (otherRecords, currentUserRecord) => {
+            print('[Leaderboard] Global scores loaded');
+            print(
+              '[Leaderboard] Current user: ' +
+                currentUserRecord.snapchatUser.displayName +
+                ', Score: ' +
+                currentUserRecord.score
+            );
+
+            otherRecords.forEach((record) => {
+              if (
+                record &&
+                record.snapchatUser &&
+                record.snapchatUser.displayName
+              ) {
+                print(
+                  '[Leaderboard] User: ' +
+                    record.snapchatUser.displayName +
+                    ', Score: ' +
+                    record.score
+                );
+              }
+            });
+          },
+          (status) => {
+            print('[Leaderboard] getLeaderboardInfo failed, status: ' + status);
+          }
+        );
+      },
+      (status) => {
+        print('[Leaderboard] getLeaderboard failed, status: ' + status);
+      }
+    );
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+const leaderboardModule = require('LensStudio:LeaderboardModule');
+
+function updateLeaderboard() {
+  const leaderboardCreateOptions = Leaderboard.CreateOptions.create();
+  leaderboardCreateOptions.name = 'TEST_NAME';
+  leaderboardCreateOptions.ttlSeconds = 800000;
+  leaderboardCreateOptions.orderingType = 1;
+
+  leaderboardModule.getLeaderboard(
+    leaderboardCreateOptions,
+    (leaderboardInstance) => {
+      let leaderboardRetrievalOptions = Leaderboard.RetrievalOptions.create();
+      leaderboardRetrievalOptions.usersLimit = 10;
+      leaderboardRetrievalOptions.usersType = Leaderboard.UsersType.Global;
+
+      leaderboardInstance.getLeaderboardInfo(
+        leaderboardRetrievalOptions,
+        (otherRecords, currentUserRecord) => {
+          print('[Leaderboard] Global scores loaded');
+          print(
+            '[Leaderboard] Current user: ' +
+              currentUserRecord.snapchatUser.displayName +
+              ', Score: ' +
+              currentUserRecord.score
+          );
+
+          otherRecords.forEach((record) => {
+            if (
+              record &&
+              record.snapchatUser &&
+              record.snapchatUser.displayName
+            ) {
+              print(
+                '[Leaderboard] User: ' +
+                  record.snapchatUser.displayName +
+                  ', Score: ' +
+                  record.score
+              );
+            }
+          });
+        },
+        (status) => {
+          print('[Leaderboard] getLeaderboardInfo failed, status: ' + status);
+        }
+      );
+    },
+    (status) => {
+      print('[Leaderboard] getLeaderboard failed, status: ' + status);
+    }
+  );
+}
+
+updateLeaderboard();
+```
+
+</TabItem>
+</Tabs>
+
+[LeaderboardModule]: https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built_In.LeaderboardModule.html
+[Leaderboard]: https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built_In.Leaderboard.html
+[getLeaderboard]: https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built_In.LeaderboardModule.html#getleaderboard
+[CreateOptions]: https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built-In.Leaderboard.CreateOptions.html
+[submitScore]: https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built_In.Leaderboard.html#submitscore
+[getLeaderboardInfo]: https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built-In.Leaderboard.html#getleaderboardinfo
+[RetrievalOptions]: https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built-In.Leaderboard.RetrievalOptions.html
+[Global]: https://developers.snap.com/lens-studio/api/lens-scripting/enums/Built-In.Leaderboard.UsersType.html#global
+[Friends]: https://developers.snap.com/lens-studio/api/lens-scripting/enums/Built-In.Leaderboard.UsersType.html#friends
+[UserRecord]: https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built-In.Leaderboard.UserRecord.html
+
+### Full Example
+
+Much of the work required to integrate a Leaderboard into a Lens involves configuring the module and building the UI for the Leaderboard. To make this easier, the comprehensive example below -- which includes all required components and UI -- can be used in your Lens.
+
+:::tip
+Note that a complete Leaderboard example containing pre-configured UI and functionality is also available in the Lens Studio Asset Library.
+:::
+
+<img
+  src="/img/spectacles/misc/leaderboard-asset-library.png"
+  style={{ maxWidth: '400px', width: '100%', borderRadius: '8px' }}
+/>
+
+The example is based on [SIK UI Components](https://developers.snap.com/spectacles/spectacles-frameworks/spectacles-interaction-kit/get-started) consists of four main components:
+
+1. **LeaderboardExample**: Core class that handles leaderboard creation, score submission, and data retrieval
+2. **LeaderboardDemo**: UI controller that connects buttons to LeaderboardExample functionality
+3. **LeaderboardItemExample**: Component for individual leaderboard entry display
+4. **GridContentCreatorLeaderboard**: UI manager that creates and positions leaderboard entries
+
+Below you'll find the complete code for each component:
+
+<CollapsibleScript title="LeaderboardExample.ts - Core leaderboard functionality">
+
+```ts
+import { GridContentCreator } from './GridContentCreatorLeaderboard';
+
+/**
+ * Leaderboard Manager for Snapchat Spectacles
+ * This component provides methods to:
+ * - Create a new leaderboard with a specified name
+ * - Submit a random score to the leaderboard
+ * - Get and display leaderboard entries visually
+ */
+@component
+export class LeaderboardExample extends BaseScriptComponent {
+  /**
+   * Name of the leaderboard to create or retrieve
+   */
+  @input
+  @hint('Name of the leaderboard to create or retrieve')
+  leaderboardName: string = 'spectacles_leaderboard';
+
+  /**
+   * Flag to enable debug logging
+   */
+  @input
+  @hint('Enable debug logging')
+  debug: boolean = false;
+
+  /**
+   * Reference to the leaderboard module
+   */
+  private leaderboardModule = require('LensStudio:LeaderboardModule');
+
+  /**
+   * Reference to the current leaderboard instance
+   * This will be null until createLeaderboard is called
+   */
+  private currentLeaderboardInstance = null;
+
+  /**
+   * Store the last submitted score for UI feedback
+   */
+  private lastSubmittedScore: number = 0;
+
+  /**
+   * Keep track of leaderboards we've created
+   */
+  private createdLeaderboards: string[] = [];
+
+  /**
+   * Arrays for generating random leaderboard names
+   */
+  private adjectives: string[] = [
+    'super',
+    'amazing',
+    'epic',
+    'fantastic',
+    'cosmic',
+    'mighty',
+    'powerful',
+    'mega',
+    'ultra',
+    'hyper',
+    'extreme',
+    'radical',
+    'awesome',
+    'incredible',
+    'stellar',
+    'supreme',
+    'divine',
+    'magical',
+    'splendid',
+    'terrific',
+    'ultimate',
+    'unbeatable',
+    'wondrous',
+  ];
+
+  private nouns: string[] = [
+    'champions',
+    'legends',
+    'heroes',
+    'titans',
+    'warriors',
+    'stars',
+    'victors',
+    'masters',
+    'kings',
+    'queens',
+    'dragons',
+    'eagles',
+    'lions',
+    'tigers',
+    'wolves',
+    'panthers',
+    'falcons',
+    'rockets',
+    'thunder',
+    'lightning',
+  ];
+
+  @input
+  @hint('Score to submit (if left at -1, a random score will be generated)')
+  scoreToSubmit: number = 10;
+
+  @input
+  @hint('Reference to GridContentCreator to update the UI')
+  gridContentCreator: GridContentCreator;
+
+  /**
+   * Array of leaderboard entries that can be used to populate the UI
+   */
+  private leaderboardEntries: Array<{
+    name: string;
+    score: number;
+    rank: number;
+    isTestData: boolean;
+  }> = [];
+
+  onAwake() {
+    print('[LeaderboardExample] Initialized');
+  }
+
+  /**
+   * Gets the list of created leaderboards
+   */
+  getCreatedLeaderboards(): string[] {
+    return this.createdLeaderboards;
+  }
+
+  /**
+   * Loads a specific leaderboard by name
+   * @param leaderboardName The name of the leaderboard to load
+   * @param callback Optional callback function to be called after the leaderboard is loaded
+   */
+  loadLeaderboard(leaderboardName: string, callback?: () => void): void {
+    if (!leaderboardName) {
+      print(
+        '[LeaderboardExample] ERROR: Cannot load leaderboard with empty name'
+      );
+      return;
+    }
+
+    this.leaderboardName = leaderboardName;
+    print(
+      `[LeaderboardExample] Loading existing leaderboard: "${this.leaderboardName}"`
+    );
+
+    const leaderboardCreateOptions = Leaderboard.CreateOptions.create();
+    leaderboardCreateOptions.name = this.leaderboardName;
+    leaderboardCreateOptions.ttlSeconds = 800000; // Time-to-live in seconds (about 9 days)
+    leaderboardCreateOptions.orderingType = 1; // 1 = Descending order (higher scores ranked higher)
+
+    this.leaderboardModule.getLeaderboard(
+      leaderboardCreateOptions,
+      (leaderboardInstance) => {
+        print(
+          `[LeaderboardExample] Successfully loaded leaderboard: "${this.leaderboardName}"`
+        );
+        this.currentLeaderboardInstance = leaderboardInstance;
+
+        // Get the leaderboard entries immediately
+        this.getLeaderboard();
+
+        // Call the callback if provided
+        if (callback) {
+          callback();
+        }
+      },
+      (status) => {
+        print(
+          `[LeaderboardExample] Failed to load leaderboard, status: ${status}`
+        );
+      }
+    );
+  }
+
+  /**
+   * Creates a new leaderboard or loads an existing one.
+   * If generateNewName is true, a new name will be generated.
+   * Otherwise, the current leaderboardName property will be used.
+   * @param generateNewName Whether to generate a new name
+   * @param callback Optional callback function to be called after the leaderboard is created
+   */
+  createLeaderboard(
+    generateNewName: boolean = true,
+    callback?: () => void
+  ): void {
+    // Reset score tracking when creating a new leaderboard
+    if (generateNewName) {
+      // Reset the last submitted score
+      this.lastSubmittedScore = 0;
+      print('[LeaderboardExample] Reset score tracking for new leaderboard');
+
+      // Clear existing leaderboard entries
+      this.leaderboardEntries = [];
+
+      // Generate a completely random leaderboard name
+      const randomAdj =
+        this.adjectives[Math.floor(Math.random() * this.adjectives.length)];
+      const randomNoun =
+        this.nouns[Math.floor(Math.random() * this.nouns.length)];
+      const randomNum = Math.floor(Math.random() * 1000);
+      const generatedName = `${randomAdj}_${randomNoun}_${randomNum}`;
+
+      // Update the leaderboardName property with the generated name
+      this.leaderboardName = generatedName;
+
+      // Add to the list of created leaderboards
+      if (!this.createdLeaderboards.includes(this.leaderboardName)) {
+        this.createdLeaderboards.push(this.leaderboardName);
+      }
+
+      print(
+        `[LeaderboardExample] Generating new random leaderboard name: "${this.leaderboardName}"`
+      );
+      print(
+        `[LeaderboardExample] Total leaderboards created: ${this.createdLeaderboards.length}`
+      );
+    } else {
+      print(
+        `[LeaderboardExample] Using existing leaderboard name: "${this.leaderboardName}"`
+      );
+    }
+
+    const leaderboardCreateOptions = Leaderboard.CreateOptions.create();
+    leaderboardCreateOptions.name = this.leaderboardName;
+    leaderboardCreateOptions.ttlSeconds = 800000; // Time-to-live in seconds (about 9 days)
+    leaderboardCreateOptions.orderingType = 1; // 1 = Descending order (higher scores ranked higher)
+
+    this.leaderboardModule.getLeaderboard(
+      leaderboardCreateOptions,
+      (leaderboardInstance) => {
+        print(
+          `[LeaderboardExample] Successfully created/loaded leaderboard: "${this.leaderboardName}"`
+        );
+        this.currentLeaderboardInstance = leaderboardInstance;
+
+        // Call the callback if provided
+        if (callback) {
+          callback();
+        }
+      },
+      (status) => {
+        print(
+          `[LeaderboardExample] Failed to create/load leaderboard, status: ${status}`
+        );
+      }
+    );
+  }
+
+  /**
+   * Submits the current score to the leaderboard
+   * Uses the scoreToSubmit property value or generates a random score if set to -1
+   */
+  submitScore(): void {
+    if (!this.currentLeaderboardInstance) {
+      print(
+        '[LeaderboardExample] ERROR: No leaderboard loaded. Call createLeaderboard first.'
+      );
+      return;
+    }
+
+    let score = this.scoreToSubmit;
+
+    // If score is -1, generate a random score
+    if (score === -1) {
+      score = Math.floor(Math.random() * 1000) + 1;
+      print(`[LeaderboardExample] Generated random score: ${score}`);
+    }
+
+    print(
+      `[LeaderboardExample] Submitting score: ${score} to leaderboard "${this.leaderboardName}"`
+    );
+
+    // Store the score for UI feedback
+    this.lastSubmittedScore = score;
+
+    // Submit the score to the leaderboard
+    this.currentLeaderboardInstance.submitScore(
+      score,
+      (currentUserRecord) => {
+        print(`[LeaderboardExample] Score submitted successfully`);
+        if (currentUserRecord && currentUserRecord.snapchatUser) {
+          const username =
+            currentUserRecord.snapchatUser.displayName || 'Unknown User';
+          print(
+            `[LeaderboardExample] User "${username}" score: ${currentUserRecord.score}`
+          );
+        }
+
+        // Refresh the leaderboard to show updated scores
+        this.getLeaderboard();
+      },
+      (status) => {
+        print(`[LeaderboardExample] Failed to submit score: ${status}`);
+      }
+    );
+  }
+
+  /**
+   * Gets the current leaderboard entries and updates the UI
+   */
+  getLeaderboard(): void {
+    if (!this.currentLeaderboardInstance) {
+      print(
+        '[LeaderboardExample] ERROR: No leaderboard loaded. Call createLeaderboard first.'
+      );
+      return;
+    }
+
+    print('[LeaderboardExample] Retrieving leaderboard entries...');
+
+    const retrievalOptions = Leaderboard.RetrievalOptions.create();
+    retrievalOptions.usersLimit = 50; // Get up to 10 entries
+    retrievalOptions.usersType = Leaderboard.UsersType.Global; // Global leaderboard
+
+    this.currentLeaderboardInstance.getLeaderboardInfo(
+      retrievalOptions,
+      (otherRecords, currentUserRecord) => {
+        this.processLeaderboardData(otherRecords, currentUserRecord);
+        this.updateGridContent();
+      },
+      (status) => {
+        print(
+          `[LeaderboardExample] Failed to get leaderboard entries: ${status}`
+        );
+      }
+    );
+  }
+
+  /**
+   * Processes the leaderboard data from the API and formats it for display
+   * @param otherRecords Array of other user records
+   * @param currentUserRecord The current user's record
+   */
+  private processLeaderboardData(otherRecords, currentUserRecord): void {
+    // Clear existing entries
+    this.leaderboardEntries = [];
+
+    // Format and store the leaderboard entries for display
+    if (otherRecords && otherRecords.length > 0) {
+      print(
+        `[LeaderboardExample] Retrieved ${otherRecords.length} leaderboard entries`
+      );
+
+      // Process other users' records
+      otherRecords.forEach((record, index) => {
+        if (record && record.snapchatUser) {
+          const username = record.snapchatUser.displayName || 'Unknown User';
+          const score = record.score || 0;
+          const rank = index + 1;
+
+          this.leaderboardEntries.push({
+            name: username,
+            score: score,
+            rank: rank,
+            isTestData: false,
+          });
+
+          this.debug &&
+            print(
+              `[LeaderboardExample] Entry ${rank}: ${username}, Score: ${score}`
+            );
+        }
+      });
+    } else {
+      print('[LeaderboardExample] No leaderboard entries found');
+
+      // Add some test data if no real entries exist
+      this.addTestData();
+    }
+
+    // Add the current user's record if available
+    if (currentUserRecord && currentUserRecord.snapchatUser) {
+      const username = currentUserRecord.snapchatUser.displayName || 'You';
+      const score = currentUserRecord.score || 0;
+
+      // Find if the current user is already in the leaderboard
+      const existingEntry = this.leaderboardEntries.find(
+        (entry) => entry.name === username && entry.score === score
+      );
+
+      if (!existingEntry) {
+        // Add the current user at the end if not already in the leaderboard
+        this.leaderboardEntries.push({
+          name: username,
+          score: score,
+          rank: this.leaderboardEntries.length + 1,
+          isTestData: false,
+        });
+
+        print(
+          `[LeaderboardExample] Added current user: ${username}, Score: ${score}`
+        );
+      }
+    }
+
+    // Sort entries by rank
+    this.leaderboardEntries.sort((a, b) => a.rank - b.rank);
+  }
+
+  /**
+   * Adds test data to the leaderboard when no real entries exist
+   */
+  private addTestData(): void {
+    print('[LeaderboardExample] Adding test data to empty leaderboard');
+
+    const testNames = [
+      'TestUser1',
+      'TestUser2',
+      'TestUser3',
+      'TestUser4',
+      'TestUser5',
+      'TestUser6',
+      'TestUser7',
+      'TestUser8',
+      'TestUser9',
+      'TestUser10',
+    ];
+
+    for (let i = 0; i < 10; i++) {
+      const score = Math.floor(Math.random() * 900) + 100; // Scores between 100-999
+      this.leaderboardEntries.push({
+        name: testNames[i],
+        score: score,
+        rank: i + 1,
+        isTestData: true,
+      });
+    }
+
+    // Sort by score in descending order
+    this.leaderboardEntries.sort((a, b) => b.score - a.score);
+
+    // Update ranks after sorting
+    this.leaderboardEntries.forEach((entry, index) => {
+      entry.rank = index + 1;
+    });
+  }
+
+  /**
+   * Updates the grid content UI with leaderboard entries
+   */
+  private updateGridContent(): void {
+    if (!this.gridContentCreator) {
+      print(
+        '[LeaderboardExample] ERROR: No gridContentCreator reference. Set it in the Inspector.'
+      );
+      return;
+    }
+
+    if (
+      this.gridContentCreator &&
+      typeof this.gridContentCreator.updateLeaderboardEntries === 'function'
+    ) {
+      this.gridContentCreator.updateLeaderboardEntries(this.leaderboardEntries);
+    } else {
+      print(
+        "[LeaderboardExample] ERROR: GridContentCreator doesn't have updateLeaderboardEntries method."
+      );
+    }
+  }
+}
+```
+
+</CollapsibleScript>
+
+<CollapsibleScript title="LeaderboardDemo.ts - UI controller for leaderboard functionality">
+
+```ts
+import { LeaderboardExample } from './LeaderboardExample';
+
+/**
+ * UI Controller for the Leaderboard Demo
+ * This component connects UI buttons to the LeaderboardExample functionality
+ */
+@component
+export class LeaderboardDemo extends BaseScriptComponent {
+  /**
+   * Reference to the LeaderboardExample component
+   */
+  @input
+  @hint('Reference to the LeaderboardExample component')
+  leaderboardManager: LeaderboardExample;
+
+  /**
+   * The UI panel that contains the leaderboard display
+   */
+  @input
+  @hint('The UI panel that contains the leaderboard display')
+  leaderboardPanel: Entity;
+
+  /**
+   * The UI panel that contains the main menu
+   */
+  @input
+  @hint('The UI panel that contains the main menu')
+  menuPanel: Entity;
+
+  /**
+   * Text label to display the current leaderboard name
+   */
+  @input
+  @hint('Text label to display the current leaderboard name')
+  leaderboardNameText: TextComponent;
+
+  /**
+   * Text label to show status messages
+   */
+  @input
+  @hint('Text label to show status messages')
+  statusText: TextComponent;
+
+  private isLeaderboardVisible: boolean = false;
+
+  onAwake(): void {
+    // Initialize with menu panel visible and leaderboard hidden
+    if (this.menuPanel) {
+      this.menuPanel.enabled = true;
+    }
+
+    if (this.leaderboardPanel) {
+      this.leaderboardPanel.enabled = false;
+    }
+
+    // Initialize status text
+    this.updateStatus('Welcome to Leaderboard Demo!');
+  }
+
+  /**
+   * Creates a new leaderboard with a random name
+   * Called by the "New Leaderboard" button
+   */
+  createNewLeaderboard(): void {
+    if (!this.leaderboardManager) {
+      this.updateStatus('ERROR: LeaderboardManager not found');
+      return;
+    }
+
+    this.updateStatus('Creating new leaderboard...');
+
+    // Create a new leaderboard with a random name
+    this.leaderboardManager.createLeaderboard(true, () => {
+      this.updateLeaderboardName();
+      this.updateStatus('New leaderboard created!');
+    });
+  }
+
+  /**
+   * Submits a score to the current leaderboard
+   * Called by the "Submit Score" button
+   */
+  submitScore(): void {
+    if (!this.leaderboardManager) {
+      this.updateStatus('ERROR: LeaderboardManager not found');
+      return;
+    }
+
+    this.updateStatus('Submitting score...');
+
+    this.leaderboardManager.submitScore();
+    this.updateStatus('Score submitted!');
+  }
+
+  /**
+   * Shows the leaderboard UI
+   * Called by the "View Leaderboard" button
+   */
+  viewLeaderboard(): void {
+    if (!this.leaderboardManager) {
+      this.updateStatus('ERROR: LeaderboardManager not found');
+      return;
+    }
+
+    // Get the current leaderboard data
+    this.leaderboardManager.getLeaderboard();
+
+    // Show the leaderboard UI
+    if (this.menuPanel) {
+      this.menuPanel.enabled = false;
+    }
+
+    if (this.leaderboardPanel) {
+      this.leaderboardPanel.enabled = true;
+    }
+
+    this.isLeaderboardVisible = true;
+    this.updateLeaderboardName();
+  }
+
+  /**
+   * Returns to the main menu
+   * Called by the "Back" button on the leaderboard
+   */
+  backToMenu(): void {
+    if (this.menuPanel) {
+      this.menuPanel.enabled = true;
+    }
+
+    if (this.leaderboardPanel) {
+      this.leaderboardPanel.enabled = false;
+    }
+
+    this.isLeaderboardVisible = false;
+  }
+
+  /**
+   * Updates the leaderboard name text element
+   */
+  private updateLeaderboardName(): void {
+    if (this.leaderboardNameText && this.leaderboardManager) {
+      this.leaderboardNameText.text = `Leaderboard: ${this.leaderboardManager.leaderboardName}`;
+    }
+  }
+
+  /**
+   * Updates the status text element
+   * @param message The message to display
+   */
+  private updateStatus(message: string): void {
+    if (this.statusText) {
+      this.statusText.text = message;
+
+      // Clear the status after 3 seconds
+      Delay.schedule(() => {
+        if (this.statusText) {
+          this.statusText.text = '';
+        }
+      }, 3);
+    }
+  }
+}
+```
+
+</CollapsibleScript>
+
+<CollapsibleScript title="LeaderboardItemExample.ts - Individual leaderboard entry display">
+
+```ts
+/**
+ * Component for individual leaderboard entry display
+ * This component is attached to each leaderboard item in the UI
+ */
+@component
+export class LeaderboardItemExample extends BaseScriptComponent {
+  /**
+   * The rank text component for this entry
+   */
+  @input
+  @hint('The rank text component for this entry')
+  rankText: TextComponent;
+
+  /**
+   * The name text component for this entry
+   */
+  @input
+  @hint('The name text component for this entry')
+  nameText: TextComponent;
+
+  /**
+   * The score text component for this entry
+   */
+  @input
+  @hint('The score text component for this entry')
+  scoreText: TextComponent;
+
+  /**
+   * The background image for this entry
+   */
+  @input
+  @hint('The background image for highlighting current user')
+  backgroundImage: ImageComponent;
+
+  /**
+   * The crown icon for the #1 ranked player
+   */
+  @input
+  @hint('The crown icon for the #1 ranked player')
+  crownIcon: Entity;
+
+  /**
+   * Update this leaderboard item with the provided data
+   * @param name The user name
+   * @param score The score value
+   * @param rank The rank position (1-based)
+   * @param isCurrentUser Whether this entry represents the current user
+   */
+  updateData(
+    name: string,
+    score: number,
+    rank: number,
+    isCurrentUser: boolean = false
+  ): void {
+    // Update text fields
+    if (this.rankText) {
+      this.rankText.text = `${rank}.`;
+    }
+
+    if (this.nameText) {
+      // Limit name length to avoid UI overflow
+      const maxLength = 15;
+      let displayName = name || 'Unknown User';
+      if (displayName.length > maxLength) {
+        displayName = displayName.substring(0, maxLength - 3) + '...';
+      }
+
+      this.nameText.text = displayName;
+    }
+
+    if (this.scoreText) {
+      this.scoreText.text = `${score}`;
+    }
+
+    // Highlight if this is the current user
+    if (this.backgroundImage) {
+      // Change background color for the current user
+      if (isCurrentUser) {
+        this.backgroundImage.color = new vec4(0.2, 0.8, 1.0, 0.3);
+      } else {
+        // Alternate row colors for readability
+        const isEvenRow = rank % 2 === 0;
+        this.backgroundImage.color = isEvenRow
+          ? new vec4(0.1, 0.1, 0.1, 0.5)
+          : new vec4(0.15, 0.15, 0.15, 0.5);
+      }
+    }
+
+    // Show crown for #1 ranked player
+    if (this.crownIcon) {
+      this.crownIcon.enabled = rank === 1;
+    }
+  }
+}
+```
+
+</CollapsibleScript>
+
+<CollapsibleScript title="GridContentCreatorLeaderboard.ts - UI manager for leaderboard entries">
+
+```ts
+import { LeaderboardItemExample } from './LeaderboardItemExample';
+
+/**
+ * UI Manager for creating and positioning leaderboard entries
+ * This component creates and updates the visual representation of leaderboard entries
+ */
+@component
+export class GridContentCreator extends BaseScriptComponent {
+  /**
+   * Prefab for the leaderboard item
+   */
+  @input
+  @hint('Prefab for the leaderboard item')
+  contentPrefab: Entity;
+
+  /**
+   * Parent object where items will be created
+   */
+  @input
+  @hint('Parent object where items will be created')
+  contentParent: Entity;
+
+  /**
+   * Spacing between items (in local space units)
+   */
+  @input
+  @hint('Spacing between items (in local space units)')
+  spacing: number = 65;
+
+  /**
+   * Maximum number of items to display
+   */
+  @input
+  @hint('Maximum number of items to display')
+  maxItems: number = 10;
+
+  /**
+   * Current user's display name, used to highlight their entry
+   */
+  @input
+  @hint("Current user's display name, used to highlight their entry")
+  currentUserName: string = '';
+
+  /**
+   * Text component to show when no entries are available
+   */
+  @input
+  @hint('Text component to show when no entries are available')
+  noEntriesText: TextComponent;
+
+  /**
+   * Store created item entities
+   */
+  private createdItems: Entity[] = [];
+
+  onAwake(): void {
+    if (this.noEntriesText) {
+      this.noEntriesText.enabled = true;
+    }
+  }
+
+  /**
+   * Updates the leaderboard UI with the provided entries
+   * @param entries Array of leaderboard entries to display
+   */
+  updateLeaderboardEntries(
+    entries: Array<{
+      name: string;
+      score: number;
+      rank: number;
+      isTestData: boolean;
+    }>
+  ): void {
+    // Check if we have any entries to display
+    if (!entries || entries.length === 0) {
+      // Show "no entries" message and clear any existing items
+      this.clearItems();
+      if (this.noEntriesText) {
+        this.noEntriesText.enabled = true;
+      }
+      return;
+    }
+
+    // Hide "no entries" message
+    if (this.noEntriesText) {
+      this.noEntriesText.enabled = false;
+    }
+
+    // Clear existing items first
+    this.clearItems();
+
+    // Calculate how many items to create (capped by maxItems)
+    const itemCount = Math.min(entries.length, this.maxItems);
+
+    // Create new items for each entry
+    for (let i = 0; i < itemCount; i++) {
+      const entry = entries[i];
+      this.createItem(entry.name, entry.score, entry.rank, i);
+    }
+  }
+
+  /**
+   * Creates a single leaderboard item at the specified index
+   * @param name User name
+   * @param score User score
+   * @param rank User rank
+   * @param index Position in the list (0-based)
+   */
+  private createItem(
+    name: string,
+    score: number,
+    rank: number,
+    index: number
+  ): void {
+    if (!this.contentPrefab || !this.contentParent) {
+      print('[GridContentCreator] ERROR: Missing prefab or parent reference');
+      return;
+    }
+
+    // Create the item from prefab
+    const itemEntity = this.contentPrefab.clone();
+
+    // Set parent
+    this.contentParent.addChild(itemEntity);
+
+    // Position the item based on index
+    const localPosition = itemEntity.getTransform().getLocalPosition();
+    localPosition.y = -index * this.spacing;
+    itemEntity.getTransform().setLocalPosition(localPosition);
+
+    // Enable the item
+    itemEntity.enabled = true;
+
+    // Get the LeaderboardItemExample component
+    const itemScript = itemEntity.getComponent(
+      'LeaderboardItemExample'
+    ) as LeaderboardItemExample;
+
+    if (itemScript) {
+      // Check if this is the current user
+      const isCurrentUser = name === this.currentUserName;
+
+      // Update the item's data
+      itemScript.updateData(name, score, rank, isCurrentUser);
+    } else {
+      print(
+        '[GridContentCreator] ERROR: LeaderboardItemExample component not found on prefab'
+      );
+    }
+
+    // Store the created item
+    this.createdItems.push(itemEntity);
+  }
+
+  /**
+   * Clears all created items
+   */
+  private clearItems(): void {
+    // Destroy all previously created items
+    for (const item of this.createdItems) {
+      if (item) {
+        item.destroy();
+      }
+    }
+
+    // Clear the array
+    this.createdItems = [];
+  }
+}
+```
+
+</CollapsibleScript>

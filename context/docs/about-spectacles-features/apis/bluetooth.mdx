@@ -1,0 +1,874 @@
+---
+description: 'Use Bluetooth Low Energy GATT APIs to scan, connect, and communicate with external bluetooth-enableddevices from Spectacles.'
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Bluetooth
+
+Spectacles offers APIs for Bluetooth Low Energy GATT (Generic Attribute Profile), so you can scan for, connect to, and manipulate devices like heart-rate monitors, fitness trackers, and smart-home appliances.
+
+:::note
+
+_Privacy Note: Accessing Bluetooth GATT APIs in a Lens will disable access to privacy-sensitive user information in that Lens, such as the camera frame, location, and audio. For testing and experimental purposes however, extended permissions are available to access both the camera frame and the open internet at the same time. Note that lenses built this way may not be released publicly. Please see [Extended Permissions](../../permission-privacy/experimental-apis.mdx#extended-permission) doc for more information._
+
+:::
+
+:::note
+
+Bluetooth support is currently limited to GATT devices. HID (Input) devices are not supported at this time.
+
+:::
+
+## Prerequisites
+
+- Lens Studio v5.10.0 or later
+- Spectacles OS v5.062 or later
+
+:::note
+
+This API is only available on Spectacles.
+
+:::
+
+## Usage
+
+To use the Bluetooth GATT API add the [BluetoothCentralModule] to your project and include it in your scripts as per the examples below.
+
+:::warning
+
+Bluetooth does not work in Lens Studio Preview. To properly test you will need to push to Spectacles.
+
+:::
+
+The flow for operating a Bluetooth device is generally:
+
+1. [Scan] for the desired device.
+2. [Connect] to the device.
+3. Read and write [characteristics] and [descriptors] as needed.
+4. Disconnect from the device when finished.
+
+:::tip
+
+Use nRF Connect App on your mobile phone to verify your ble device's UUIDs along with message format and contents.
+
+:::
+
+:::note
+
+If your device pairs to your phone (eg via debugging tool like nRF Connect app), you may need to reset it so it can pair to Spectacles.
+You will know you need to reset your device if it connects to Spectacles and immediately disconnects.
+
+:::
+
+### Single-Device Usage
+
+The Bluetooth API can be used to scan and connect to one device or for multiple devices. The following example scans for a single device named [DEVICE NAME]. Once found, it connects to the device in `onFoundScanResult`, finds a [Characteristic] of interest, then demonstrates how to read values, write values, and listen for changes in the Characteristic.
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+@component
+export class BleTest_SingleDevice extends BaseScriptComponent {
+  @input
+  bluetoothModule: Bluetooth.BluetoothCentralModule;
+
+  @input
+  logToScreenText: Text;
+
+  private bluetoothGatt: Bluetooth.BluetoothGatt;
+  private onConnectionStateChangedEventRemover;
+  private deviceName: string;
+  private serviceUUID: string;
+  private characteristicUUID: string;
+  private deviceAddress: Uint8Array;
+
+  onAwake() {
+    this.deviceName = 'Hue color lamp';
+    this.serviceUUID = '932C32BD-0000-47A2-835A-A8D455B859DD';
+    this.characteristicUUID = '932C32BD-0002-47A2-835A-A8D455B859DD';
+
+    if (!global.deviceInfoSystem.isEditor()) {
+      this.scanForGatt();
+    }
+  }
+
+  private logToScreen(msg: string) {
+    this.logToScreenText.text = msg;
+    print(msg);
+  }
+
+  private scanForGatt() {
+    this.logToScreen('----- Bluetooth Test: Single Device -----');
+    // To limit your scan results, set a property in the filter
+    let scanFilter = new Bluetooth.ScanFilter();
+    scanFilter.deviceName = this.deviceName; // Case-sensitive
+
+    let scanSettings = new Bluetooth.ScanSettings();
+
+    // Setting unique devices to true means you will only see scan results for
+    // unique devices in the predicate for the duration of this scan session.
+    scanSettings.uniqueDevices = true;
+
+    // The timeout is the length of time the scan could continue before stopping.
+    scanSettings.timeoutSeconds = 30;
+    scanSettings.scanMode = Bluetooth.ScanMode.LowPower;
+
+    this.logToScreen('Starting scan');
+    this.bluetoothModule
+      .startScan(
+        [scanFilter],
+        scanSettings,
+        // The predicate function will be invoked with each scan result:
+        // If this.predicate returns true, the scan will stop.
+        // If this.predicate returns false, the scan will continue until timeout.
+        (result) => this.predicate(result)
+      )
+      .then((result) => {
+        // This fires when the predicate returns true
+        this.logToScreen(
+          'The scan is over, we succeeded in finding the single result we were looking for in the predicate.'
+        );
+        this.onFoundScanResult(result);
+      })
+      .catch((error) => {
+        // This fires on calling bluetoothModule.stopScan() and on scan timing out
+        this.logToScreen(
+          'The scan is over. It either timed out, we called stopScan(), or an error occured.'
+        );
+        this.reportError(error);
+      });
+  }
+
+  private predicate(result?: Bluetooth.ScanResult) {
+    // If you're only looking for one scan result, use the predicate to find it,
+    // and then return true and act on your scan result in ".then"
+    if (result.deviceName === this.deviceName) {
+      // The desired device was found, return true to stop the scan
+      return true;
+    } else {
+      // Returning "false" from the predicate continues the scan until true is
+      // returned or the scan times out
+      return false;
+    }
+  }
+
+  private onFoundScanResult(scanResult?: Bluetooth.ScanResult) {
+    this.bluetoothModule
+      .connectGatt(scanResult.deviceAddress)
+      .then((gattResult) => {
+        this.logToScreen(scanResult.deviceName + 'device is connected!');
+
+        this.bluetoothGatt = gattResult as Bluetooth.BluetoothGatt;
+
+        // Example #1: Iterate through UUIDs to confirm what they are
+        // Tip: when you type your variable at the declaration, intellisense will
+        // work thereafter.
+        let services: Bluetooth.BluetoothGattService[] =
+          this.bluetoothGatt.getServices();
+        services.forEach((service) => {
+          this.logToScreen(
+            this.deviceName +
+              'found service ' +
+              service +
+              ', with uuid ' +
+              service.uuid
+          );
+          let characteristics: Bluetooth.BluetoothGattCharacteristic[] =
+            service.getCharacteristics();
+          characteristics.forEach((characteristic) => {
+            this.logToScreen(
+              this.deviceName +
+                ' found characteristic ' +
+                characteristic +
+                ', with uuid ' +
+                characteristic.uuid
+            );
+          });
+        });
+
+        // Example #2: Get the service/characteristic by known UUIDs
+        try {
+          // Note: this throws an error on fail, hence the try/catch
+          let service: Bluetooth.BluetoothGattService =
+            this.bluetoothGatt.getService(this.serviceUUID);
+          if (service !== undefined) {
+            try {
+              // Note: this throws an error on fail, hence the try/catch
+              let characteristic: Bluetooth.BluetoothGattCharacteristic =
+                service.getCharacteristic(this.characteristicUUID);
+              if (characteristic !== undefined) {
+                // Example #3: Read value
+                characteristic
+                  .readValue()
+                  .then((result) => {
+                    let val: Uint8Array = result;
+                    this.logToScreen('characteristic read .then val: ' + val);
+                  })
+                  .catch((error) => {
+                    this.reportError(error);
+                  });
+
+                // Example #4: write the value for power on: 1
+                let val = new Uint8Array([1]);
+                characteristic
+                  .writeValue(val)
+                  .then(() => {
+                    // Note: we are not given the value that was written
+                    this.logToScreen('characteristic write value fulfilled');
+                  })
+                  .catch((error) => {
+                    this.reportError(error);
+                  });
+
+                // Example #5: register for notifications
+                characteristic
+                  .registerNotifications((arg) =>
+                    this.characteristicNotification(arg)
+                  )
+                  .then(() => {
+                    this.logToScreen(
+                      'Characteristic is registered for notifications.'
+                    );
+                  })
+                  .catch((error) => {
+                    this.reportError(error);
+                  });
+
+                // Example #6: Subscribe to connection state change events
+                this.onConnectionStateChangedEventRemover =
+                  this.bluetoothGatt.onConnectionStateChangedEvent.add((arg) =>
+                    this.onConnectionStateChanged(arg)
+                  );
+              }
+            } catch (error) {
+              this.reportError(error);
+            }
+          }
+        } catch (error) {
+          this.reportError(error);
+        }
+      })
+      .catch((error) => {
+        this.logToScreen(scanResult.deviceName + 'connection error');
+        this.reportError(error);
+      });
+  }
+
+  private characteristicNotification(val: Uint8Array) {
+    this.logToScreen('characteristicNotification ' + val);
+  }
+
+  private onConnectionStateChanged(arg: Bluetooth.ConnectionStateChangedEvent) {
+    // This will first fire when the device first successfully does or does not connect.
+    // This arg is an enum for connection states.
+    // 0 = Disconnected
+    // 1 = Connected
+    if (arg.state.toString() === '0') {
+      this.logToScreen(
+        'onConnectionStateChanged: ' +
+          this.deviceName +
+          ' disconnected ' +
+          arg.state.toString()
+      );
+    } else if (arg.state.toString() === '1') {
+      this.logToScreen(
+        'onConnectionStateChanged: ' +
+          this.deviceName +
+          ' connected ' +
+          arg.state.toString()
+      );
+    }
+  }
+
+  private reportError(reason: unknown) {
+    if (reason instanceof Error) {
+      this.logToScreen(
+        `[reportError Error] ${reason.name}: ${reason.message}\n${reason.stack}`
+      );
+    } else if (typeof reason !== 'string') {
+      this.logToScreen(`[reportError !string] ${typeof reason}: ${reason}`);
+    } else {
+      this.logToScreen(`[reportError string] ${reason}`);
+    }
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+// @input Asset.BluetoothCentralModule bluetoothModule {"hint": "Bluetooth.BluetoothCentralModule"}
+// @input Component.Text logToScreenText
+
+let bluetoothGatt;
+let onConnectionStateChangedEventRemover;
+const deviceName = 'Hue color lamp';
+const serviceUUID = '932C32BD-0000-47A2-835A-A8D455B859DD';
+const characteristicUUID = '932C32BD-0002-47A2-835A-A8D455B859DD';
+
+function onAwake() {
+  if (!global.deviceInfoSystem.isEditor()) {
+    scanForGatt();
+  }
+}
+
+function logToScreen(msg) {
+  script.logToScreenText.text = msg;
+  print(msg);
+}
+
+function scanForGatt() {
+  logToScreen('----- Bluetooth Test: Single Device -----');
+  // To limit your scan results, set a property in the filter
+  var scanFilter = new Bluetooth.ScanFilter();
+  scanFilter.deviceName = deviceName; // Case-sensitive
+
+  const scanSettings = new Bluetooth.ScanSettings();
+
+  // Setting unique devices to true means you will only see scan results for
+  // unique devices in the predicate for the duration of this scan session.
+  scanSettings.uniqueDevices = true;
+
+  // The timeout is the length of time the scan could continue before stopping.
+  scanSettings.timeoutSeconds = 30;
+  scanSettings.scanMode = Bluetooth.ScanMode.LowPower;
+
+  logToScreen('Starting scan');
+  script.bluetoothModule
+    .startScan(
+      [scanFilter],
+      scanSettings,
+      // The predicate function will be invoked with each scan result:
+      // If predicate returns true, the scan will stop.
+      // If predicate returns false, the scan will continue until timeout.
+      function (result) {
+        return predicate(result);
+      }
+    )
+    .then(function (result) {
+      // This fires when the predicate returns true
+      logToScreen(
+        'The scan is over, we succeeded in finding the single result we were looking for in the predicate.'
+      );
+      onFoundScanResult(result);
+    })
+    .catch(function (error) {
+      // This fires on calling bluetoothModule.stopScan() and on scan timing out
+      logToScreen(
+        'The scan is over. It either timed out, we called stopScan(), or an error occured.'
+      );
+      reportError(error);
+    });
+}
+
+function predicate(result) {
+  // If you're only looking for one scan result, use the predicate to find it,
+  // and then return true and act on your scan result in ".then"
+  if (result.deviceName === deviceName) {
+    // The desired device was found, return true to stop the scan
+    return true;
+  } else {
+    // Returning "false" from the predicate continues the scan until true is
+    // returned or the scan times out
+    return false;
+  }
+}
+
+function onFoundScanResult(scanResult) {
+  script.bluetoothModule
+    .connectGatt(scanResult.deviceAddress)
+    .then(function (gattResult) {
+      logToScreen(scanResult.deviceName + 'device is connected!');
+
+      bluetoothGatt = gattResult;
+
+      // Example #1: Iterate through UUIDs to confirm what they are
+      const services = bluetoothGatt.getServices();
+      services.forEach(function (service) {
+        logToScreen(
+          deviceName +
+            'found service ' +
+            service +
+            ', with uuid ' +
+            service.uuid
+        );
+        const characteristics = service.getCharacteristics();
+        characteristics.forEach(function (characteristic) {
+          logToScreen(
+            deviceName +
+              ' found characteristic ' +
+              characteristic +
+              ', with uuid ' +
+              characteristic.uuid
+          );
+        });
+      });
+
+      // Example #2: Get the service/characteristic by known UUIDs
+      try {
+        // Note: this throws an error on fail, hence the try/catch
+        const service = bluetoothGatt.getService(serviceUUID);
+        if (service !== undefined) {
+          try {
+            // Note: this throws an error on fail, hence the try/catch
+            const characteristic =
+              service.getCharacteristic(characteristicUUID);
+            if (characteristic !== undefined) {
+              // Example #3: Read value
+              characteristic
+                .readValue()
+                .then(function (result) {
+                  const val = result;
+                  logToScreen('characteristic read .then val: ' + val);
+                })
+                .catch(function (error) {
+                  reportError(error);
+                });
+
+              // Example #4: write the value for power on: 1
+              const val = new Uint8Array([1]);
+              characteristic
+                .writeValue(val)
+                .then(function () {
+                  // Note: we are not given the value that was written
+                  logToScreen('characteristic write value fulfilled');
+                })
+                .catch(function (error) {
+                  reportError(error);
+                });
+
+              // Example #5: register for notifications
+              characteristic
+                .registerNotifications(function (arg) {
+                  characteristicNotification(arg);
+                })
+                .then(function () {
+                  logToScreen(
+                    'Characteristic is registered for notifications.'
+                  );
+                })
+                .catch(function (error) {
+                  reportError(error);
+                });
+
+              // Example #6: Subscribe to connection state change events
+              onConnectionStateChangedEventRemover =
+                bluetoothGatt.onConnectionStateChangedEvent.add(function (arg) {
+                  onConnectionStateChanged(arg);
+                });
+            }
+          } catch (error) {
+            reportError(error);
+          }
+        }
+      } catch (error) {
+        reportError(error);
+      }
+    })
+    .catch(function (error) {
+      logToScreen(scanResult.deviceName + 'connection error');
+      reportError(error);
+    });
+}
+
+function characteristicNotification(val) {
+  logToScreen('characteristicNotification ' + val);
+}
+
+function onConnectionStateChanged(arg) {
+  // This will first fire when the device first successfully does or does not connect.
+  // This arg is an enum for connection states.
+  // 0 = Disconnected
+  // 1 = Connected
+  if (arg.state.toString() === '0') {
+    logToScreen(
+      'onConnectionStateChanged: ' +
+        deviceName +
+        ' disconnected ' +
+        arg.state.toString()
+    );
+  } else if (arg.state.toString() === '1') {
+    logToScreen(
+      'onConnectionStateChanged: ' +
+        deviceName +
+        ' connected ' +
+        arg.state.toString()
+    );
+  }
+}
+
+function reportError(reason) {
+  if (reason instanceof Error) {
+    logToScreen(
+      '[reportError Error] ' +
+        reason.name +
+        ': ' +
+        reason.message +
+        '\n' +
+        reason.stack
+    );
+  } else if (typeof reason !== 'string') {
+    logToScreen('[reportError !string] ' + typeof reason + ': ' + reason);
+  } else {
+    logToScreen('[reportError string] ' + reason);
+  }
+}
+
+// Initialize
+onAwake();
+```
+
+</TabItem>
+</Tabs>
+
+The Bluetooth API can alternatively be used with async/await semantics:
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+private async scanForGatt() {
+    let scanFilter = new Bluetooth.ScanFilter();
+    let scanSettings = new Bluetooth.ScanSettings();
+
+    scanSettings.uniqueDevices = true;
+    scanSettings.timeoutSeconds = 30;
+    scanSettings.scanMode = Bluetooth.ScanMode.LowPower;
+
+    try {
+        const result = await this.bluetoothModule.startScan(
+            [scanFilter],
+            scanSettings,
+            (result) => this.predicate(result)
+        );
+        await this.onFoundScanResult(result);
+    } catch (error) {
+        this.reportError(error);
+    }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+async function scanForGatt() {
+  const scanFilter = new Bluetooth.ScanFilter();
+  const scanSettings = new Bluetooth.ScanSettings();
+
+  scanSettings.uniqueDevices = true;
+  scanSettings.timeoutSeconds = 30;
+  scanSettings.scanMode = Bluetooth.ScanMode.LowPower;
+
+  try {
+    const result = await script.bluetoothModule.startScan(
+      [scanFilter],
+      scanSettings,
+      function (result) {
+        return predicate(result);
+      }
+    );
+    await onFoundScanResult(result);
+  } catch (error) {
+    reportError(error);
+  }
+}
+```
+
+</TabItem>
+</Tabs>
+
+### Multi-Device Usage
+
+The scanning flow is slightly different if you're looking to connect to multiple scan results in a single scan session. In the example, below, we scan for a number of devices then sequentially connect to them after scan completion.
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+@component
+export class BleTest_MultipleDevices extends BaseScriptComponent {
+  @input
+  bluetoothModule: Bluetooth.BluetoothCentralModule;
+
+  @input
+  logToScreenText: Text;
+
+  private scanResults: Bluetooth.ScanResult[];
+  private scanResultIndex: number;
+
+  onAwake() {
+    this.scanResults = [];
+    this.scanResultIndex = 0;
+
+    if (!global.deviceInfoSystem.isEditor()) {
+      this.scanForGatt();
+    }
+  }
+
+  private logToScreen(msg: string) {
+    this.logToScreenText.text = msg;
+    print(msg);
+  }
+
+  private scanForGatt() {
+    this.logToScreen('----- Bluetooth Test: Multiple Devices -----');
+
+    let scanFilter1 = new Bluetooth.ScanFilter();
+    scanFilter1.deviceName = 'Hue color lamp';
+
+    let scanFilter2 = new Bluetooth.ScanFilter();
+    scanFilter2.deviceName = 'Thingy';
+
+    let scanSetting = new Bluetooth.ScanSettings();
+    scanSetting.uniqueDevices = true;
+    scanSetting.timeoutSeconds = 30;
+    scanSetting.scanMode = Bluetooth.ScanMode.LowPower;
+
+    this.logToScreen(
+      'Starting scan for ' + scanSetting.timeoutSeconds + ' seconds.'
+    );
+    // When looking for multiple results, you must return false in order to keep
+    // scanning for new devices. The scan operation will not complete with a successful
+    // result ( .then ), but will instead complete with a timeout error handled in .catch.
+    // You can store the results you're interested in from within the predicate function,
+    // then sequentially connect to them after the scan has completed.
+    this.bluetoothModule
+      .startScan([scanFilter1, scanFilter2], scanSetting, (result) =>
+        this.predicate(result)
+      )
+      .then((result) => {
+        // As described above, in this multiple-device search example, the scan will
+        // resolve on timeout in .catch.
+      })
+      .catch((error) => {
+        // This fires on calling bluetoothModule.stopScan() and on scan timeout.
+        this.logToScreen(
+          'The scan is over. It either timed out, we called stopScan(), or an error occured.'
+        );
+
+        // When looking for multiple scan results, connect to the results after the
+        // scan is over.
+        this.tryConnectToNextScanResult();
+        this.reportError(error);
+      });
+  }
+
+  private predicate(result?: Bluetooth.ScanResult) {
+    // When looking for multiple scan results, use the predicate to store results. Return
+    // false so the scan continues until timeout.
+    this.scanResults.push(result);
+    return false;
+  }
+
+  private tryConnectToNextScanResult() {
+    // Connect serially.
+    if (
+      this.scanResults.length > 0 &&
+      this.scanResultIndex < this.scanResults.length
+    ) {
+      this.connectToScanResult(this.scanResults[this.scanResultIndex]);
+      this.scanResultIndex++;
+    }
+  }
+
+  private connectToScanResult(scanResult?: Bluetooth.ScanResult) {
+    this.logToScreen(
+      'connectToScanResult ' +
+        scanResult.deviceName +
+        ' ' +
+        scanResult.deviceAddress
+    );
+
+    // Tip: Wait until connection attempt suceeds or fails before moving on to connect
+    // the next device.
+    this.bluetoothModule
+      .connectGatt(scanResult.deviceAddress)
+      .then((gattResult) => {
+        this.logToScreen(scanResult.deviceName + ' device is connected!');
+
+        // Since you will have multiple connections to manage, here you would
+        // send your gattResult to an instaced class to handle this device's
+        // interrogation and callbacks.
+        // See class "ScanResult.ts" in sample project "Ble Playground" for an example.
+        this.tryConnectToNextScanResult();
+      })
+      .catch((error) => {
+        this.logToScreen(scanResult.deviceName + ' connection error');
+        this.reportError(error);
+        this.tryConnectToNextScanResult();
+      });
+  }
+
+  private reportError(reason: unknown) {
+    if (reason instanceof Error) {
+      this.logToScreen(
+        `[reportError Error] ${reason.name}: ${reason.message}\n${reason.stack}`
+      );
+    } else if (typeof reason !== 'string') {
+      this.logToScreen(`[reportError !string] ${typeof reason}: ${reason}`);
+    } else {
+      this.logToScreen(`[reportError string] ${reason}`);
+    }
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+// @input Asset.BluetoothCentralModule bluetoothModule {"hint": "Bluetooth.BluetoothCentralModule"}
+// @input Component.Text logToScreenText
+
+const scanResults = [];
+let scanResultIndex = 0;
+
+function onAwake() {
+  if (!global.deviceInfoSystem.isEditor()) {
+    scanForGatt();
+  }
+}
+
+function logToScreen(msg) {
+  script.logToScreenText.text = msg;
+  print(msg);
+}
+
+function scanForGatt() {
+  logToScreen('----- Bluetooth Test: Multiple Devices -----');
+
+  const scanFilter1 = new Bluetooth.ScanFilter();
+  scanFilter1.deviceName = 'Hue color lamp';
+
+  const scanFilter2 = new Bluetooth.ScanFilter();
+  scanFilter2.deviceName = 'Thingy';
+
+  const scanSetting = new Bluetooth.ScanSettings();
+  scanSetting.uniqueDevices = true;
+  scanSetting.timeoutSeconds = 30;
+  scanSetting.scanMode = Bluetooth.ScanMode.LowPower;
+
+  logToScreen('Starting scan for ' + scanSetting.timeoutSeconds + ' seconds.');
+  // When looking for multiple results, you must return false in order to keep
+  // scanning for new devices. The scan operation will not complete with a successful
+  // result ( .then ), but will instead complete with a timeout error handled in .catch.
+  // You can store the results you're interested in from within the predicate function,
+  // then sequentially connect to them after the scan has completed.
+  script.bluetoothModule
+    .startScan([scanFilter1, scanFilter2], scanSetting, function (result) {
+      return predicate(result);
+    })
+    .then(function (result) {
+      // As described above, in this multiple-device search example, the scan will
+      // resolve on timeout in .catch.
+    })
+    .catch(function (error) {
+      // This fires on calling bluetoothModule.stopScan() and on scan timeout.
+      logToScreen(
+        'The scan is over. It either timed out, we called stopScan(), or an error occured.'
+      );
+
+      // When looking for multiple scan results, connect to the results after the
+      // scan is over.
+      tryConnectToNextScanResult();
+      reportError(error);
+    });
+}
+
+function predicate(result) {
+  // When looking for multiple scan results, use the predicate to store results. Return
+  // false so the scan continues until timeout.
+  scanResults.push(result);
+  return false;
+}
+
+function tryConnectToNextScanResult() {
+  // Connect serially.
+  if (scanResults.length > 0 && scanResultIndex < scanResults.length) {
+    connectToScanResult(scanResults[scanResultIndex]);
+    scanResultIndex++;
+  }
+}
+
+function connectToScanResult(scanResult) {
+  logToScreen(
+    'connectToScanResult ' +
+      scanResult.deviceName +
+      ' ' +
+      scanResult.deviceAddress
+  );
+
+  // Tip: Wait until connection attempt suceeds or fails before moving on to connect
+  // the next device.
+  script.bluetoothModule
+    .connectGatt(scanResult.deviceAddress)
+    .then(function (gattResult) {
+      logToScreen(scanResult.deviceName + ' device is connected!');
+
+      // Since you will have multiple connections to manage, here you would
+      // send your gattResult to an instaced class to handle this device's
+      // interrogation and callbacks.
+      // See class "ScanResult.ts" in sample project "Ble Playground" for an example.
+      tryConnectToNextScanResult();
+    })
+    .catch(function (error) {
+      logToScreen(scanResult.deviceName + ' connection error');
+      reportError(error);
+      tryConnectToNextScanResult();
+    });
+}
+
+function reportError(reason) {
+  if (reason instanceof Error) {
+    logToScreen(
+      '[reportError Error] ' +
+        reason.name +
+        ': ' +
+        reason.message +
+        '\n' +
+        reason.stack
+    );
+  } else if (typeof reason !== 'string') {
+    logToScreen('[reportError !string] ' + typeof reason + ': ' + reason);
+  } else {
+    logToScreen('[reportError string] ' + reason);
+  }
+}
+
+// Initialize
+onAwake();
+```
+
+</TabItem>
+</Tabs>
+
+## Known Limitations
+
+The BLE API is Experimental. It is expected that some of the API is may be constrained or may change in the future.
+
+General Affordances:
+
+- The Bluetooth API matches both lower and upper case UUIDs, so you don't need to worry about UUID case sensitivity in your implementation.
+
+### BluetoothCentralModule
+
+- BluetoothCentralModule.onBluetoothStatusChangedEvent does not fire
+- BluetoothCentralModule.status is always "0" for "Unknown"
+- Note the differences in how to use the predicate in the single vs multi-device examples above
+- If connecting to multiple devices, do so sequentially (do not connect to multiple devices in parallel)
+
+### BluetoothGattCharacteristic
+
+- Some Characteristics ask for a `Int8Array`; the API only supports `Uint8Array`. Not tested negative values can simply be placed in the Uint8Array data structure.
+
+[BluetoothCentralModule]: @ls/Bluetooth.BluetoothCentralModule
+[scan]: @ls/Bluetooth.BluetoothCentralModule#startScan
+[connect]: @ls/Bluetooth.BluetoothGatt#connect
+[characteristics]: @ls/Bluetooth.BluetoothGattCharacteristic
+[descriptors]: @ls/Bluetooth.BluetoothGattDescriptor
+[disconnect]: @ls/Bluetooth.BluetoothGatt#disconnect

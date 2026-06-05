@@ -1,0 +1,51 @@
+---
+sidebar_position: 2
+description: 'Frequently asked questions about Spectacles Lens features including tracking, audio, and connected lenses.'
+---
+
+# Features
+
+Frequently asked questions about Lens features and their behavior on Spectacles, including tracking, audio, and connected lenses.
+
+import Collapsible from './Collapsible.tsx';
+
+### Marker Tracking
+
+<Collapsible title="Does Marker Tracking work on Spectacles? Why is the tracking result misaligned with the target?">
+  <br />
+  Marker Tracking is supported on Spectacles. Ensure that you set the correct size (in centimeters) for the real image marker in the Image Tracker Asset within Lens Studio.
+
+</Collapsible>
+
+### Audio Component
+
+<Collapsible title="Why do some audio tracks fail to play in the Lens?">
+  <br />
+  Developers can use as many Audio Components in the Lens. However, the limitation lies in the number of audio assets that can play concurrently. If a Lens is scripted to play more than 16 Audio assets simultaneously, it may result in audio not playing on Spectacles.
+
+</Collapsible>
+
+### Connected Lens
+
+<Collapsible title="What is the technical flow when joining a Connected Lens Session?">
+  <br />
+  When a user joins a Connected Lens session, the following sequence occurs:
+  1. Session has been created
+  2. Mapping has been started
+  3. Mapping has been done
+  4. User has connected to the session
+  5. Storage Properties have been created
+
+For more detailed flow chart, Please see [Lifecycle for SyncKit](https://developers.snap.com/spectacles/spectacles-frameworks/spectacles-sync-kit/lifecycle).
+
+</Collapsible>
+
+### Face Tracking
+
+<Collapsible title="Is Face Tracking supported on Spectacles?">
+  <br />
+  Yes, Face Tracking is supported on Spectacles with some limitations. 
+  1. Use [Head Binding](https://developers.snap.com/lens-studio/features/ar-tracking/face/head-attached-3d-objects) component to attach 3D objects to the head.
+  2. Ensure that Attachment Point Type is ONLY set to `Candide Center`, `Right Eyeball`, or `Left Eyeball`.
+
+</Collapsible>

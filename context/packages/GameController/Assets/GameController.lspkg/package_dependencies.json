@@ -1,0 +1,31 @@
+{
+"dependencies": [
+{
+"assetId": "77pMkoqQPt5MSnQYdckogW",
+"exportId": "faa53730-3d19-4023-ad79-3d5360a83bb5",
+"id": "7a3c78c1-4ff4-41a1-9f38-a2b9e6360f03",
+"name": "Bitmoji 3D",
+"version": "8.3.0"
+},
+{
+"assetId": "7zO8BENXbqVfihGvfh8Fy2",
+"exportId": "1d86bde5-4e69-4494-8b59-e20e296dbde3",
+"id": "dc4c33c9-7391-46fc-8b73-8687edf8fbfd",
+"name": "SnapDecorators",
+"version": "1.0.0"
+},
+{
+"assetId": "42fyXBlj0QfHNP51m6vpai",
+"exportId": "3e491f94-610c-485f-9973-8e4412f565a1",
+"id": "446861a9-57a3-494a-857c-cc314774bafc",
+"name": "SurfacePlacement",
+"version": "0.0.5"
+},
+{
+"assetId": "6ZNW6RFFJEkiM8DtuMPyWU",
+"id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+"name": "SpecsCharacterController",
+"version": "1.0.0"
+}
+]
+}

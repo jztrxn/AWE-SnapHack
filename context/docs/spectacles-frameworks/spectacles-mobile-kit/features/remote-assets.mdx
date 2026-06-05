@@ -1,0 +1,39 @@
+---
+sidebar_position: 3
+description: 'Load and manage remote assets in Spectacles mobile apps using the Mobile Kit to share media and data with Spectacles Lenses.'
+---
+
+# Remote Assets
+
+To load remote resources (e.g., texture, audio or other resources) hosted by the connected mobile application, use the _<u>spectacleskit://</u>_ scheme.
+This works with the [<u>RemoteMediaModule</u>](https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built-In.RemoteMediaModule.html).
+
+```JavaScript
+const remoteMediaModule = require("LensStudio:RemoteMediaModule")
+
+const textureId = 'spectacleskit://test.png'
+remoteMediaModule.loadAsImageTexture(
+    textureId,
+    (texture) => {
+        mainPass.baseTex = texture
+    },
+    (error) => {
+        print(`Error loading asset: ${error}`)
+    }
+)
+
+const meshId = 'spectacleskit://test.glb'
+remoteMediaModule.loadAsGltfAsset(
+    meshId,
+    (asset) => {
+        asset.tryInstantiate(
+            script.gltfContainer,
+            script.gltfMaterial
+        )
+        // You can now find a new object in script.gltfContainer
+    },
+    (error)=> {
+        print(`Error loading asset: ${error}`)
+    }
+)
+```

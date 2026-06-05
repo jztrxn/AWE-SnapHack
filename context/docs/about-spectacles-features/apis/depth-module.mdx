@@ -1,0 +1,258 @@
+---
+description: 'Request and receive depth data from Spectacles to understand scene geometry, measure distances, and build spatially-aware experiences.'
+---
+
+# Depth Module
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+Spectacles offers APIs to retrieve the depth frame – in which the pixels encode the depth of the scene – to better understand and build experiences around the user’s real-world environment.
+
+This is an `Experimental` API. Please see [Experimental APIs](../../permission-privacy/experimental-apis.mdx#experimental-apis) for more details.
+
+:::warning
+_The Depth module requires camera access in a Lens which will disable open internet access for that Lens. The depth camera frame contains user information that may not be transmitted outside the Lens. For testing and experimental purposes however, extended permissions are available to access both the camera frame and the open internet at the same time. Note that Lenses built this way may not be released publicly. Please see [Extended Permissions](../../permission-privacy/experimental-apis.mdx#extended-permission) for more information._
+:::
+
+## Requesting \+ Receiving Depth Frames
+
+The [DepthModule] enables developers to set up a [DepthFrameSession] to request a steady stream of [DepthFrameData].
+
+### Depth Frame Requests
+
+To begin receiving depth frames, construct a [DepthFrameSession] and sign up to the [onNewFrame] event to receive [DepthFrameData].
+The depth computation is started after calling [DepthFrameSession.start] and can be stopped for all event callbacks of this session with [DepthFrameSession.stop].
+
+For example:
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+@component
+export class DepthFrameRequest extends BaseScriptComponent {
+  private depthModule: DepthModule = require('LensStudio:DepthModule');
+  private session: DepthFrameSession;
+  private registration: EventRegistration;
+
+  onAwake() {
+    this.createEvent('OnStartEvent').bind(() => {
+      this.session = this.depthModule.createDepthFrameSession();
+
+      this.registration = this.session.onNewFrame.add(
+        (depthFrameData: DepthFrameData) => {
+          // Process the depth frame data.
+        }
+      );
+
+      // Start depth estimation to receive depth frame data via the onNewFrame event.
+      this.session.start();
+    });
+
+    this.createEvent('OnDestroyEvent').bind(() => {
+      this.session.onNewFrame.remove(this.registration);
+
+      // Stop depth estimation for this session.
+      this.session.stop();
+    });
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+const depthModule = require('LensStudio:DepthModule');
+let session;
+let registration;
+
+script.createEvent('OnStartEvent').bind(function () {
+  session = depthModule.createDepthFrameSession();
+
+  registration = session.onNewFrame.add(function (depthFrameData) {
+    // Process the depth frame data.
+  });
+
+  // Start depth estimation to receive depth frame data via the onNewFrame event.
+  session.start();
+});
+
+script.createEvent('OnDestroyEvent').bind(function () {
+  session.onNewFrame.remove(registration);
+
+  // Stop depth estimation for this session.
+  session.stop();
+});
+```
+
+</TabItem>
+</Tabs>
+
+:::note
+createDepthFrameSession may not be invoked inside the onAwake event.
+:::
+
+## Getting Depth Camera Information
+
+On Spectacles '24, depth is estimated based on transformed frames of the left color camera. To understand how the depth camera transforms 3D space into 2D space, [DepthFrameData] provides information about the [DeviceCamera]. In addition, the timestamp of the frame is provided in order to be able to synchronize depth frames with the color frames provided by the [CameraModule].
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+this.session.onNewFrame.add((depthFrameData: DepthFrameData) => {
+  const depthDeviceCamera = depthFrameData.deviceCamera;
+  print(depthDeviceCamera.resolution);
+  print(depthDeviceCamera.focalLength);
+  print(depthDeviceCamera.principalPoint);
+  print(depthDeviceCamera.pose); // The relative offset between a reference point on the device and the camera
+
+  print(depthFrameData.toWorldTrackingOriginFromDeviceRef); // The pose of the device reference relative to the frame of reference of the tracked device position.
+
+  print(depthFrameData.timestampSeconds); // The timestamp of the depth frame can be used to find the matching color frame used for estimating depth.
+});
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+session.onNewFrame.add(function (depthFrameData) {
+  const depthDeviceCamera = depthFrameData.deviceCamera;
+  print(depthDeviceCamera.resolution);
+  print(depthDeviceCamera.focalLength);
+  print(depthDeviceCamera.principalPoint);
+  print(depthDeviceCamera.pose); // The relative offset between a reference point on the device and the camera
+
+  print(depthFrameData.toWorldTrackingOriginFromDeviceRef); // The pose of the device reference relative to the frame of reference of the tracked device position.
+
+  print(depthFrameData.timestampSeconds); // The timestamp of the depth frame can be used to find the matching color frame used for estimating depth.
+});
+```
+
+</TabItem>
+</Tabs>
+
+Additionally, [DeviceCamera] includes project and unproject methods that makes it easier to convert 3D points into 2D points and vice versa.
+
+## Code Example
+
+In Lens Studio click "+" in the Asset Browser window, select "General" and create a new TypeScript or JavaScript file.
+Copy and paste the following code into the file and attach the script to an object in the scene.
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+@component
+export class DepthModuleExample extends BaseScriptComponent {
+  private depthModule: DepthModule = require('LensStudio:DepthModule');
+  private session: DepthFrameSession;
+  private registration: EventRegistration;
+
+  onAwake() {
+    this.createEvent('OnStartEvent').bind(() => {
+      this.session = this.depthModule.createDepthFrameSession();
+
+      this.registration = this.session.onNewFrame.add(
+        (depthFrameData: DepthFrameData) => {
+          const depthDeviceCamera = depthFrameData.deviceCamera;
+
+          // Sample depth for specific pixel
+          const pixelCoordX = 112;
+          const pixelCoordY = 80;
+          const depthFrameArrayIdx = Math.floor(
+            pixelCoordX + pixelCoordY * depthDeviceCamera.resolution.x
+          );
+          const depthValue = depthFrameData.depthFrame[depthFrameArrayIdx];
+
+          // Back-project depth pixel to device reference space
+          const normalizedCoord = new vec2(
+            pixelCoordX / depthDeviceCamera.resolution.x,
+            pixelCoordY / depthDeviceCamera.resolution.y
+          );
+          const point3dInDeviceRef = depthDeviceCamera.unproject(
+            normalizedCoord,
+            depthValue
+          );
+
+          // Transform point in device reference space to world tracking origin space
+          const worldFromDeviceRef =
+            depthFrameData.toWorldTrackingOriginFromDeviceRef;
+          const point3dInWorld =
+            worldFromDeviceRef.multiplyPoint(point3dInDeviceRef);
+          print(point3dInWorld);
+        }
+      );
+
+      this.session.start();
+    });
+
+    this.createEvent('OnDestroyEvent').bind(() => {
+      this.session.onNewFrame.remove(this.registration);
+      this.session.stop();
+    });
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+const depthModule = require('LensStudio:DepthModule');
+let session;
+let registration;
+
+script.createEvent('OnStartEvent').bind(() => {
+  session = depthModule.createDepthFrameSession();
+
+  registration = session.onNewFrame.add((depthFrameData) => {
+    const depthDeviceCamera = depthFrameData.deviceCamera;
+
+    // Sample depth for specific pixel
+    const pixelCoordX = 112;
+    const pixelCoordY = 80;
+    const depthFrameArrayIdx = Math.floor(
+      pixelCoordX + pixelCoordY * depthDeviceCamera.resolution.x
+    );
+    const depthValue = depthFrameData.depthFrame[depthFrameArrayIdx];
+
+    // Back-project depth pixel to device reference space
+    const normalizedCoord = new vec2(
+      pixelCoordX / depthDeviceCamera.resolution.x,
+      pixelCoordY / depthDeviceCamera.resolution.y
+    );
+    const point3dInDeviceRef = depthDeviceCamera.unproject(
+      normalizedCoord,
+      depthValue
+    );
+
+    // Transform point in device reference space to world tracking origin space
+    const worldFromDeviceRef =
+      depthFrameData.toWorldTrackingOriginFromDeviceRef;
+    const point3dInWorld = worldFromDeviceRef.multiplyPoint(point3dInDeviceRef);
+    print(point3dInWorld);
+  });
+
+  session.start();
+});
+
+script.createEvent('OnDestroyEvent').bind(() => {
+  session.onNewFrame.remove(registration);
+  session.stop();
+});
+```
+
+</TabItem>
+</Tabs>
+
+[DepthModule]: https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built_In.DepthModule.html
+[DepthFrameSession]: https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built-In.DepthFrameSession.html
+[DepthFrameData]: https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built-In.DepthFrameData.html
+[onNewFrame]: https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built-In.DepthFrameSession.html#onnewframe
+[DepthFrameSession.start]: https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built_In.DepthFrameSessionModule.html#start
+[DepthFrameSession.stop]: https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built_In.DepthFrameSessionModule.html#stop
+[DeviceCamera]: https://developers.snap.com/lens-studio/api/lens-scripting/classes/Built_In.DeviceCamera.html

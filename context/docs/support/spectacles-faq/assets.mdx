@@ -1,0 +1,141 @@
+---
+sidebar_position: 1
+description: 'Frequently asked questions about prefabs, World Mesh, remote assets, and scene hierarchy limits in Spectacles Lenses.'
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Assets
+
+[Assets](/lens-studio/assets-pipeline/importing-and-exporting-resources) are managed in the Assets panel in Lens Studio, where they can be imported, organized, and modified.
+
+### Prefabs
+
+import Collapsible from './Collapsible.tsx';
+
+<Collapsible title="Why is the transform not being updated after I press “Apply” on Prefab?">
+  <br />
+  When you create a scene object, adjust its transform, and then convert it into
+  a prefab, the transform values are stored at the time of prefab creation. Once
+  it becomes a prefab, its position and rotation can no longer be modified. This
+  behavior is to prevent common mistakes when applying or reverting an entire
+  prefab instance.
+</Collapsible>
+
+<Collapsible title="Is it possible to get a component from a Prefab asset in Asset Browser?">
+  <br />
+  If you don’t instantiate the prefab, it won’t return a scene object, meaning
+  you won’t be able to access its components. Directly modifying the prefab
+  asset affects the root prefab, impacting all instances. Therefore, the only
+  way to access its components is to instantiate it first.
+</Collapsible>
+
+### World Mesh
+
+<Collapsible title="What is the World Mesh Tracking Distance?">
+  <br />
+  On Spectacles, the maximum depth is around 4.5 meters at the moment. In
+  reality it's often shorter at around 4 meters depending on the lighting
+  conditions.
+</Collapsible>
+
+<Collapsible title="What is the World Mesh Best Practice?">
+  <br />
+  Occasionally, gaps may appear in the World Mesh, causing objects to fall
+  endlessly. To prevent this, you can add colliders to cover the holes. For
+  optimal Lens performance, the best approach is to pre-scan the room.
+  Alternatively, you can perform the scan in the background during the splash
+  screen or introduction phase and then stop World Mesh Tracking once the scan
+  is complete.
+</Collapsible>
+
+<Collapsible title="How can I stop World Mesh Tracking?">
+  <br />
+  World Mesh tracker is happening on the RenderMesh level so we need to disable it through RenderMeshVisual.
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+@component
+export class NewScript extends BaseScriptComponent {
+  @input
+  worldMeshVisul: RenderMeshVisual;
+  onAwake() {
+    let worldRenderProvider = this.worldMeshVisul.mesh
+      .control as WorldRenderObjectProvider;
+    worldRenderProvider.enableWorldMeshesTracking = false;
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+// @input Component.RenderMeshVisual worldMeshVisul
+
+const worldRenderProvider = script.worldMeshVisul.mesh.control;
+worldRenderProvider.enableWorldMeshesTracking = false;
+```
+
+</TabItem>
+</Tabs>
+
+</Collapsible>
+
+<Collapsible title="What is World Mesh Refresh Rate?">
+  <br />
+  It currently updates with 5Hz.
+</Collapsible>
+
+<Collapsible title="How can I extract indices from World Mesh?">
+  <br />
+  The World Mesh uses a 32-bit index type, whereas `mesh.extractIndices()` is
+  designed to operate with a 16-bit index type, as not all devices support
+  rendering 32-bit indices. Consequently, extracting indices from the World Mesh
+  in its current state is not possible. Moreover, attempting to do so is not
+  recommended, as it would impose a significant performance cost on Spectacles.
+  The World Mesh may contain millions of indices, and processing such a large
+  amount in JavaScript would be highly inefficient.
+</Collapsible>
+
+### Remote Assets
+
+<Collapsible title="How does the logic for downloading Remote Assets on Spectacles work? Is it the same as on Snapchat?">
+  <br />
+  There has been a change in how and when Spectacles download remote assets.
+  Previously, assets were downloaded asynchronously when developers called the
+  download function. Now, all assets are downloaded on the system side. When a
+  Lens is installed, its assets are downloaded, and the Lens won’t be marked as
+  ready to launch if any are missing. Assets known at the time of Lens download
+  (those listed in the manifest) are fetched beforehand, ensuring they are
+  available before the Lens becomes accessible to the user. The 'download' call
+  within the Lens is merely visual, as the files are already stored on the
+  device. Additionally, remotely pushed Lenses remain available across all
+  devices linked to an account for 24 hours, as they are tied to the account
+  rather than a specific device.
+</Collapsible>
+
+<Collapsible title="What are the best practices for managing remote assets?">
+  <br />
+
+- Avoid scripts on prefabs, especially TypeScript with references.
+  Including scripts can create a cascading effect when uploading the prefab to
+  remote assets, resulting in a significantly larger prefab size.
+
+- RAM usage
+  varies depending on asset size while loading remote assets. We are working on
+  integrating a RAM monitor into Lens Studio to improve the development
+  experience.
+
+</Collapsible>
+
+### Scene Hierarchy
+
+<Collapsible title="How many SceneObjects and Components can I use in a scene?">
+  <br />
+  A scene supports up to **100,000 SceneObjects** and **200,000 Components** globally. There is no limit on the number of children a single object can have, but the hierarchy can be at most **256 levels deep**.
+
+</Collapsible>

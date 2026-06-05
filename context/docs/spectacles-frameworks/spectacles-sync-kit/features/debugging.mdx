@@ -1,0 +1,56 @@
+---
+sidebar_position: 2
+description: 'Debug Spectacles Sync Kit multiplayer Lenses with logging, network state inspection, and tools for diagnosing synchronization issues.'
+---
+
+# Debugging
+
+Spectacles Sync Kit and Lens Studio provide a number of tools to help debug Connected Lenses on device and in the editor. For more information on Lens Studio Connected Lenses features, including the Connected Lenses Monitor and Multiple Previews, see [Connected Lenses > Development Workflow](../../../../lens-studio/features/connected-lenses/development-workflow).
+
+### SyncEntityDebug
+
+SyncEntityDebug is a helper script that can show SyncEntity information using text components. It is especially useful for debugging SyncEntities on device. SyncEntity information that can be shown by the SyncEntityDebug script includes:
+
+- Network ID
+- Owner Display Name
+- Owner ID
+- Storage Properties
+
+#### Setup Steps
+
+To use the SyncEntityDebug in your scene, follow these steps:
+
+1. Add text components in the Scene Hierarchy for each piece of SyncEntity information you want to debug.
+
+<p align="center">
+  <img
+    src="/img/spectacles/spectacles-sync-kit/sync-entity-debug-example.png"
+    style={{ maxWidth: '500px', width: '100%', borderRadius: '8px' }}
+  />
+</p>
+
+2. Add the SyncEntityDebug script to a scene object in the Scene Hierarchy. Populate the relevant text component inputs in the SyncEntityDebug script Inspector panel. You do not have to populate all inputs.
+
+<p align="center">
+  <img
+    src="/img/spectacles/spectacles-sync-kit/sync-entity-debug-inspector.png"
+    style={{ maxWidth: '500px', width: '100%', borderRadius: '8px' }}
+  />
+</p>
+
+3. For **Target Type**, use Network Root if you are using SyncEntityDebug script within a prefab. Otherwise, set Target Type to Sync Entity, and populate the **Sync Entity Script** input with the script that the SyncEntity is associated with.
+
+4. The Ownership Button can be populated with an [SIK Pinch Button](https://developers.snap.com/lens-studio/api/lens-scripting/classes/Packages_SpectaclesInteractionKit_Components_UI_PinchButton_PinchButton.PinchButton.html), which will clear ownership of the SyncEntity when pinched.
+
+Once the SyncEntityDebug is set up, the text components will update to reflect SyncEntity information in the Preview panel and on Spectacles when pushed to device.
+
+<p align="center">
+  <video
+    src="/img/spectacles/spectacles-sync-kit/sync-entity-debug-demo.webm"
+    style={{ maxWidth: '500px', width: '100%', borderRadius: '8px' }}
+    autoPlay
+    loop
+    muted
+    playsInline
+  ></video>
+</p>

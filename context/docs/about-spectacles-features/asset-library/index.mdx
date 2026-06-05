@@ -1,0 +1,349 @@
+---
+sidebar_position: 4
+description: 'Discover pre-built asset packages available in the Lens Studio Asset Library for accelerating Spectacles Lens development.'
+---
+
+import CardList from '@site/src/components/CardSampleList';
+import { assetLibraryTags } from '@site/src/data/TagsAssetLibrary';
+
+# Asset Library
+
+Check out the Spectacles section on the Lens Studio Asset Library for Spectacles-centered assets.
+You can find the [Asset Library](https://developers.snap.com/lens-studio/assets-pipeline/asset-library/asset-library-overview) in Lens Studio.
+
+:::info Repository Migration
+While [https://github.com/Snapchat/Spectacles-Sample](https://github.com/Snapchat/Spectacles-Sample) will continue to reflect the latest changes, **it will be deprecated in the future**. We recommend using our new organization at [https://github.com/specs-devs](https://github.com/specs-devs) for samples ([specs-devs/samples](https://github.com/specs-devs/samples)) and packages ([specs-devs/packages](https://github.com/specs-devs/packages)).
+:::
+
+:::note Packages marked with 🔒
+Some packages are not available in the public repository but might be part of the [specs-devs/context](https://github.com/specs-devs/context) repo as filtered context material for AI-assisted development.
+:::
+
+## Core
+
+Essential packages for Spectacles development
+
+<CardList
+  numColumns={3}
+  cards={[
+    {
+      title: '🔒 Spectacles Interaction Kit',
+      image:
+        '/img/spectacles/asset-library/asset-library-spectacles-iteraction-kit.png',
+      description:
+        'A package that provide a rich input interaction set up in lenses.',
+      tags: assetLibraryTags['Spectacles Interaction Kit'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+    {
+      title: '🔒 Spectacles Interaction Kit Examples',
+      image:
+        '/img/spectacles/asset-library/asset-library-spectacles-iteraction-kit.png',
+      description:
+        'A package that provide SIK examples to get started with lens development.',
+      tags: assetLibraryTags['Spectacles Interaction Kit Examples'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+    {
+      title: '🔒 Spectacles Sync Kit',
+      image:
+        '/img/spectacles/asset-library/asset-library-spectacles-sync-kit.png',
+      description:
+        'A package that enables real-time syncing between connected lenses.',
+      tags: assetLibraryTags['Spectacles Sync Kit'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+    {
+      title: '🔒 Spatial Image',
+      image: '/img/spectacles/asset-library/asset-library-spatial-image.png',
+      description: 'Transforms a 2D image into a spatialized 3D mesh.',
+      tags: assetLibraryTags['Spatial Image'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+    {
+      title: '🔒 Web View',
+      image: '/img/spectacles/asset-library/asset-library-web-view.png',
+      description: 'Allows hosting web content inside a Lens.',
+      tags: assetLibraryTags['Web View'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+    {
+      title: '🔒 Spectacles UI Kit',
+      image: '/img/spectacles/asset-library/asset-library-ui-kit.png',
+      description:
+        'A comprehensive UI framework for building spatial interfaces on Spectacles.',
+      tags: assetLibraryTags['Spectacles UI Kit'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+    {
+      title: 'Spectacles Navigation Kit',
+      image:
+        '/img/spectacles/asset-library/asset-library-spectacles-navigation-kit.png',
+      description:
+        'Set of components designed to simplify the development of navigation experiences for Spectacles.',
+      href: 'https://github.com/specs-devs/packages/tree/main/SpectaclesNavigationKit',
+      tags: assetLibraryTags['Spectacles Navigation Kit'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+  ]}
+/>
+
+## Input Helpers
+
+User interface and input assistance tools
+
+<CardList
+  numColumns={3}
+  cards={[
+    {
+      title: 'Spectacles 3D Hand Hints',
+      image:
+        '/img/spectacles/asset-library/asset-library-specs-3d-hand-hints.png',
+      description: 'Suite of animated Hand Gestures Hints.',
+      href: 'https://github.com/specs-devs/packages/tree/main/Spectacles3DHandHints',
+      tags: assetLibraryTags['Spectacles 3D Hand Hints'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+    {
+      title: 'Interactable Helper',
+      image:
+        '/img/spectacles/asset-library/asset-library-interactable-helper.png',
+      description:
+        'Low to medium fidelity prototyping tool for Spectacles Interaction Kit components without code.',
+      href: 'https://github.com/specs-devs/packages/tree/main/InteractableHelper',
+      tags: assetLibraryTags['Interactable Helper'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+  ]}
+/>
+
+## Remote Services
+
+Network and remote service integration tools
+
+<CardList
+  numColumns={3}
+  cards={[
+    {
+      title: 'Remote Service Gateway',
+      image:
+        '/img/spectacles/asset-library/asset-library-remote-service-gateway.png',
+      description:
+        'A package that provides a set of tools that allow to publish lenses with access to user-sensitive data.',
+      href: 'https://github.com/specs-devs/packages/tree/main/RemoteServiceGateway',
+      tags: assetLibraryTags['Remote Service Gateway'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+    {
+      title: '🔒 Remote Service Gateway Token Generator',
+      image:
+        '/img/spectacles/asset-library/asset-library-remote-service-gateway-token-generation.png',
+      description: 'A tool to generate tokens for the Remote Service Gateway.',
+      tags: assetLibraryTags['Remote Service Gateway Token Generator'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+    {
+      title: 'Auth Kit',
+      image: '/img/spectacles/asset-library/asset-library-auth-kit.png',
+      description:
+        'Provides authentication and authorization capabilities for lenses.',
+      href: 'https://github.com/specs-devs/packages/tree/main/AuthKit',
+      tags: assetLibraryTags['Authorization Kit'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+    {
+      title: '🔒 Supabase Plugin',
+      image: '/img/spectacles/asset-library/asset-library-supabase-plugin.png',
+      description:
+        'Integration plugin for Supabase backend services and authentication.',
+      tags: assetLibraryTags['Supabase Plugin'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+    {
+      title: 'Supabase Client',
+      image: '/img/spectacles/asset-library/asset-library-supabase-client.png',
+      description:
+        'Client library for connecting to Supabase backend infrastructure.',
+      href: 'https://github.com/specs-devs/packages/tree/main/SupabaseClient',
+      tags: assetLibraryTags['Supabase Client'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+    {
+      title: 'Commerce Kit',
+      image: '/img/spectacles/asset-library/asset-library-commerce-kit.png',
+      description:
+        'E-commerce integration toolkit for building shopping experiences.',
+      href: 'https://github.com/specs-devs/packages/tree/main/CommerceKit',
+      tags: assetLibraryTags['Commerce Kit'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+  ]}
+/>
+
+## Helpers
+
+Development utilities and helper tools
+
+<CardList
+  numColumns={3}
+  cards={[
+    {
+      title: 'Instantiation',
+      image: '/img/spectacles/asset-library/asset-library-instantiation.png',
+      description: 'Examples for dynamic object creation.',
+      href: 'https://github.com/specs-devs/packages/tree/main/Instantiation',
+      tags: assetLibraryTags['Instantiation'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+    {
+      title: 'Solvers',
+      image: '/img/spectacles/asset-library/asset-library-solvers.png',
+      description:
+        'Collections of spatial behaviors for Spatial UI or scene objects.',
+      href: 'https://github.com/specs-devs/packages/tree/main/Solvers',
+      tags: assetLibraryTags['Solvers'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+    {
+      title: 'Leaderboard',
+      image: '/img/spectacles/asset-library/asset-library-leaderboard.png',
+      description: 'Simple set up to get started ranking players in your lens.',
+      href: 'https://github.com/specs-devs/packages/tree/main/Leaderboard',
+      tags: assetLibraryTags['Leaderboard'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+    {
+      title: 'Access Components',
+      image:
+        '/img/spectacles/asset-library/asset-library-access-components.png',
+      description:
+        'Collection of scripts to showcase how to reference and access classes.',
+      href: 'https://github.com/specs-devs/packages/tree/main/AccessComponents',
+      tags: assetLibraryTags['Access Components'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+    {
+      title: 'Runtime Gizmos',
+      image: '/img/spectacles/asset-library/asset-library-runtime-gizmos.png',
+      description:
+        'Collections of line based tools for debugging or visualization.',
+      href: 'https://github.com/specs-devs/packages/tree/main/RuntimeGizmos',
+      tags: assetLibraryTags['Runtime Gizmos'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+    {
+      title: 'Marker Tracking Helper',
+      image:
+        '/img/spectacles/asset-library/asset-library-marker-tracking-helper.png',
+      description: 'Provides Marker Tracking Examples.',
+      href: 'https://github.com/specs-devs/packages/tree/main/MarkerTrackingHelper',
+      tags: assetLibraryTags['Marker Tracking Helper'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+    {
+      title: '🔒 Pointer',
+      image: '/img/spectacles/asset-library/asset-library-pointer.png',
+      description: 'Creates directional indicators in AR scenes.',
+      tags: assetLibraryTags['Pointer'].tags,
+      author: {
+        name: 'BennyP',
+        url: 'https://www.snapchat.com/add/jewbear3333?locale=en-US',
+      },
+    },
+    {
+      title: '🔒 Raycaster',
+      image: '/img/spectacles/asset-library/asset-library-raycaster.png',
+      description: 'Demonstrates raycasting capabilities in Spectacles.',
+      tags: assetLibraryTags['Raycaster'].tags,
+      author: {
+        name: 'BennyP',
+        url: 'https://www.snapchat.com/add/jewbear3333?locale=en-US',
+      },
+    },
+    {
+      title: 'World Query Hit - Spawn On Surface',
+      image: '/img/spectacles/asset-library/asset-library-world-query-hit.png',
+      description: 'Performs hit tests for real-world surfaces.',
+      href: 'https://github.com/specs-devs/packages/tree/main/WorldQueryHit',
+      tags: assetLibraryTags['World Query Hit - Spawn On Surface'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+    {
+      title: 'Surface Placement',
+      image:
+        '/img/spectacles/asset-library/asset-library-surface-detection.png',
+      description: 'Detects and recognizes real-world surfaces.',
+      href: 'https://github.com/specs-devs/packages/tree/main/SurfacePlacement',
+      tags: assetLibraryTags['Surface Detection'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+    {
+      title: 'LSTween',
+      image: '/img/spectacles/asset-library/asset-library-ls-tween.png',
+      description: 'Helps developers with animation handling in Lens Studio.',
+      href: 'https://github.com/specs-devs/packages/tree/main/LSTween',
+      tags: assetLibraryTags['LSTween'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+    {
+      title: '🔒 Motion Controller',
+      image:
+        '/img/spectacles/asset-library/asset-library-motion-controller.png',
+      description: 'Helps developers handling the controller API.',
+      tags: assetLibraryTags['Motion Controller'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+    {
+      title: 'Game Controller',
+      image: '/img/spectacles/asset-library/asset-library-game-controller.png',
+      description:
+        'Enables game controller functionality through BLE connectivity.',
+      href: 'https://github.com/specs-devs/packages/tree/main/GameController',
+      tags: assetLibraryTags['Game Controller'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+    {
+      title: 'Function Call Helper',
+      image: '/img/spectacles/asset-library/asset-library-function-caller.png',
+      description:
+        'System for exposing function callbacks in the inspector, allowing you to configure and trigger script functions through UI buttons.',
+      href: 'https://github.com/specs-devs/packages/tree/main/FunctionCallHelper',
+      tags: assetLibraryTags['Function Call Helper'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+    {
+      title: 'Volumetric Line',
+      image: '/img/spectacles/asset-library/asset-library-volumetric-line.png',
+      description: 'Advanced volumetric line rendering system for 3D graphics.',
+      href: 'https://github.com/specs-devs/packages/tree/main/VolumetricLine',
+      tags: assetLibraryTags['Volumetric Line'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+    {
+      title: 'Composite Camera Texture',
+      image:
+        '/img/spectacles/asset-library/asset-library-composite-camera-texture.png',
+      description: 'Advanced camera texture compositing and blending system.',
+      href: 'https://github.com/specs-devs/packages/tree/main/CompositeCameraTexture',
+      tags: assetLibraryTags['Composite Camera Texture'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+    {
+      title: 'Crop Camera Texture',
+      image:
+        '/img/spectacles/asset-library/asset-library-crop-camera-texture.png',
+      description: 'Camera texture cropping and region selection tools.',
+      href: 'https://github.com/specs-devs/packages/tree/main/CropCameraTexture',
+      tags: assetLibraryTags['Crop Camera Texture'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+    {
+      title: 'Transform Sync Server and Client',
+      image: '/img/spectacles/asset-library/Client.png',
+      description:
+        'A server plugin and Lens Studio client asset for Spectacles Lens creators. This tool lets you manipulate 3D objects directly on Spectacles (grab, move, rotate, scale) and sync those transforms back to Lens Studio, either automatically when interaction ends or manually via an Apply button.',
+      tags: assetLibraryTags['Transform Sync Server and Client'].tags,
+      author: { name: 'Snap Inc.', url: 'https://www.spectacles.com/' },
+    },
+  ]}
+/>

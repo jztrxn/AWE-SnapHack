@@ -1,0 +1,98 @@
+---
+sidebar_position: 1
+sidebar_label: 'Overview'
+description: 'Understand the permission model for Spectacles Lenses including how user consent is managed for camera, location, and other data.'
+---
+
+import Admonition from '@theme/Admonition';
+
+# Permissions & Privacy
+
+When using capabilities or components, Lens Studio automatically declares the necessary permissions in the project.
+
+There are 2 important types of permissions:
+
+1. Sensitive User Data
+2. External Connectivity
+
+The Spectacles camera captures information about surroundings, enabling interaction with AR content in the environment. The microphone uses information about voice, facilitating features like recorded videos and voice commands. Both camera and microphone access are essential for the device to function properly. Additionally, Spectacles can use location data to support location-based Lenses and features. These APIs are tagged as “Exposes User Data” on the [API](https://developers.snap.com/lens-studio/api/lens-scripting/index.html) page.
+
+<Admonition type="tip" title="Good">
+  When camera is not used directly, and APIs returns processed data, such as
+  face landmarks, hand joints, surfaces, the camera is not considered to be
+  used.
+</Admonition>
+
+While some Lenses are designed for solo use, others require communication with external devices, such as Connected Lenses or RemoteServiceModule, which interact with the internet. During such interactions, Spectacles prevent simultaneous use of these capabilities with sensitive user data to ensure privacy in published Lenses.
+
+<Admonition type="tip" title="Good">
+  Access to some internal Snap Cloud services, as Remote Service Gateway,
+  doesn't count as external connectivity. This means that you can use Remote
+  Service Gateway with sensitive user data in published Lenses.
+</Admonition>
+
+To discover what permissions have been declared in your project, go to the Spectacles section inside your Project Settings.
+
+<p align="center">
+  <img
+    src="/img/spectacles/permissions/permissions-project-info-settings.png"
+    style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+  />
+</p>
+
+## Using Non-Declared Permissions Features
+
+In some cases, you might use capabilities that require permission declarations dynamically through scripts.
+
+For example, when you dynamically instantiate a HeadComponent through script:
+
+<Admonition type="caution" title="Bad">
+
+```js
+let headComponent = script.getSceneObject().createComponent('Component.Head');
+let headLandMarks = headComponent.getLandmarks();
+```
+
+</Admonition>
+
+<Admonition type="tip" title="Good">
+
+```js
+require('LensStudio:FaceTrackingModule');
+let headComponent = script.getSceneObject().createComponent('Component.Head');
+let headLandMarks = headComponent.getLandmarks();
+```
+
+</Admonition>
+
+In this case, Lens Studio does not automatically declare the permission compared to attaching a HeadComponent to a SceneObject in the Scene Hierarchy Panel. Lenses that attempt to use features without declaring the permissions in their Lens Project will automatically get a permission denied by the SnapOS system.
+
+<p align="center">
+  <img
+    src="/img/spectacles/permissions/permission-denied-notification.png"
+    style={{ maxWidth: '400px', width: '100%', borderRadius: '8px' }}
+  />
+</p>
+
+To learn more about the types of permissions Lenses can use, review the [List of Permissions Types](#list-of-permissions-types) section.
+
+## List of Permissions Types
+
+| Permission Type            | Assets & APIs Requesting Permission                                                                                                                        |
+| :------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Colocated Connected Lenses | ConnectedLensModule                                                                                                                                        |
+| Remote Connected Lenses    | ConnectedLensModule                                                                                                                                        |
+| Speech to Text             | VoiceMLModule<br />DialogModule                                                                                                                            |
+| Text to Speech             | TextToSpeechModule                                                                                                                                         |
+| Remote APIs                | RemoteServiceModule<br />RemoteMediaModule                                                                                                                 |
+| Bitmoji                    | BitmojiModule                                                                                                                                              |
+| Camera - SnapML            | CameraTextureProvider<br />CameraModule                                                                                                                    |
+| Microphone - SnapML        | MicrophoneAudioProvider<br />VoiceMLModule<br />DialogModule                                                                                               |
+| GPS - Precise              | RawLocationModule                                                                                                                                          |
+| Location - Coarse          | ProcessedLocationModule                                                                                                                                    |
+| Face                       | FaceRenderObjectProvider (Mesh)<br />HeadComponent (Landmarks)<br />FaceTrackingModule                                                                     |
+| Foundational Trackers      | DeviceTracking<br />DeviceTrackingModule                                                                                                                   |
+| Supplementary Trackers     | SegmentationTextureProvider<br />ObjectTrackingAsset<br />MarkerTrackingAsset<br />DepthTextureProvider<br />TrackedPoint<br />Point<br />Cloud World Mesh |
+| Body Trackers              | Object3DAsset                                                                                                                                              |
+| Internet                   | RemoteServiceModule                                                                                                                                        |
+| Input Framework (Text)     | TextInputModule                                                                                                                                            |

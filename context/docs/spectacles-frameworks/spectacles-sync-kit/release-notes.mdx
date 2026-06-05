@@ -1,0 +1,97 @@
+---
+sidebar_label: 'Release Notes'
+description: 'Version history, breaking changes, new features, and update instructions for each Spectacles Sync Kit release.'
+---
+
+# Sync Kit Release Notes
+
+## **V1.3.6064068**
+
+### **Breaking Changes**
+
+#### **Storage Property Type Definition**
+
+The type definition for `StorageProperty` has changed. Types such as `StorageProperty<string>` or `StorageProperty<StorageTypes.bool>` are no longer accepted. Use `StorageProperty<StorageTypes.string>` or `StorageProperty<StorageTypes.bool>` instead.
+
+**Migration Example:**
+
+```typescript
+// Before
+const myProperty: StorageProperty<vec3> = ...;
+
+// After
+const myProperty: StorageProperty<StorageTypes.vec3> = ...;
+```
+
+## **V1.3.651799**
+
+Spectacles Sync Kit (SSK) v1.3.651799 has several improvements and new features, including ability to localize faster by looking at other players around you, Start Mode and Start Menu customization, reduction of SSK packages by moving mapping UI into system, new visuals and more.
+
+To update the SpectaclesSyncKit in your existing project:
+
+1. Open your project in Lens Studio.
+2. Log in to Lens Studio.
+3. Move all custom objects and scripts under **SpectaclesInteractionKit** and **SpectaclesSyncKit/ Colocated World** out of the **SpectaclesSyncKit** prefab.
+4. In the Asset Browser panel,
+   - If **SpectaclesSyncKit** package is unpacked, right-click the **SpectaclesSyncKit** folder and select Lock Package Contents. And select **Pull Update from Library**.
+   - If **SpectaclesSyncKit** is locked, right-click on the **SpectaclesSyncKit** package. Select **Pull Update from Library**. If this option is not available in the context menu, check that you are logged in to Lens Studio.
+5. In the Asset Browser panel,
+   - If **SpectaclesInteractionKit** package is unpacked, right-click the **SpectaclesInteractionKit** package and select Lock Package Contents. And select **Pull Update from Library**.
+   - If **SpectaclesInteractionKit** package is locked, right-click on the **SpectaclesInteractionKit** package. Select **Pull Update from Library**. If this option is not available in the context menu, check that you are logged in to Lens Studio.
+   - If **Pull Update** is not shown, click **Register to Library** then try again.
+6. Drag **SpectaclesInteractionKit** prefab into Scene Hierarchy and click **Revert** on **SpectaclesSyncKit** to ensure your scene has the proper script reference.
+7. Move all custom objects and scripts back to **SpectaclesInteractionKit** and **SpectaclesSyncKit/ Colocated World**.
+
+:::info
+Before reverting the SpectaclesSyncKit prefab, make sure to move any custom Scene Objects (such as those under Colocated World) out of the SpectaclesSyncKit hierarchy. If custom objects remain inside SpectaclesSyncKit when you revert the prefab, they will be deleted from the Scene.
+:::
+
+### **Faster Localization**
+
+The new mapping flow makes it faster and easier for players to connect within the same shared space. Instead of manually aligning environments, players can now look at another participant who has already joined the session to automatically map and sync their space. This streamlined process reduces setup time and ensures a smoother, more natural multiplayer experience.
+
+### **Start Mode and Start Menu Customization**
+
+A new Start Mode option has been added to the Session Controller Component, allowing creators to configure how the Lens starts. In addition, developers can also now customize the Start Menu to match their Lens design. The StartMenu scene object in the Scene Hierarchy includes editable elements.
+
+## **V1.2.24479**
+
+Spectacles Sync Kit v1.2.24479 has several improvements, including [Configuring Same Session ID](../../about-spectacles-features/connected-lenses/building-connected-lenses#configuring-session-id) and [Custom Location Integration](./features/connected-custom-location.mdx).
+
+To update the SpectaclesSyncKit in your existing project:
+
+1. Drag the **SpectaclesSyncKit/SpectaclesInteractionKit** folder to the **Assets** folder.
+2. Right-click the **SpectaclesInteractionKit** folder and select **Lock Package Contents**.
+3. Right-click the **SpectaclesInteractionKit** package and select **Pull Update**.
+   - If **Pull Update** is not shown, click **Register to Library** then try again.
+4. Right-click the **SpectaclesSyncKit** folder in your Asset Browser and select Pull Update.
+5. Right-click the **SpectaclesSyncKit** folder and select **Lock Package Contents**.
+6. Please also select the SpectaclesSyncKit and SpectaclesInteractionKit prefab in your Scene Hierarchy and click **Revert** to ensure your scene has the proper script reference.
+
+:::important
+Before reverting the **SpectaclesSyncKit** prefab, make sure to move any custom Scene Objects (such as those under Colocated World) out of the SpectaclesSyncKit hierarchy. If custom objects remain inside SpectaclesSyncKit when you revert the prefab, they will be deleted from the Scene.
+:::
+
+### **Session ID Configuration for Spectacles and Lens Studio**
+
+Introduced support for configuring a same `Session ID` to enable automatic session synchronization between **Spectacles to Lens Studio** and **Spectacles to Spectacles**. This enhancement simplifies not only session selection flow but also development workflow for Multiplayer Lenses, ensuring all connected devices automatically join the same session without manual selection.
+
+- **Spectacles to Spectacles**, setting a Session ID ensures both devices connect to the same session automatically which removes the need to manually select or join a session, simplifying the user flow and reducing setup time.
+
+- **Lens Studio to Spectacles**, developers can test multiplayer functionality using just one Spectacles device, allowing for faster iteration and more efficient development.
+
+:::note
+For Same Session ID configuration setup, please refer to [Configuring Same Session](../../about-spectacles-features/connected-lenses/building-connected-lenses#configuring-session-id).
+:::
+
+### **Custom Location Integration**
+
+**Custom Location Integration** feature combines Custom Location with the Spectacles Sync Kit, enabling persistent, shared AR experiences linked to real-world environments. Developers can now pre-scan a location, allowing for seamless multiplayer user flow without needing to restart the mapping flow every time the Lens is launched.
+
+### **Bug Fixes**
+
+- Fixed error message regarding `cleanup()` in `SyncEntity`.
+- Fixed claiming ownership of `SyncEntity` issue when the object is being instantiated.
+- Fixed general compatibility `SyncEntity` issues with `Instantiator`.
+- Fixed Lens crashed when removing a key from the store.
+- Fixed mapping gets stuck in the session

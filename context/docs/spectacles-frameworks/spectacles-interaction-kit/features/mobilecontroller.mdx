@@ -1,0 +1,149 @@
+---
+sidebar_position: 4
+description: 'Configure and use the mobile phone as a controller input for Spectacles Lenses through the Spectacles Interaction Kit framework.'
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Mobile Controller
+
+Spectacles Interaction Kit introduces mobile controller-based interactions, enabling users to control and interact with AR lenses using their mobile phones. By calibrating Spectacles with the Spectacles mobile app, users can switch between hand tracking and mobile interaction modes, turning their smartphones into versatile input devices. This feature enhances user engagement by allowing for more precise and tactile interactions with AR content.
+
+For developers, the mobile controller input in SIK provides a versatile interaction mode for creating multi-modal AR experiences. This functionality complements other input methods, such as hand tracking, offering a comprehensive approach to user interaction. SIK ensures that **Interactables** are compatible with both hand tracking and mobile controller interactions without requiring additional modifications.
+
+## Relevant Components
+
+### Code Example - MobileInputData
+
+**MobileInputData** interfaces with Lens Studio’s **Motion Controller Module** to provide phone tracking data to the rest of SIK, specifically to the **MobileInteractor** component.
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+import { SIK } from 'SpectaclesInteractionKit.lspkg/SIK';
+
+@component
+export class ExampleMobileScript extends BaseScriptComponent {
+  onAwake() {
+    this.createEvent('OnStartEvent').bind(() => {
+      this.onStart();
+    });
+  }
+
+  onStart() {
+    // Retrieve MobileInputData from SIK's definitions.
+    let mobileInputData = SIK.MobileInputData;
+
+    // Fetch the MotionController for the phone.
+    let motionController = mobileInputData.motionController;
+
+    // Add print callbacks for whenever the phone is touched.
+    motionController.onTouchEvent.add(() => {
+      print(
+        `The phone has been touched. The position of the phone is: ${motionController.getWorldPosition()}.`
+      );
+    });
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+const SIK = require('SpectaclesInteractionKit.lspkg/SIK').SIK;
+const mobileInputData = SIK.MobileInputData;
+
+function onAwake() {
+  // Wait for other components to initialize by deferring to OnStartEvent.
+  script.createEvent('OnStartEvent').bind(() => {
+    onStart();
+  });
+}
+
+function onStart() {
+  // Fetch the MotionController for the phone.
+  var motionController = mobileInputData.motionController;
+
+  // Add print callbacks for whenever the phone is touched.
+  motionController.onTouchEvent.add(() => {
+    print(
+      `The phone has been touched. The position of the phone is: ${motionController.getWorldPosition()}.`
+    );
+  });
+}
+
+onAwake();
+```
+
+</TabItem>
+</Tabs>
+
+### Code Example - MobileInteractor
+
+**MobileInteractor** processes information from **MobileInputData** to interact with scene objects in the lens that have an **Interactable** component. For more details about the interaction system, refer to [Feature Guide: Interaction System](./interactionsystem.mdx).
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+import { SIK } from 'SpectaclesInteractionKit.lspkg/SIK';
+import { InteractorInputType } from 'SpectaclesInteractionKit.lspkg/Core/Interactor/Interactor';
+@component
+export class ExampleMobileScript extends BaseScriptComponent {
+  onAwake() {
+    this.createEvent('UpdateEvent').bind(() => {
+      this.onUpdate();
+    });
+  }
+
+  onUpdate() {
+    // Retrieve InteractionManager from SIK's definitions.
+    let interactionManager = SIK.InteractionManager;
+
+    // Fetch the MobileInteractor for the phone.
+    let mobileInteractor = interactionManager.getInteractorsByType(
+      InteractorInputType.Mobile
+    )[0];
+
+    // Print the position and direction of the MobileInteractor each frame.
+    print(
+      `The mobile interactor is at position: ${mobileInteractor.startPoint} and is pointing in direction: ${mobileInteractor.direction}.`
+    );
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+const SIK = require('SpectaclesInteractionKit.lspkg/SIK').SIK;
+const interactionManager = SIK.InteractionManager;
+
+function onAwake() {
+  // Wait for other components to initialize by deferring to OnStartEvent.
+  script.createEvent('UpdateEvent').bind(() => {
+    onUpdate();
+  });
+}
+
+function onUpdate() {
+  // Fetch the MobileInteractor for the phone.
+  let mobileInteractor = interactionManager.getInteractorsByType(
+    InteractorInputType.Mobile
+  )[0];
+
+  // Print the position and direction of the MobileInteractor each frame.
+  print(
+    `The mobile interactor is at position: ${mobileInteractor.startPoint} and is pointing in direction: ${mobileInteractor.direction}.`
+  );
+}
+
+onAwake();
+```
+
+</TabItem>
+</Tabs>

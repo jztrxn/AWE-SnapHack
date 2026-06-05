@@ -1,0 +1,681 @@
+---
+description: 'Build Spectacles experiences where virtual content stays locked to real-world locations and persists across sessions using Spatial Anchors.'
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Spatial Anchors
+
+## Overview
+
+<video
+  src="/img/spectacles/spatial-anchor/spatial-anchor-example.webm"
+  style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+  autoPlay
+  loop
+  muted
+  playsInline
+></video>
+
+Anchors in augmented reality enable the creation of immersive experiences by allowing users to seamlessly integrate virtual content with the real world. These anchors serve as fixed points that ensure digital elements remain in place as users move around their environment.
+
+For instance, in the realm of interior design, AR anchors can facilitate virtual furniture placement, enabling users to visualize how different pieces would look in their homes before making a purchase. Another practical application is in creating interactive instructional Lenses that overlay step-by-step guides directly on household appliances, making it easier for users to operate them without needing to consult a manual.
+
+The Anchors API exposes this functionality to developers. The AnchorModule is the entrypoint to the overall anchoring system, and the first anchor type that can be used is WorldAnchor.
+
+:::note
+
+WorldAnchor is the only anchor type available today. Future releases will include more anchor types.
+
+:::
+
+## Getting Started
+
+### Prerequisites
+
+- Lens Studio v5.12.0 or later
+- Spectacles OS v5.63.0300 or later
+
+### Package Installation
+
+<img
+  src="/img/spectacles/spatial-anchor/spatial-anchor-asset-library.png"
+  style={{ maxWidth: '300px', width: '100%', borderRadius: '8px' }}
+/>
+
+Install and import the Spatial Anchors from the Asset Library.
+
+:::note
+
+After installing Spatial Anchors from the Asset Library, you will need to import it into your project. For more information, please refer to the [documentation](../../../lens-studio/features/package-management/asset-packages-introduction#asset-library).
+
+:::
+
+:::warning
+
+This guide assumes that the scripts you create will be located in the same directory as the Spatial Anchors package.
+:::
+
+### AnchorModule Configuration
+
+This guide will help you quickly integrate and manage augmented reality anchors using the `AnchorModule`, `AnchorSession`, and `WorldAnchor` components.
+
+The AnchorModule is the starting point for managing anchors. It allows you to create an AnchorSession within a specified area.
+
+Add AnchorModule to the scene. Inside the Anchors package in Asset Browser, find AnchorModule and drag it into your Scene. Setup the AnchorModule by selecting it in your Scene. By default the storage is Local.
+Cloud Storage is an optional dependency that can be provided:
+
+<img
+  src="/img/spectacles/spatial-anchor/spatial-anchor-1.png"
+  style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+/>
+
+To provide the optional cloud storage, add the following Asset by clicking on the + sign in Asset Browser, searching for the component, and selecting it:
+
+- Location Cloud Storage Module
+
+<img
+  src="/img/spectacles/spatial-anchor/spatial-anchor-2.png"
+  style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+/>
+
+When cloud storage is enabled, make sure a permission script is added to the scene and is placed above AnchorModule in the scene Hierarchy.
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```typescript
+@component
+export class Permissions extends BaseScriptComponent {
+  onAwake() {
+    require('LensStudio:ConnectedLensModule');
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+require('LensStudio:ConnectedLensModule');
+```
+
+</TabItem>
+</Tabs>
+
+Finally, ensure your camera is properly set up. Select your camera in the Scene Hierarchy and add Device Tracking to it, and set the Device Tracking mode to World.
+
+<img
+  src="/img/spectacles/spatial-anchor/spatial-anchor-3.png"
+  style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+/>
+
+### Starting an AnchorSession
+
+The next step is to obtain an AnchorSession, which enables you to scan for and place anchors. Create a new script that takes AnchorModule as an input. Ensure your script appears _after_ AnchorModule in the Scene Hierarchy to ensure AnchorModule is initialized first.
+
+In this example, we set up the onAnchorNearby callback to be invoked whenever a new Anchor is found. Note that we haven’t placed any anchors yet, so none will be found\!
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```typescript
+import {
+  AnchorSession,
+  AnchorSessionOptions,
+} from 'Spatial Anchors.lspkg/AnchorSession';
+
+import { Anchor } from 'Spatial Anchors.lspkg/Anchor';
+import { AnchorModule } from 'Spatial Anchors.lspkg/AnchorModule';
+
+@component
+export class AnchorPlacementController extends BaseScriptComponent {
+  @input anchorModule: AnchorModule;
+
+  private anchorSession?: AnchorSession;
+
+  onAwake() {
+    this.createEvent('OnStartEvent').bind(() => {
+      this.onStart();
+    });
+  }
+
+  async onStart() {
+    // Set up the AnchorSession options to scan for World Anchors
+    const anchorSessionOptions = new AnchorSessionOptions();
+    anchorSessionOptions.scanForWorldAnchors = true;
+
+    // Start scanning for anchors
+    this.anchorSession =
+      await this.anchorModule.openSession(anchorSessionOptions);
+
+    // Listen for anchors
+    this.anchorSession.onAnchorNearby.add(this.onAnchorNearby.bind(this));
+  }
+
+  public onAnchorNearby(anchor: Anchor) {
+    // Invoked when a new Anchor is found
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+const AnchorSession =
+  require('Spatial Anchors.lspkg/AnchorSession').AnchorSession;
+const AnchorSessionOptions =
+  require('Spatial Anchors.lspkg/AnchorSession').AnchorSessionOptions;
+const Anchor = require('Spatial Anchors.lspkg/Anchor').Anchor;
+const AnchorModule = require('Spatial Anchors.lspkg/AnchorModule').AnchorModule;
+
+// @input Component.ScriptComponent anchorModule
+
+let anchorSession;
+
+script.createEvent('OnStartEvent').bind(function () {
+  onStart();
+});
+
+async function onStart() {
+  // Set up the AnchorSession options to scan for World Anchors
+  const anchorSessionOptions = new AnchorSessionOptions();
+  anchorSessionOptions.scanForWorldAnchors = true;
+
+  // Start scanning for anchors
+  anchorSession = await script.anchorModule.openSession(anchorSessionOptions);
+
+  // Listen for anchors
+  anchorSession.onAnchorNearby.add(onAnchorNearby);
+}
+
+function onAnchorNearby(anchor) {
+  // Invoked when a new Anchor is found
+}
+```
+
+</TabItem>
+</Tabs>
+
+### Placing an Anchor
+
+There are many ways to place an anchor. We’ll use a simple example where we enable the user to anchor a 3D cube in front of them by pinching a button. To create the button first install the [SpectaclesInteractionKit](../../spectacles-frameworks/spectacles-interaction-kit/get-started.mdx) and add a PinchButton to your scene. Wire up the PinchButton such that when it’s pinched, a WorldAnchor is created and a cube is attached to the new anchor.
+
+Expanding from the example above:
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```typescript
+import {
+  AnchorSession,
+  AnchorSessionOptions,
+} from 'Spatial Anchors.lspkg/AnchorSession';
+
+import { Anchor } from 'Spatial Anchors.lspkg/Anchor';
+import { AnchorComponent } from 'Spatial Anchors.lspkg/AnchorComponent';
+import { AnchorModule } from 'Spatial Anchors.lspkg/AnchorModule';
+import { PinchButton } from 'SpectaclesInteractionKit.lspkg/Components/UI/PinchButton/PinchButton';
+
+@component
+export class AnchorPlacementController extends BaseScriptComponent {
+  @input anchorModule: AnchorModule;
+  @input createAnchorButton: PinchButton;
+
+  @input camera: SceneObject;
+  @input prefab: ObjectPrefab;
+
+  private anchorSession?: AnchorSession;
+
+  onAwake() {
+    this.createEvent('OnStartEvent').bind(() => {
+      this.onStart();
+    });
+  }
+
+  async onStart() {
+    this.createAnchorButton.onButtonPinched.add(() => {
+      this.createAnchor();
+    });
+
+    // Set up the AnchorSession options to scan for World Anchors
+    const anchorSessionOptions = new AnchorSessionOptions();
+    anchorSessionOptions.scanForWorldAnchors = true;
+
+    // Start scanning for anchors
+    this.anchorSession =
+      await this.anchorModule.openSession(anchorSessionOptions);
+
+    // Listen for nearby anchors
+    this.anchorSession.onAnchorNearby.add(this.onAnchorNearby.bind(this));
+  }
+
+  public onAnchorNearby(anchor: Anchor) {
+    // Invoked when a new Anchor is found
+  }
+
+  private async createAnchor() {
+    // Compute the anchor position 5 units in front of user
+    let toWorldFromDevice = this.camera.getTransform().getWorldTransform();
+    let anchorPosition = toWorldFromDevice.mult(
+      mat4.fromTranslation(new vec3(0, 0, -5))
+    );
+
+    // Create the anchor
+    let anchor = await this.anchorSession.createWorldAnchor(anchorPosition);
+
+    // Create the object and attach it to the anchor
+    this.attachNewObjectToAnchor(anchor);
+
+    // Save the anchor so it's loaded in future sessions
+    try {
+      this.anchorSession.saveAnchor(anchor);
+    } catch (error) {
+      print('Error saving anchor: ' + error);
+    }
+  }
+
+  private attachNewObjectToAnchor(anchor: Anchor) {
+    // Create a new object from the prefab
+    let object: SceneObject = this.prefab.instantiate(this.getSceneObject());
+    object.setParent(this.getSceneObject());
+
+    // Associate the anchor with the object by adding an AnchorComponent to the
+    // object and setting the anchor in the AnchorComponent.
+    let anchorComponent = object.createComponent(
+      AnchorComponent.getTypeName()
+    ) as AnchorComponent;
+    anchorComponent.anchor = anchor;
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+const AnchorSession =
+  require('Spatial Anchors.lspkg/AnchorSession').AnchorSession;
+const AnchorSessionOptions =
+  require('Spatial Anchors.lspkg/AnchorSession').AnchorSessionOptions;
+const Anchor = require('Spatial Anchors.lspkg/Anchor').Anchor;
+const AnchorComponent =
+  require('Spatial Anchors.lspkg/AnchorComponent').AnchorComponent;
+const AnchorModule = require('Spatial Anchors.lspkg/AnchorModule').AnchorModule;
+const PinchButton =
+  require('SpectaclesInteractionKit.lspkg/Components/UI/PinchButton/PinchButton').PinchButton;
+
+// @input Component.ScriptComponent anchorModule
+// @input Component.ScriptComponent createAnchorButton
+// @input SceneObject camera
+// @input Asset.ObjectPrefab prefab
+
+let anchorSession;
+
+script.createEvent('OnStartEvent').bind(function () {
+  onStart();
+});
+
+async function onStart() {
+  script.createAnchorButton.onButtonPinched.add(function () {
+    createAnchor();
+  });
+
+  // Set up the AnchorSession options to scan for World Anchors
+  const anchorSessionOptions = new AnchorSessionOptions();
+  anchorSessionOptions.scanForWorldAnchors = true;
+
+  // Start scanning for anchors
+  anchorSession = await script.anchorModule.openSession(anchorSessionOptions);
+
+  // Listen for nearby anchors
+  anchorSession.onAnchorNearby.add(onAnchorNearby);
+}
+
+function onAnchorNearby(anchor) {
+  // Invoked when a new Anchor is found
+}
+
+async function createAnchor() {
+  // Compute the anchor position 5 units in front of user
+  const toWorldFromDevice = script.camera.getTransform().getWorldTransform();
+  const anchorPosition = toWorldFromDevice.mult(
+    mat4.fromTranslation(new vec3(0, 0, -5))
+  );
+
+  // Create the anchor
+  const anchor = await anchorSession.createWorldAnchor(anchorPosition);
+
+  // Create the object and attach it to the anchor
+  attachNewObjectToAnchor(anchor);
+
+  // Save the anchor so it's loaded in future sessions
+  try {
+    anchorSession.saveAnchor(anchor);
+  } catch (error) {
+    print('Error saving anchor: ' + error);
+  }
+}
+
+function attachNewObjectToAnchor(anchor) {
+  // Create a new object from the prefab
+  const object = script.prefab.instantiate(script.getSceneObject());
+  object.setParent(script.getSceneObject());
+
+  // Associate the anchor with the object by adding an AnchorComponent to the
+  // object and setting the anchor in the AnchorComponent.
+  const anchorComponent = object.createComponent(AnchorComponent.getTypeName());
+  anchorComponent.anchor = anchor;
+}
+```
+
+</TabItem>
+</Tabs>
+
+In the code above, when the button is pinched a new anchor is created in front of the user (via createAnchor); then, an object is created and attached to said anchor. The object here can be any SceneObject; here we use an injected prefab.
+
+### Scanning for Anchors
+
+Anchors can be saved so that when we return to a Lens those anchors are found again. The anchors will be recognized by the onAnchorNearby method. In the example above, we saved the anchor by calling `this.anchorSession.saveAnchor(anchor)`. Because we attached an onAnchorNearby callback to our AnchorSession, that saved anchor will be recovered the next time we run the code and Spectacles successfully localizes the user.
+
+:::note
+
+You can save _anchors_, but we do not save the content associated with anchors. This means that if we want to recover the objects that we had associated with an anchor in a previous session, we have to recreate those objects.
+
+:::
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```typescript
+import {
+  AnchorSession,
+  AnchorSessionOptions,
+} from 'Spatial Anchors.lspkg/AnchorSession';
+
+import { Anchor } from 'Spatial Anchors.lspkg/Anchor';
+import { AnchorComponent } from 'Spatial Anchors.lspkg/AnchorComponent';
+import { AnchorModule } from 'Spatial Anchors.lspkg/AnchorModule';
+import { PinchButton } from 'SpectaclesInteractionKit.lspkg/Components/UI/PinchButton/PinchButton';
+
+@component
+export class AnchorPlacementController extends BaseScriptComponent {
+  @input anchorModule: AnchorModule;
+  @input createAnchorButton: PinchButton;
+
+  @input camera: SceneObject;
+  @input prefab: ObjectPrefab;
+
+  private anchorSession?: AnchorSession;
+
+  onAwake() {
+    this.createEvent('OnStartEvent').bind(() => {
+      this.onStart();
+    });
+  }
+
+  async onStart() {
+    this.createAnchorButton.onButtonPinched.add(() => {
+      this.createAnchor();
+    });
+
+    // Set up the AnchorSession options to scan for World Anchors
+    const anchorSessionOptions = new AnchorSessionOptions();
+    anchorSessionOptions.scanForWorldAnchors = true;
+
+    // Start scanning for anchors
+    this.anchorSession =
+      await this.anchorModule.openSession(anchorSessionOptions);
+
+    // Listen for nearby anchors
+    this.anchorSession.onAnchorNearby.add(this.onAnchorNearby.bind(this));
+  }
+
+  public onAnchorNearby(anchor: Anchor) {
+    print('Anchor found: ' + anchor.id);
+    this.attachNewObjectToAnchor(anchor);
+  }
+
+  private async createAnchor() {
+    // Compute the anchor position 5 units in front of user
+    let toWorldFromDevice = this.camera.getTransform().getWorldTransform();
+    let anchorPosition = toWorldFromDevice.mult(
+      mat4.fromTranslation(new vec3(0, 0, -5))
+    );
+
+    // Create the anchor
+    let anchor = await this.anchorSession.createWorldAnchor(anchorPosition);
+
+    // Create the object and attach it to the anchor
+    this.attachNewObjectToAnchor(anchor);
+
+    // Save the anchor so it's loaded in future sessions
+    try {
+      this.anchorSession.saveAnchor(anchor);
+    } catch (error) {
+      print('Error saving anchor: ' + error);
+    }
+  }
+
+  private attachNewObjectToAnchor(anchor: Anchor) {
+    // Create a new object from the prefab
+    let object: SceneObject = this.prefab.instantiate(this.getSceneObject());
+    object.setParent(this.getSceneObject());
+
+    // Associate the anchor with the object by adding an AnchorComponent to the
+    // object and setting the anchor in the AnchorComponent.
+    let anchorComponent = object.createComponent(
+      AnchorComponent.getTypeName()
+    ) as AnchorComponent;
+    anchorComponent.anchor = anchor;
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+const AnchorSession =
+  require('Spatial Anchors.lspkg/AnchorSession').AnchorSession;
+const AnchorSessionOptions =
+  require('Spatial Anchors.lspkg/AnchorSession').AnchorSessionOptions;
+const Anchor = require('Spatial Anchors.lspkg/Anchor').Anchor;
+const AnchorComponent =
+  require('Spatial Anchors.lspkg/AnchorComponent').AnchorComponent;
+const AnchorModule = require('Spatial Anchors.lspkg/AnchorModule').AnchorModule;
+const PinchButton =
+  require('SpectaclesInteractionKit.lspkg/Components/UI/PinchButton/PinchButton').PinchButton;
+
+// @input Component.ScriptComponent anchorModule
+// @input Component.ScriptComponent createAnchorButton
+// @input SceneObject camera
+// @input Asset.ObjectPrefab prefab
+
+let anchorSession;
+
+script.createEvent('OnStartEvent').bind(function () {
+  onStart();
+});
+
+async function onStart() {
+  script.createAnchorButton.onButtonPinched.add(function () {
+    createAnchor();
+  });
+
+  // Set up the AnchorSession options to scan for World Anchors
+  const anchorSessionOptions = new AnchorSessionOptions();
+  anchorSessionOptions.scanForWorldAnchors = true;
+
+  // Start scanning for anchors
+  anchorSession = await script.anchorModule.openSession(anchorSessionOptions);
+
+  // Listen for nearby anchors
+  anchorSession.onAnchorNearby.add(onAnchorNearby);
+}
+
+function onAnchorNearby(anchor) {
+  print('Anchor found: ' + anchor.id);
+  attachNewObjectToAnchor(anchor);
+}
+
+async function createAnchor() {
+  // Compute the anchor position 5 units in front of user
+  const toWorldFromDevice = script.camera.getTransform().getWorldTransform();
+  const anchorPosition = toWorldFromDevice.mult(
+    mat4.fromTranslation(new vec3(0, 0, -5))
+  );
+
+  // Create the anchor
+  const anchor = await anchorSession.createWorldAnchor(anchorPosition);
+
+  // Create the object and attach it to the anchor
+  attachNewObjectToAnchor(anchor);
+
+  // Save the anchor so it's loaded in future sessions
+  try {
+    anchorSession.saveAnchor(anchor);
+  } catch (error) {
+    print('Error saving anchor: ' + error);
+  }
+}
+
+function attachNewObjectToAnchor(anchor) {
+  // Create a new object from the prefab
+  const object = script.prefab.instantiate(script.getSceneObject());
+  object.setParent(script.getSceneObject());
+
+  // Associate the anchor with the object by adding an AnchorComponent to the
+  // object and setting the anchor in the AnchorComponent.
+  const anchorComponent = object.createComponent(AnchorComponent.getTypeName());
+  anchorComponent.anchor = anchor;
+}
+```
+
+</TabItem>
+</Tabs>
+
+## Additional Concepts
+
+### Updating Anchors
+
+Anchors can be updated or deleted. To change the pose (position and rotation) of a WorldAnchor, for example:
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```typescript
+anchor.toWorldFromAnchor = pose; // Set to some new mat4 pose
+try {
+  this.anchorSession.saveAnchor(anchor);
+} catch (error) {
+  print('Error saving anchor: ' + error);
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+anchor.toWorldFromAnchor = pose; // Set to some new mat4 pose
+try {
+  anchorSession.saveAnchor(anchor);
+} catch (error) {
+  print('Error saving anchor: ' + error);
+}
+```
+
+</TabItem>
+</Tabs>
+
+Finally, deletion is accomplished by invoking `anchorSession.deleteAnchor(anchor)`.
+
+### Cleaning Up
+
+When you're done, ensure you close the session to stop tracking:
+
+```typescript
+await anchorSession.close();
+```
+
+### Area
+
+An area is the scope for persistent anchors using a user-supplied string, such as "living-room." When users create anchors within this area, those anchors will automatically be restored the next time they return. Each area is specific to a particular lens, ensuring no interaction occurs between areas with the same name across different lenses.
+
+### Persistence
+
+The WorldAnchor has the capability to persist across sessions, but they are not saved automatically. You can save, and later update, these anchors using saveAnchor or remove them with deleteAnchor in the AnchorSession. It's important to remember that while anchors persist, the associated content does not. Include logic to re-associate content with the anchor when it is restored. For instance, if a user attaches virtual weather information to an anchor at their front door, ensure that this information is re-attached when the anchor is restored in future sessions.
+
+## API Reference
+
+### AnchorModule
+
+| Signature   | Type                                                                | Description                                                                                                                                                                                      |
+| :---------- | :------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **METHODS** |                                                                     |                                                                                                                                                                                                  |
+| openSession | function (options: AnchorSessionOptions) → Promise\<AnchorSession\> | Open an `AnchorSession` and begin scanning for anchors, given parameters in `AnchorSessionOptions`. The returned `AnchorSession` will manage the creation, recognition, and updating of anchors. |
+
+### AnchorSession
+
+The `AnchorSession` fires events upon the recognition of anchors. When an anchor is recognized, it is handed to you, allowing you to associate it with a `SceneObject` using the `AnchorComponent`. Anchors managed by the `AnchorModule` are divided into two categories: those recognized and provided by the system (`SystemAnchor`) and those modifiable by the user (`UserAnchor`). In this release, one anchor type is introduced: `WorldAnchor`, which derives from `UserAnchor`.
+
+| Signature         | Type                                                        | Description                                                                                                                                                                                 |
+| :---------------- | :---------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **METHODS**       |                                                             |                                                                                                                                                                                             |
+| close             | function () → Promise\<void\>                               | End scanning. No further operations on this session.                                                                                                                                        |
+| reset             | function () → Promise\<void\>                               | Clear the session: e.g. forget previous anchors here. Resets the ability to track in the current area.                                                                                      |
+| saveAnchor        | function (anchor: UserAnchor) → Promise\<UserAnchor\>       | Save the given anchor. Required to both persist new anchors (e.g. after call to `createWorldAnchor`) and to persist changes (e.g. after changing `toWorldFromAnchor`).                      |
+| deleteAnchor      | function (anchor: UserAnchor) → Promise\<UserAnchor\>       | Remove the given anchor. The anchor will no longer be loaded by scan.                                                                                                                       |
+| createWorldAnchor | function (toWorldFromAnchor: mat4) → Promise\<WorldAnchor\> | Create an anchor with the specified world pose. 'World' is the coordinate system of scene graph root, compatible with a child rendering camera positioned by `DeviceTracking` set to world. |
+| **PROPERTIES**    |                                                             |                                                                                                                                                                                             |
+| area              | string                                                      | The area to which anchors of this session are scoped.                                                                                                                                       |
+| onAnchorNearby    | event → (anchor: Anchor)                                    | Callback invoked when scan has found a nearby anchor.                                                                                                                                       |
+
+### AnchorSessionOptions
+
+| Signature           | Type            | Description                                                                                |
+| :------------------ | :-------------- | :----------------------------------------------------------------------------------------- |
+| **METHODS**         |                 |                                                                                            |
+| create()            | Static function |                                                                                            |
+| **PROPERTIES**      |                 |                                                                                            |
+| scanForWorldAnchors | bool            | True to scan for world anchors. Defaults to true.                                          |
+| area                | string          | If supplied, scopes anchors returned to the specified area. Otherwise uses a default area. |
+
+### Anchor
+
+Base class for anchors.
+
+The state moves from \<initializing\>  
+→ (ready / error) \[once per lens session\]  
+ → (found / not found) \[potentially many times per ‘ready’\]
+
+| Signature         | Type                                                     | Description                                                                                                                                    |
+| :---------------- | :------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
+| **PROPERTIES**    |                                                          |                                                                                                                                                |
+| id                | string                                                   | ID of anchor is guaranteed to be unique within area. May be used by lenses to look up content they may have associated with the anchor.        |
+| toWorldFromAnchor | mat4                                                     | Pose of the anchor in world space. Only valid when state == Found.                                                                             |
+| state             | State enum \{ Initializing, Ready, Found, Lost, Error \} | Current tracking state.                                                                                                                        |
+| onFound           | event → ()                                               | Invoked when the anchor is found. At this point content can be associated with the anchor.                                                     |
+| onLost            | event → ()                                               | Invoked when the anchor is lost; e.g. it is no longer reliably being tracked. Content should be removed.                                       |
+| onReady           | event → ()                                               | We have all the information needed to track. Used, e.g., to end a ‘loading’ animation for this anchor. `onError` will never fire this session. |
+| onError           | event → (error: Error)                                   | If fired, is not recoverable. `onFound` will never be called this lens session.                                                                |
+
+### WorldAnchor
+
+World anchors can be created by developers by specifying a pose for the anchor in world space.
+
+| Signature         | Type | Description                        |
+| :---------------- | :--- | :--------------------------------- |
+| **PROPERTIES**    |      |                                    |
+| toWorldFromAnchor | mat4 | Pose of the anchor in world space. |
+
+### AnchorComponent
+
+Component that ties virtual content (attached to a SceneObject) to the physical world (via an Anchor\`). More technically, this is a Component that applies a pose supplied from an Anchor to a SceneObject.
+
+| Signature      | Type   | Description                                                  |
+| :------------- | :----- | :----------------------------------------------------------- |
+| **PROPERTIES** |        |                                                              |
+| anchor         | Anchor | The anchor that the parent SceneObject should track against. |

@@ -1,0 +1,286 @@
+---
+sidebar_position: 1
+sidebar_label: 'Get Started'
+description: 'Set up the Spectacles Auth Kit to add user authentication and third-party service authorization to your Spectacles Lenses.'
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Get Started with Auth Kit
+
+<img
+  src="/img/spectacles/misc/authkit-thumbnail.png"
+  style={{ maxWidth: '512px', width: '100%', borderRadius: '8px' }}
+/>
+
+## Prerequisites
+
+- Lens Studio 5.12.1 or later
+- An OAuth2 provider
+- Spectacles App
+
+:::note
+
+Auth Kit uses OAuth2 authentication flow through the Spectacles App, which requires a mobile device for testing. Deep link redirects are handled by the Spectacles App and are not supported in the Lens Studio editor.
+
+:::
+
+:::note
+
+Auth Kit is exclusively designed for Spectacles Lenses and uses the Spectacles App for OAuth2 authentication. It is not supported for Snapchat Lenses.
+
+:::
+
+## About Auth Kit
+
+Auth Kit enables secure user authentication with external services through the [OAuth2 protocol](https://oauth.net/2/), with all authentication flows handled by the Spectacles App.
+
+To start building authenticated experiences in your Lens using Auth Kit, follow the instructions below to [start a new project](#starting-a-new-project) or [update an existing project](#updating-an-existing-project) in Lens Studio.
+
+### Package Resources
+
+The Auth Kit package includes the following resources when imported into your Asset Browser:
+
+- **OAuth2 Core**: Main OAuth2 class and authentication logic optimized for Spectacles
+- **Token Management**: Secure token and TokenManager classes with Spectacles App integration
+- **Deep Link Integration**: Seamless OAuth2 redirect handling via Spectacles App deep links
+
+### Required Redirect URI
+
+Auth Kit requires different redirect URIs for development and production environments. Configure your OAuth2 provider accordingly.
+
+:::info
+
+**Finding Your Lens ID**
+
+When publishing your Lens, you'll need to replace `[LENS_ID]` with your actual Lens ID. You can find this in the [My Lenses Portal](https://my-lenses.snapchat.com/) after submitting your Lens for review.
+
+:::
+
+#### Standard OAuth2 Providers
+
+**Development Environment:**
+
+```
+https://www.spectacles.com/deeplink/specslink/oauth2redirect/unsecure
+```
+
+**Published Lens:**
+
+```
+https://www.spectacles.com/deeplink/specslink/oauth2redirect/[LENS_ID]
+```
+
+Replace `[LENS_ID]` with your actual Lens ID when publishing.
+
+#### Google OAuth2
+
+Google OAuth2 requires special setup and uses a different URI format with a custom scheme.
+
+**Setup Steps:**
+
+1. Register your app as an "iOS application" in the [Google Cloud Console](https://console.cloud.google.com)
+2. Set Bundle ID to `com.snap.spectacles` when creating the iOS client
+3. Use the custom scheme format for redirect URIs as shown below
+
+**URI Format:**
+
+- **Development:** `com.snap.spectacles:/specslink/oauth2redirect/unsecure`
+- **Published Lens:** `com.snap.spectacles:/specslink/oauth2redirect/[LENS_ID]`
+
+**Implementation Example:**
+
+```typescript
+const googleOAuth = new OAuth2({
+  clientId: 'YOUR_GOOGLE_CLIENT_ID',
+  authorizationUri: 'https://accounts.google.com/o/oauth2/v2/auth',
+  tokenUri: 'https://oauth2.googleapis.com/token',
+  redirectUri: 'com.snap.spectacles:/specslink/oauth2redirect/LENS_ID', // For published lens
+  // redirectUri: 'com.snap.spectacles:/specslink/oauth2redirect/unsecure' // For development
+});
+```
+
+## Starting a New project
+
+### Importing Auth Kit into a New Lens Studio Project
+
+To start building an authenticated Spectacles Lens from scratch using Auth Kit, follow these steps:
+
+1. Create a new Lens Studio project or open an existing Spectacles project.
+
+2. Import the Auth Kit package from Asset Library. Follow [this guide](/lens-studio/assets-pipeline/asset-library/asset-library-overview#using-the-asset-library) to learn how to install packages from the Asset Library.
+
+3. Create a new TypeScript script in your project and import the OAuth2 class from Auth Kit:
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```typescript
+import { OAuth2 } from 'AuthKit.lspkg/Core/OAuth2';
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+var OAuth2 = require('AuthKit.lspkg/Core/OAuth2').OAuth2;
+```
+
+</TabItem>
+</Tabs>
+
+4. Configure your OAuth2 provider with the required settings for Spectacles App integration:
+
+```typescript
+const oauth = new OAuth2({
+  clientId: 'YOUR_CLIENT_ID', // Required: OAuth2 client ID
+  authorizationUri: 'https://example.com/oauth/authorize', // Required: Authorization endpoint
+  tokenUri: 'https://example.com/oauth/token', // Required: Token exchange endpoint
+  refreshUri: 'https://example.com/oauth/refresh', // Optional: Token refresh endpoint
+  clientSecret: 'YOUR_CLIENT_SECRET', // Optional: For confidential clients
+  redirectUri:
+    'https://www.spectacles.com/deeplink/specslink/oauth2redirect/LENS_ID',
+});
+```
+
+## Basic Usage
+
+:::note
+
+The following examples are code snippets and may not be completed and won't run as-is.
+
+:::
+
+### Setting Up Auth Kit with OAuth2
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```typescript
+import { OAuth2 } from 'OAuth2Kit.lspkg/Core/OAuth2';
+
+// Create OAuth2 instance configured for Spectacles App integration
+const oauth = new OAuth2({
+  clientId: 'YOUR_CLIENT_ID', // Required: OAuth2 client ID
+  authorizationUri: 'https://example.com/oauth/authorize', // Required: Authorization endpoint
+  tokenUri: 'https://example.com/oauth/token', // Required: Token exchange endpoint
+  refreshUri: 'https://example.com/oauth/refresh', // Optional: Token refresh endpoint
+  clientSecret: 'YOUR_CLIENT_SECRET', // Optional: For confidential clients
+  redirectUri:
+    'https://www.spectacles.com/deeplink/specslink/oauth2redirect/LENS_ID',
+});
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+var OAuth2 = require('OAuth2Kit.lspkg/Core/OAuth2').OAuth2;
+
+// Create OAuth2 instance configured for Spectacles App integration
+var oauth = new OAuth2({
+  clientId: 'YOUR_CLIENT_ID', // Required: OAuth2 client ID
+  authorizationUri: 'https://example.com/oauth/authorize', // Required: Authorization endpoint
+  tokenUri: 'https://example.com/oauth/token', // Required: Token exchange endpoint
+  refreshUri: 'https://example.com/oauth/refresh', // Optional: Token refresh endpoint
+  clientSecret: 'YOUR_CLIENT_SECRET', // Optional: For confidential clients
+  redirectUri:
+    'https://www.spectacles.com/deeplink/specslink/oauth2redirect/LENS_ID',
+});
+```
+
+</TabItem>
+</Tabs>
+
+### Starting Authentication via Spectacles App
+
+```typescript
+try {
+  // Start the OAuth2 authorization process through Spectacles App
+  const token = await oauth.authorize('read write profile');
+
+  if (token) {
+    print('Successfully authorized via Spectacles App!');
+
+    // Get access token for authenticated API calls
+    const accessToken = await oauth.getAccessToken();
+
+    // Make authenticated requests to your OAuth2 provider
+    const response = await fetch('https://api.provider.com/user', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+  }
+} catch (error) {
+  print(`Authorization failed: ${error.message}`);
+}
+```
+
+### Checking Authorization Status
+
+```typescript
+// Check if user is currently authorized through Auth Kit
+if (oauth.isAuthorized) {
+  print('User is authenticated via Spectacles App');
+  // Access token will be automatically refreshed if needed
+  const accessToken = await oauth.getAccessToken();
+} else {
+  print('User needs to authenticate through Spectacles App');
+  // Initiate OAuth2 authorization flow via Spectacles App
+  await oauth.authorize('required scopes');
+}
+```
+
+### Sign Out
+
+```typescript
+// Clear stored tokens and sign out user from Auth Kit
+oauth.signOut();
+```
+
+### Configuration Options
+
+When creating an OAuth2 instance for Auth Kit, you can configure the following options:
+
+| Option               | Type   | Required | Description                                        |
+| -------------------- | ------ | -------- | -------------------------------------------------- |
+| `clientId`           | string | ✅       | Your OAuth2 client ID from the provider            |
+| `authorizationUri`   | string | ✅       | OAuth2 authorization endpoint URL                  |
+| `tokenUri`           | string | ✅       | OAuth2 token exchange endpoint URL                 |
+| `refreshUri`         | string | ?        | Token refresh endpoint (defaults to tokenUri)      |
+| `clientSecret`       | string | ?        | OAuth2 client secret (for confidential clients)    |
+| `authenticationType` | string | ✅       | Flow type: "code" (recommended for Spectacles App) |
+
+## Testing Requirements
+
+Auth Kit is designed exclusively for Spectacles and requires specific setup for testing:
+
+### Prerequisites for Testing
+
+1. **Spectacles Device**: Auth Kit is not compatible with Lens Studio Editor - you must test on actual Spectacles
+2. **Spectacles App**: Ensure the Spectacles App is installed and ready on your mobile device
+3. **Mobile Device**: The Spectacles App handles OAuth2 redirects and requires a connected mobile device
+4. **Network Connection**: Both Spectacles and your mobile device need internet connectivity
+
+### Testing Steps
+
+1. **Deploy your Lens** to Spectacles using Lens Studio
+2. **Open the Spectacles App** on your mobile device
+3. **Launch your Lens** on the Spectacles device
+4. **Initiate authentication** through your Lens interface
+5. **Check your mobile device** and a notification will appear to verify the OAuth2 connection
+6. **Complete the authentication flow** by following the prompts in the Spectacles App
+
+### Error Handling
+
+Auth Kit provides detailed error messages for common OAuth2 scenarios:
+
+```typescript
+try {
+  await oauth.authorize('read write');
+} catch (error) {
+  print(`Auth Kit OAuth2 error: ${error.message}`);
+}
+```

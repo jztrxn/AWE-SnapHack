@@ -1,0 +1,93 @@
+---
+sidebar_position: 5
+description: 'Configure the Spectacles Interaction Kit cursor for hand and controller input, including visual feedback, targeting behavior, and hover states.'
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Cursor
+
+Spectacles Interaction Kit provides control and targeting feedback through the **cursor components**. To support scenarios where users interact from a distance greater than arm’s reach (the “farfield” use case), the **InteractorCursor** projects along the direction of the user's **Interactor**, helping users understand how to target more distant objects. The **InteractorCursor** offers automatic feedback when targeting objects.
+
+<video
+  src="/img/spectacles/ui/cursor-example.webm"
+  style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+  autoPlay
+  loop
+  muted
+  playsInline
+></video>
+
+To enable each **Interactor** to benefit from cursor feedback, Spectacles Interaction Kit provides the **CursorController** component. This component automatically instantiates and manages an **InteractorCursor** for each **Interactor** in the scene. The **CursorController** is included in the starter project by default.
+
+<video
+  src="/img/spectacles/ui/container-example.webm"
+  style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+  autoPlay
+  loop
+  muted
+  playsInline
+></video>
+
+## Relevant Components
+
+**InteractorCursor** reads the state of an **Interactor** (such as position, direction, and target) to reposition the cursor and adjust visual feedback to reflect current state.
+
+**CursorController** automatically instantiates an **InteractorCursor** for each **Interactor** within the scene, streamlining integration.
+
+### Code Example
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+import { SIK } from 'SpectaclesInteractionKit.lspkg/SIK';
+
+@component
+export class ExampleCursorScript extends BaseScriptComponent {
+  onAwake() {
+    this.createEvent('OnStartEvent').bind(() => {
+      this.onStart();
+    });
+  }
+
+  onStart() {
+    let cursorController = SIK.CursorController;
+
+    // Disable the visual of all cursors in the scene.
+    let cursors = cursorController.getAllCursors();
+    for (const cursor of cursors) {
+      cursor.enabled = false;
+    }
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+const SIK = require('SpectaclesInteractionKit.lspkg/SIK').SIK;
+const cursorController = SIK.CursorController;
+
+function onAwake() {
+  // Wait for other components to initialize by deferring to OnStartEvent.
+  script.createEvent('OnStartEvent').bind(() => {
+    onStart();
+  });
+}
+
+function onStart() {
+  // Disable the visual of all cursors in the scene.
+  let cursors = cursorController.getAllCursors();
+  for (const cursor of cursors) {
+    cursor.enabled = false;
+  }
+}
+
+onAwake();
+```
+
+</TabItem>
+</Tabs>

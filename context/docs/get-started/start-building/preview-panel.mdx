@@ -1,0 +1,43 @@
+---
+sidebar_position: 2
+description: 'Use the Spectacles Preview Panel in Lens Studio to simulate and test your Lens experience before deploying to Spectacles.'
+---
+
+# Preview Panel for Spectacles
+
+Simulate your Lens on a device using the Preview Panel without deploying it to the device. In the Preview Panel, configure the simulation environment for Spectacles (2024). Spectacles introduces new features and APIs that are only compatible with Spectacles.
+
+It is recommended that you turn on the [Interactive Preview Mode](/lens-studio/lens-studio-workflow/previewing-your-lens#interactive-preview) to fully leverage these features.
+
+## Simulation Mode with Spectacles (2024) Renders
+
+In Spectacles (2024) simulation mode within the Preview Panel, the display rendering mimics the additive display you will experience on the actual device.
+
+<img
+  src="/img/spectacles/setup/preview-panel-spectacles-simulation.png"
+  style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+/>
+
+### Stereo Rendering
+
+While in Simulation mode for Spectacles, you can adjust the settings for Stereo Eye rendering:
+
+- Left: Displays the rendering of the left eye.
+
+- Right: Displays the rendering of the right eye.
+
+- Center: Provides an estimation of what the content will look like from the user's perspective.
+
+<img
+  src="/img/spectacles/setup/preview-panel-stereo-view.png"
+  style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+/>
+
+## Simulation Mode without Spectacles (2024) Renders
+
+If you need to use Spectacles-specific APIs without the mocked rendering, set your simulation mode to No Simulation. Then, navigate to Settings → Device Type Override → Spectacles.
+
+<img
+  src="/img/spectacles/setup/preview-panel-device-override.png"
+  style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+/>

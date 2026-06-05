@@ -1,0 +1,106 @@
+---
+sidebar_position: 2
+description: 'Combine Spectacles Sync Kit with Custom Locations to build shared multiplayer experiences anchored to specific real-world mapped locations.'
+---
+
+# Connected Custom Location
+
+Location Based Experience brings together [Custom Location](https://developers.snap.com/spectacles/about-spectacles-features/apis/custom-locations) and the [Spectacles Sync Kit](https://developers.snap.com/spectacles/spectacles-frameworks/spectacles-sync-kit/overview.mdx) to enable persistent, shared AR experiences tied to real-world environments. By pre-scanning a location, creators can deliver seamless multiplayer interactions without the need to restart the mapping flow each time the Lens is launched. New features like Guided Mode and Same Session Setup further simplify the experience, making development faster and more efficient.
+
+### Creating a Custom Location
+
+A detailed workflow for setting up a Custom Location can be found in the [Custom Location documentation](https://developers.snap.com/spectacles/about-spectacles-features/apis/custom-locations).
+
+:::note
+Currently this feature only supports one location. `Custom Location Group` is not supported.
+:::
+
+### Setting up Colocated World
+
+Once a Custom Location has been created in Lens Studio, go to `Colocated World` Scene Object and place `Location` asset into `Located At component`.
+
+<p align="center">
+  <img
+    src="/img/spectacles/spectacles-sync-kit/location-locatedAt.png"
+    style={{ maxWidth: '500px', width: '100%', borderRadius: '8px' }}
+  />
+</p>
+
+### Creating a Location Mesh Visualization for Content Placement
+
+When using a Custom Location for a Connected Lens, the origin point `(0, 0, 0)` does not align with the device's position upon completing the mapping process. Instead, the origin is determined by the location where the map was originally generated in Spectacles. Including the `Location Mesh` in Lens Studio helps accurately visualize and position content within the scene.
+
+1. To create a `Location Mesh` and `Location Material`, click the `“+”` button in Lens Studio and select `Location Mesh` and `Location Material` from the options.
+
+<p align="center">
+  <img
+    src="/img/spectacles/spectacles-sync-kit/location-mesh.png"
+    style={{ maxWidth: '500px', width: '100%', borderRadius: '8px' }}
+  />
+</p>
+
+2. In the `Location Mesh` asset, assign the `Location` asset to the `Location` input field.
+
+<p align="center">
+  <img
+    src="/img/spectacles/spectacles-sync-kit/location-mesh-location.png"
+    style={{ maxWidth: '500px', width: '100%', borderRadius: '8px' }}
+  />
+</p>
+
+3. Create a Scene Object with a `RenderMeshVisual` component, then assign the `Location Mesh` and `Location Material` to their respective input fields.
+
+<p align="center">
+  <img
+    src="/img/spectacles/spectacles-sync-kit/location-mesh-material.png"
+    style={{ maxWidth: '500px', width: '100%', borderRadius: '8px' }}
+  />
+</p>
+
+4. The Scene View should display the Location Mesh with Material applied.
+
+:::note
+The transform of the Location Mesh Scene Object should remain at its default position (0, 0, 0). Modifying the transform will result in misalignment within the Lens.
+:::
+
+<p align="center">
+  <img
+    src="/img/spectacles/spectacles-sync-kit/location-mesh-render.png"
+    style={{ maxWidth: '500px', width: '100%', borderRadius: '8px' }}
+  />
+</p>
+
+### Custom Mapping Visuals for Location Based Experience
+
+To enhance user experience during the mapping process, developers can implement custom mapping visuals.
+
+1. Unpack **Spectacles Sync Kit** package and locate the `ColocationUI` prefab in Asset Browser.
+
+<p align="center">
+  <img
+    src="/img/spectacles/spectacles-sync-kit/ssk-colocationUI.png"
+    style={{ maxWidth: '300px', width: '100%', borderRadius: '8px' }}
+  />
+</p>
+
+2. Open `ColocationUI` prefab in the Scene Hierarchy. The mapping UI offers options for customization. For example, you can modify the `RelocalizationGuidance` text and animations to provide specific guidance to users during the mapping process.
+
+:::note
+Modifying the `ColocationUI` prefab directly will not be reflected because the contents are controlled by the scripts. To create a unique experience, please follow next steps.
+:::
+
+<p align="center">
+  <img
+    src="/img/spectacles/spectacles-sync-kit/ssk-colocationUI-structure.png"
+    style={{ maxWidth: '300px', width: '100%', borderRadius: '8px' }}
+  />
+</p>
+
+3. In order to override the current setup, locate `CustomLandmarkGuidance` folder in Asset Browser and modify these scripts to fit your needs. For example, change the text copies in `GuidanceCopy` script will allow you to customize the instructions shown to users during the mapping process.
+
+<p align="center">
+  <img
+    src="/img/spectacles/spectacles-sync-kit/ssk-colocationUI-guidance.png"
+    style={{ maxWidth: '300px', width: '100%', borderRadius: '8px' }}
+  />
+</p>

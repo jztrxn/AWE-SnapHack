@@ -1,0 +1,285 @@
+---
+sidebar_position: 10
+description: 'Use SyncEntity to make scene objects syncable, sharing their state and properties across connected Spectacles users.'
+---
+
+import CodeExamples from '@site/src/components/CodeExample';
+
+import createSyncEntityTs from './code-examples/sync-entity/ts/create-sync-entity.ts?raw';
+import constructorWithParamsTs from './code-examples/sync-entity/ts/constructor-with-params.ts?raw';
+import getOnSceneObjectTs from './code-examples/sync-entity/ts/get-on-scene-object.ts?raw';
+import getOnComponentTs from './code-examples/sync-entity/ts/get-on-component.ts?raw';
+import notifyOnReadyTs from './code-examples/sync-entity/ts/notify-on-ready.ts?raw';
+import isSetupFinishedTs from './code-examples/sync-entity/ts/is-setup-finished.ts?raw';
+import requestOwnershipOnCreationTs from './code-examples/sync-entity/ts/request-ownership-on-creation.ts?raw';
+import requestOwnershipTs from './code-examples/sync-entity/ts/request-ownership.ts?raw';
+import tryClaimOwnershipTs from './code-examples/sync-entity/ts/try-claim-ownership.ts?raw';
+import tryRevokeOwnershipTs from './code-examples/sync-entity/ts/try-revoke-ownership.ts?raw';
+import isStoreOwnedTs from './code-examples/sync-entity/ts/is-store-owned.ts?raw';
+import doIOwnStoreTs from './code-examples/sync-entity/ts/do-i-own-store.ts?raw';
+import canIModifyStoreTs from './code-examples/sync-entity/ts/can-i-modify-store.ts?raw';
+import ownerInfoTs from './code-examples/sync-entity/ts/owner-info.ts?raw';
+import onOwnerUpdatedTs from './code-examples/sync-entity/ts/on-owner-updated.ts?raw';
+import persistenceTs from './code-examples/sync-entity/ts/persistence.ts?raw';
+import destroyTs from './code-examples/sync-entity/ts/destroy.ts?raw';
+import destroyCheckTs from './code-examples/sync-entity/ts/destroy-check.ts?raw';
+import onDestroyedEventsTs from './code-examples/sync-entity/ts/on-destroyed-events.ts?raw';
+
+import createSyncEntityJs from './code-examples/sync-entity/js/create-sync-entity.js?raw';
+import constructorWithParamsJs from './code-examples/sync-entity/js/constructor-with-params.js?raw';
+import getOnSceneObjectJs from './code-examples/sync-entity/js/get-on-scene-object.js?raw';
+import getOnComponentJs from './code-examples/sync-entity/js/get-on-component.js?raw';
+import notifyOnReadyJs from './code-examples/sync-entity/js/notify-on-ready.js?raw';
+import isSetupFinishedJs from './code-examples/sync-entity/js/is-setup-finished.js?raw';
+import requestOwnershipOnCreationJs from './code-examples/sync-entity/js/request-ownership-on-creation.js?raw';
+import requestOwnershipJs from './code-examples/sync-entity/js/request-ownership.js?raw';
+import tryClaimOwnershipJs from './code-examples/sync-entity/js/try-claim-ownership.js?raw';
+import tryRevokeOwnershipJs from './code-examples/sync-entity/js/try-revoke-ownership.js?raw';
+import isStoreOwnedJs from './code-examples/sync-entity/js/is-store-owned.js?raw';
+import doIOwnStoreJs from './code-examples/sync-entity/js/do-i-own-store.js?raw';
+import canIModifyStoreJs from './code-examples/sync-entity/js/can-i-modify-store.js?raw';
+import ownerInfoJs from './code-examples/sync-entity/js/owner-info.js?raw';
+import onOwnerUpdatedJs from './code-examples/sync-entity/js/on-owner-updated.js?raw';
+import persistenceJs from './code-examples/sync-entity/js/persistence.js?raw';
+import destroyJs from './code-examples/sync-entity/js/destroy.js?raw';
+import destroyCheckJs from './code-examples/sync-entity/js/destroy-check.js?raw';
+import onDestroyedEventsJs from './code-examples/sync-entity/js/on-destroyed-events.js?raw';
+
+# Sync Entity
+
+The SyncEntity class is the scripting foundation for syncing data in a Lens. A SyncEntity connects a script to a Realtime Store, letting the script manage the state of the entity, including synced data.
+
+### Creating a New SyncEntity
+
+Creating a new SyncEntity is as straightforward as calling the SyncEntity constructor. The script component associated with the SyncEntity is passed as a required parameter.
+
+<CodeExamples
+  typescriptCode={createSyncEntityTs}
+  javascriptCode={createSyncEntityJs}
+  lineRange={{ typescript: '6-6', javascript: '4-4' }}
+/>
+
+The constructor also accepts the following optional parameters:
+
+- `storagePropertySet`: [StoragePropertySet](./storage-properties#adding-storage-properties-to-a-syncentity)
+- `claimOwnership`: boolean, see [Ownership](#ownership)
+- `persistence`: `RealtimeStoreCreateOptions.Persistence`, see [Persistence](#persistence)
+- `networkIdOptions`: [NetworkIdOptions](#network-id)
+
+<CodeExamples
+  typescriptCode={constructorWithParamsTs}
+  javascriptCode={constructorWithParamsJs}
+  lineRange={{ typescript: '8-8', javascript: '4-4' }}
+/>
+
+### Getting an Existing SyncEntity
+
+There may be cases where a scene object already has a script with a sync entity attached to it, such as a [SyncTransform](./sync-transform) component. In this case, the existing SyncEntity can be accessed from another script, instead of creating a new one.
+
+A SyncEntity can be found on a scene object by calling:
+
+<CodeExamples
+  typescriptCode={getOnSceneObjectTs}
+  javascriptCode={getOnSceneObjectJs}
+  lineRange={{ typescript: '8-10', javascript: '4-6' }}
+/>
+
+A SyncEntity can be found on a component by calling:
+
+<CodeExamples
+  typescriptCode={getOnComponentTs}
+  javascriptCode={getOnComponentJs}
+  lineRange={{ typescript: '8-8', javascript: '9-9' }}
+/>
+
+If no SyncEntity is found, `null` is returned.
+
+### SyncEntity Setup
+
+Before a SyncEntity is fully available for use, it needs to finish its setup process. This includes:
+
+- Waiting for the multiplayer session to connect.
+- Connecting to its existing Realtime Store, or creating a new one if none is found.
+
+It is important that setup is finished before data is accessed from the SyncEntity. To check that a SyncEntity is ready to use, call `SyncEntity.notifyOnReady()`. The method accepts a callback function that runs once the SyncEntity is ready. If setup is already finished, the callback function executes immediately.
+
+<CodeExamples
+  typescriptCode={notifyOnReadyTs}
+  javascriptCode={notifyOnReadyJs}
+  lineRange={{ typescript: '8-15', javascript: '6-11' }}
+/>
+
+You can also check if setup has completed by checking `SyncEntity.isSetupFinished`, which is a boolean.
+
+<CodeExamples
+  typescriptCode={isSetupFinishedTs}
+  javascriptCode={isSetupFinishedJs}
+  lineRange={{ typescript: '9-11', javascript: '6-8' }}
+/>
+
+Many actions are completely fine to do before setup is finished, such as subscribing to events, adding [storage properties](./storage-properties), or subscribing to storage property changes. You can even preemptively request ownership before setup is finished. It is generally good practice to wait until setup has completed before starting any SyncEntity behavior like sending [networked events](./networked-events), or modifying storage properties.
+
+### Ownership
+
+Each SyncEntity can either have an owner or be unowned. If a SyncEntity is owned, only the owner is allowed to modify its values. If a SyncEntity is unowned, any user can modify the values. Ownership follows the same rules as Realtime Store ownership.
+
+#### Request Ownership
+
+You can request ownership of a SyncEntity in multiple ways: either when the entity is created or afterward.
+
+#### Request Ownership on Creation
+
+Ownership can be requested while constructing the SyncEntity by passing a `requestOwnership` boolean as the third parameter. To request ownership, pass `true`.
+
+<CodeExamples
+  typescriptCode={requestOwnershipOnCreationTs}
+  javascriptCode={requestOwnershipOnCreationJs}
+  lineRange={{ typescript: '8-8', javascript: '4-4' }}
+/>
+
+:::info
+If the SyncEntity is already owned, the ownership request will be added to a queue and tried again whenever the entity becomes unowned.
+:::
+
+After the SyncEntity has been created, ownership can either be requested with a one-time request, or as a queued request.
+
+#### One-Time Ownership Request
+
+To do a one-time ownership request, use `SyncEntity.requestOwnership()`. The method accepts `onSuccess` and `onError` callbacks as parameters. This will immediately callback with success if the local user already owns it. If the SyncEntity is unowned, ownership is granted and the success callback runs. If the SyncEntity is already owned, the request is not granted and nothing further happens. If an error occurs during the request, the error callback runs.
+
+<CodeExamples
+  typescriptCode={requestOwnershipTs}
+  javascriptCode={requestOwnershipJs}
+  lineRange={{ typescript: '8-18', javascript: '6-15' }}
+/>
+
+#### Queued Ownership Request
+
+Alternatively, ownership requests can be placed in a queue and granted when the SyncEntity becomes unowned. This is done by calling `SyncEntity.tryClaimOwnership()`, which also takes `onSuccess` and `onError` callbacks as parameters. This will also immediately callback with success if the local user already owns it. This places the request in a queue, and the SyncEntity will continue to try gaining ownership whenever the SyncEntity becomes unowned. If the SyncEntity has not yet finished setup when this function is called, the ownership request will be put into the queue so that ownership can be requested as soon as possible.
+
+<CodeExamples
+  typescriptCode={tryClaimOwnershipTs}
+  javascriptCode={tryClaimOwnershipJs}
+  lineRange={{ typescript: '8-18', javascript: '6-14' }}
+/>
+
+#### Revoke Ownership
+
+Ownership of a SyncEntity can be revoked using `SyncEntity.tryRevokeOwnership()`. The method accepts optional `onSuccess` and `onError` callbacks as parameters. This will immediately callback with success if the local user does not own the SyncEntity.
+
+<CodeExamples
+  typescriptCode={tryRevokeOwnershipTs}
+  javascriptCode={tryRevokeOwnershipJs}
+  lineRange={{ typescript: '9-11', javascript: '6-8' }}
+/>
+
+#### Check Ownership
+
+Check if the SyncEntity's Realtime Store is owned using `SyncEntity.isStoreOwned()`.
+
+<CodeExamples
+  typescriptCode={isStoreOwnedTs}
+  javascriptCode={isStoreOwnedJs}
+  lineRange={{ typescript: '9-11', javascript: '6-8' }}
+/>
+
+Check if the local user owns the SyncEntity's Realtime Store using `SyncEntity.doIOwnStore()`.
+
+<CodeExamples
+  typescriptCode={doIOwnStoreTs}
+  javascriptCode={doIOwnStoreJs}
+  lineRange={{ typescript: '9-11', javascript: '6-8' }}
+/>
+
+Check if the local user is allowed to modify the SyncEntity's Realtime Store using `SyncEntity.canIModifyStore()`.
+
+<CodeExamples
+  typescriptCode={canIModifyStoreTs}
+  javascriptCode={canIModifyStoreJs}
+  lineRange={{ typescript: '9-11', javascript: '6-8' }}
+/>
+
+To get the current owner's [UserInfo](./user-information), use `SyncEntity.ownerInfo`. This can return `null`, or be a UserInfo object with `null` fields if the SyncEntity is unowned.
+
+<CodeExamples
+  typescriptCode={ownerInfoTs}
+  javascriptCode={ownerInfoJs}
+  lineRange={{ typescript: '9-10', javascript: '6-7' }}
+/>
+
+#### React to Ownership changes
+
+Use the `SyncEntity.onOwnerUpdated` event to be notified when ownership changes.
+
+<CodeExamples
+  typescriptCode={onOwnerUpdatedTs}
+  javascriptCode={onOwnerUpdatedJs}
+  lineRange={{ typescript: '9-11', javascript: '6-8' }}
+/>
+
+### Persistence
+
+Each SyncEntity has a persistence setting that is specified during construction. The argument can either be a `RealtimeStoreCreateOptions.Persistence` value, or a string (for example, "Session").
+
+- **Session**: Default value. The SyncEntity's state persists as long as at least one user is in the session. If no users are in the session, the SyncEntity's state will be reset the next time the session is joined by a user.
+- **Persist**: The SyncEntity's state persists even after all users leave the session. Not currently supported on Spectacles.
+- **Owner**: This is meant to be used with SyncEntities that have an owner. If the owner leaves the session, the SyncEntity will automatically be destroyed.
+- **Ephemeral**: This is not suggested for use with SyncEntity.
+
+<CodeExamples
+  typescriptCode={persistenceTs}
+  javascriptCode={persistenceJs}
+  lineRange={{ typescript: '8-8', javascript: '4-4' }}
+/>
+
+### Storage Properties
+
+Storage properties allow values to be synchronized on a SyncEntity via its Realtime Store. For example, storage properties can be used to share a player's current score or display name, or to sync the position of a scene object.
+
+For more information on how to create, modify, and respond to storage property changes, see [Storage Properties](./storage-properties).
+
+### Network ID
+
+A Network ID uniquely identifies a SyncEntity in the session. Two types of Network ID can be used: Object ID or Custom. Object ID automatically generates a Network ID for the SyncEntity. It is the default and should be used in most cases. Custom lets you enter your own Network ID string. The NetworkIdOptions class can be passed into the SyncEntity constructor, although it can usually be skipped.
+
+- `NetworkID.networkIdType`: `NetworkIdType.ObjectId` or `NetworkIDType.Custom`
+- `NetworkID.customNetworkId`: Custom string
+- `NetworkID.customPrefix`: Custom string to prepend to the Network ID
+
+### Networked Events
+
+Networked events can be used to send messages from the local SyncEntity to other clients in the Connected Lenses session. Networked events do not change the state of the SyncEntity, but enable immediate, one-time communication.
+
+For more information on how to create, send, and respond to networked events, see [Networked Events](./networked-events).
+
+### Destroying a SyncEntity
+
+To destroy a SyncEntity, call `SyncEntity.destroy()`. This will also destroy the scene object that the SyncEntity's script component is attached to.
+
+<CodeExamples
+  typescriptCode={destroyTs}
+  javascriptCode={destroyJs}
+  lineRange={{ typescript: '9-9', javascript: '6-6' }}
+/>
+
+Destroying the SyncEntity will mark it as destroyed by setting `SyncEntity.destroyed` to true. This boolean can be used to check if a SyncEntity has been destroyed.
+
+<CodeExamples
+  typescriptCode={destroyCheckTs}
+  javascriptCode={destroyCheckJs}
+  lineRange={{ typescript: '9-11', javascript: '6-8' }}
+/>
+
+SyncEntities also have events that are triggered when destroyed.
+
+- `SyncEntity.onDestroyed`: Called when a SyncEntity is destroyed by a local or remote user.
+- `SyncEntity.onLocalDestroyed`: Called when a SyncEntity is destroyed by the local user.
+- `SyncEntity.onRemoteDestroyed`: Called when a SyncEntity is destroyed by another user.
+
+A callback function can be added to these events.
+
+<CodeExamples
+  typescriptCode={onDestroyedEventsTs}
+  javascriptCode={onDestroyedEventsJs}
+  lineRange={{ typescript: '9-19', javascript: '6-16' }}
+/>

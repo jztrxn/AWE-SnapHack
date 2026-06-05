@@ -1,0 +1,300 @@
+---
+sidebar_position: 3
+description: "Use the Spectacles Interaction Kit's hand tracking system to detect hand poses, pinch gestures, and finger positions for Spectacles interactions."
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Hand Tracking
+
+The Spectacles Interaction Kit enables developers to create immersive augmented reality experiences using hand tracking as an input method. This technology allows users to interact with their environment in a natural way, enhancing the sense of presence and social interaction. By leveraging hand tracking, developers can create more dynamic and realistic AR interactions.
+
+<video
+  src="/img/spectacles/misc/hand-tracking-pinch.webm"
+  style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+  autoPlay
+  loop
+  muted
+  playsInline
+></video>
+
+Developers can utilize several hand interaction modes within the Spectacles Interaction Kit, including indirect (ray-based) interactions, direct-pinch, and direct-poke, to enhance their lenses. These interaction modalities offer flexibility in user engagement with AR content, allowing for contextually appropriate experiences. SIK’s hand tracking input also works in conjunction with other input methods, such as mobile controller input, providing a multi-faceted approach to user interaction with lenses.
+
+## Relevant Components
+
+### Code Example - Hand Input Data
+
+**HandInputData** interfaces with Lens Studio’s ObjectTracking3D and GestureModule to provide hand tracking data to the rest of SIK, and in particular to the **HandInteractor** and **HandVisual** components. Please note that **HandInputData** provides hand tracking data only.
+**TrackedHand** represents and manages a tracked hand. It can be accessed using **HandInputData**’s **getHand** API. **TrackedHand** provides useful properties, including all keypoints of the hand, among others.
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+import { SIK } from 'SpectaclesInteractionKit.lspkg/SIK';
+
+@component
+export class ExampleHandScript extends BaseScriptComponent {
+  onAwake() {
+    this.createEvent('OnStartEvent').bind(() => {
+      this.onStart();
+    });
+  }
+
+  onStart() {
+    // Retrieve HandInputData from SIK's definitions.
+    let handInputData = SIK.HandInputData;
+
+    // Fetch the TrackedHand for left and right hands.
+    let leftHand = handInputData.getHand('left');
+    let rightHand = handInputData.getHand('right');
+
+    // Add print callbacks for whenever these hands pinch.
+    leftHand.onPinchDown.add(() => {
+      print(
+        `The left hand has pinched. The tip of the left index finger is: ${leftHand.indexTip.position}.`
+      );
+    });
+    rightHand.onPinchDown.add(() => {
+      print(
+        `The right hand has pinched. The tip of the right index finger is: ${rightHand.indexTip.position}.`
+      );
+    });
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+const SIK = require('SpectaclesInteractionKit.lspkg/SIK').SIK;
+const handInputData = SIK.HandInputData;
+
+function onAwake() {
+  // Wait for other components to initialize by deferring to OnStartEvent.
+  script.createEvent('OnStartEvent').bind(() => {
+    onStart();
+  });
+}
+
+function onStart() {
+  // Fetch the TrackedHand for left and right hands.
+  var leftHand = handInputData.getHand('left');
+  var rightHand = handInputData.getHand('right');
+
+  // Add print callbacks for whenever these hands pinch.
+  leftHand.onPinchDown.add(() => {
+    print(
+      `The left hand has pinched. The tip of the left index finger is: ${leftHand.indexTip.position}.`
+    );
+  });
+  rightHand.onPinchDown.add(() => {
+    print(
+      `The right hand has pinched. The tip of the right index finger is: ${rightHand.indexTip.position}.`
+    );
+  });
+}
+
+onAwake();
+```
+
+</TabItem>
+</Tabs>
+
+### Code Example - HandInteractor
+
+**HandInteractor** processes information from **HandInputData** to interact with scene objects in the lens that have an **Interactable** component. For more information about the interaction system, refer to [Interaction System](./interactionsystem.mdx).
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+import { SIK } from 'SpectaclesInteractionKit.lspkg/SIK';
+import { InteractorInputType } from 'SpectaclesInteractionKit.lspkg/Core/Interactor/Interactor';
+@component
+export class ExampleHandScript extends BaseScriptComponent {
+  onAwake() {
+    this.createEvent('UpdateEvent').bind(() => {
+      this.onUpdate();
+    });
+  }
+
+  onUpdate() {
+    // Retrieve InteractionManager from SIK's definitions.
+    let interactionManager = SIK.InteractionManager;
+
+    // Fetch the HandInteractor for left and right hands.
+    let leftHandInteractor = interactionManager.getInteractorsByType(
+      InteractorInputType.LeftHand
+    )[0];
+    let rightHandInteractor = interactionManager.getInteractorsByType(
+      InteractorInputType.RightHand
+    )[0];
+
+    // Print the position and direction of the HandInteractors each frame.
+    print(
+      `The left hand interactor is at position: ${leftHandInteractor.startPoint} and is pointing in direction: ${leftHandInteractor.direction}.`
+    );
+    print(
+      `The right hand interactor is at position: ${rightHandInteractor.startPoint} and is pointing in direction: ${rightHandInteractor.direction}.`
+    );
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+const SIK = require('SpectaclesInteractionKit.lspkg/SIK').SIK;
+const interactionManager = SIK.InteractionManager;
+const interactorInputType =
+  require('SpectaclesInteractionKit.lspkg/Core/Interactor/Interactor').InteractorInputType;
+
+function onAwake() {
+  // Wait for other components to initialize by deferring to OnStartEvent.
+  script.createEvent('UpdateEvent').bind(() => {
+    onUpdate();
+  });
+}
+
+function onUpdate() {
+  // Fetch the HandInteractor for left and right hands.
+  var leftHandInteractor = interactionManager.getInteractorsByType(
+    interactorInputType.LeftHand
+  )[0];
+  var rightHandInteractor = interactionManager.getInteractorsByType(
+    interactorInputType.RightHand
+  )[0];
+
+  // Print the position and direction of the HandInteractors each frame.
+  print(
+    `The left hand interactor is at position: ${leftHandInteractor.startPoint} and is pointing in direction: ${leftHandInteractor.direction}.`
+  );
+  print(
+    `The right hand interactor is at position: ${rightHandInteractor.startPoint} and is pointing in direction: ${rightHandInteractor.direction}.`
+  );
+}
+
+onAwake();
+```
+
+</TabItem>
+</Tabs>
+
+### Code Example - Keypoints
+
+**TrackedHand** provides access to all 21 keypoints of a tracked hand, which can be used for various purposes, such as attaching objects to specific parts of the hand or analyzing hand gestures. This class represents a keypoint representing one of the many joints of a Hand in 3D space, providing methods to retrieve its world position, world rotation, and screen-space position. It uses an ObjectTracking3D component to create an attachment point and a WorldCameraFinderProvider to convert world coordinates to screen coordinates.
+
+<img
+  src="/img/spectacles/spectacles-interaction-kit/sik-keypoints.png"
+  style={{ maxWidth: '400px', width: '100%', borderRadius: '8px' }}
+/>
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+import SIK from 'SpectaclesInteractionKit.lspkg/SIK';
+
+@component
+export class KeypointExample extends BaseScriptComponent {
+  @input
+  keypointPrefab: ObjectPrefab; // Prefab to instantiate on each keypoint
+
+  // use handInputData from SIK to get hand data
+  private handInputData = SIK.HandInputData;
+  private leftHand = this.handInputData.getHand('left');
+  private keypointSceneObject: SceneObject;
+
+  onAwake() {
+    this.onUpdatePrefabPosition();
+  }
+
+  private onUpdatePrefabPosition() {
+    this.createEvent('UpdateEvent').bind(() => {
+      if (this.leftHand.isTracked()) {
+        // Hand is tracked - create prefab if it doesn't exist
+        if (!this.keypointSceneObject) {
+          this.keypointSceneObject = this.keypointPrefab.instantiate(
+            this.getSceneObject()
+          );
+          print('Left hand tracked - instantiated keypoint prefab');
+        }
+
+        // Update position and rotation
+        const transform = this.keypointSceneObject.getTransform();
+        let indexTip = this.leftHand.indexTip;
+
+        // Set position to keypoint position
+        transform.setWorldPosition(indexTip.position);
+        // Set rotation to keypoint rotation
+        transform.setWorldRotation(indexTip.rotation);
+      } else {
+        // Hand is not tracked - destroy prefab if it exists
+        if (this.keypointSceneObject) {
+          this.keypointSceneObject.destroy();
+          this.keypointSceneObject = null;
+          print('Left hand lost - destroyed keypoint prefab');
+        }
+      }
+    });
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+//@input Asset.ObjectPrefab keypointPrefab
+
+const SIK = require('SpectaclesInteractionKit.lspkg/SIK').SIK;
+const handInputData = SIK.HandInputData;
+const leftHand = handInputData.getHand('left');
+var keypointSceneObject = null;
+
+function onAwake() {
+  onUpdatePrefabPosition();
+}
+
+function onUpdatePrefabPosition() {
+  // Create update event that runs every frame
+  var updateEvent = script.createEvent('UpdateEvent');
+  updateEvent.bind(function () {
+    if (leftHand.isTracked()) {
+      // Hand is tracked - create prefab if it doesn't exist
+      if (!keypointSceneObject) {
+        keypointSceneObject = script.keypointPrefab.instantiate(
+          script.getSceneObject()
+        );
+        print('Left hand tracked - instantiated keypoint prefab');
+      }
+
+      // Update position and rotation to follow index finger tip
+      var transform = keypointSceneObject.getTransform();
+      var indexTip = leftHand.indexTip;
+
+      // Set position to keypoint position
+      transform.setWorldPosition(indexTip.position);
+
+      // Set rotation to keypoint rotation
+      transform.setWorldRotation(indexTip.rotation);
+    } else {
+      // Hand is not tracked - destroy prefab if it exists
+      if (keypointSceneObject) {
+        keypointSceneObject.destroy();
+        keypointSceneObject = null;
+        print('Left hand lost - destroyed keypoint prefab');
+      }
+    }
+  });
+}
+// Initialize the script
+onAwake();
+```
+
+</TabItem>
+</Tabs>

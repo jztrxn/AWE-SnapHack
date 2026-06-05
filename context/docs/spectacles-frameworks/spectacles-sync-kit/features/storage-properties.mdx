@@ -1,0 +1,359 @@
+---
+sidebar_position: 9
+description: 'Sync data like scores, positions, and colors across connected users with manual and automatic StorageProperties on SyncEntities.'
+---
+
+import CodeExamples from '@site/src/components/CodeExample';
+
+import addStoragePropertyCodeTs from './code-examples/storage-properties/ts/add-storage-property.ts?raw';
+import storagePropertySetCodeTs from './code-examples/storage-properties/ts/storage-property-set.ts?raw';
+import manualStorageTypesCodeTs from './code-examples/storage-properties/ts/manual-storage-types.ts?raw';
+import customManualStorageCodeTs from './code-examples/storage-properties/ts/custom-manual-storage.ts?raw';
+import setStoragePropertyCodeTs from './code-examples/storage-properties/ts/set-storage-property.ts?raw';
+import setValueImmediateCodeTs from './code-examples/storage-properties/ts/set-value-immediate.ts?raw';
+import onAnyChangeCodeTs from './code-examples/storage-properties/ts/on-any-change.ts?raw';
+import onLocalChangeCodeTs from './code-examples/storage-properties/ts/on-local-change.ts?raw';
+import onRemoteChangeCodeTs from './code-examples/storage-properties/ts/on-remote-change.ts?raw';
+import onPendingValueChangeCodeTs from './code-examples/storage-properties/ts/on-pending-value-change.ts?raw';
+import automaticTransformCodeTs from './code-examples/storage-properties/ts/automatic-transform.ts?raw';
+import automaticBaseColorCodeTs from './code-examples/storage-properties/ts/automatic-base-color.ts?raw';
+import automaticMaterialPropertyCodeTs from './code-examples/storage-properties/ts/automatic-material-property.ts?raw';
+import automaticMeshVisualPropertyCodeTs from './code-examples/storage-properties/ts/automatic-mesh-visual-property.ts?raw';
+import automaticTextCodeTs from './code-examples/storage-properties/ts/automatic-text.ts?raw';
+import automaticStorageTypesCodeTs from './code-examples/storage-properties/ts/automatic-storage-types.ts?raw';
+import customAutomaticStorageCodeTs from './code-examples/storage-properties/ts/custom-automatic-storage.ts?raw';
+import limitSendRateCodeTs from './code-examples/storage-properties/ts/limit-send-rate.ts?raw';
+import snapshotBufferOptionsCodeTs from './code-examples/storage-properties/ts/snapshot-buffer-options.ts?raw';
+import smoothingInPropertyCodeTs from './code-examples/storage-properties/ts/smoothing-in-property.ts?raw';
+import smoothingInConstructorCodeTs from './code-examples/storage-properties/ts/smoothing-in-constructor.ts?raw';
+import smoothingWithConstructorsCodeTs from './code-examples/storage-properties/ts/smoothing-with-constructors.ts?raw';
+
+import addStoragePropertyCodeJs from './code-examples/storage-properties/js/add-storage-property.js?raw';
+import storagePropertySetCodeJs from './code-examples/storage-properties/js/storage-property-set.js?raw';
+import manualStorageTypesCodeJs from './code-examples/storage-properties/js/manual-storage-types.js?raw';
+import customManualStorageCodeJs from './code-examples/storage-properties/js/custom-manual-storage.js?raw';
+import setStoragePropertyCodeJs from './code-examples/storage-properties/js/set-storage-property.js?raw';
+import setValueImmediateCodeJs from './code-examples/storage-properties/js/set-value-immediate.js?raw';
+import onAnyChangeCodeJs from './code-examples/storage-properties/js/on-any-change.js?raw';
+import onLocalChangeCodeJs from './code-examples/storage-properties/js/on-local-change.js?raw';
+import onRemoteChangeCodeJs from './code-examples/storage-properties/js/on-remote-change.js?raw';
+import onPendingValueChangeCodeJs from './code-examples/storage-properties/js/on-pending-value-change.js?raw';
+import automaticTransformCodeJs from './code-examples/storage-properties/js/automatic-transform.js?raw';
+import automaticBaseColorCodeJs from './code-examples/storage-properties/js/automatic-base-color.js?raw';
+import automaticMaterialPropertyCodeJs from './code-examples/storage-properties/js/automatic-material-property.js?raw';
+import automaticMeshVisualPropertyCodeJs from './code-examples/storage-properties/js/automatic-mesh-visual-property.js?raw';
+import automaticTextCodeJs from './code-examples/storage-properties/js/automatic-text.js?raw';
+import automaticStorageTypesCodeJs from './code-examples/storage-properties/js/automatic-storage-types.js?raw';
+import customAutomaticStorageCodeJs from './code-examples/storage-properties/js/custom-automatic-storage.js?raw';
+import limitSendRateCodeJs from './code-examples/storage-properties/js/limit-send-rate.js?raw';
+import snapshotBufferOptionsCodeJs from './code-examples/storage-properties/js/snapshot-buffer-options.js?raw';
+import smoothingInPropertyCodeJs from './code-examples/storage-properties/js/smoothing-in-property.js?raw';
+import smoothingInConstructorCodeJs from './code-examples/storage-properties/js/smoothing-in-constructor.js?raw';
+import smoothingWithConstructorsCodeJs from './code-examples/storage-properties/js/smoothing-with-constructors.js?raw';
+
+# Storage Properties
+
+Storage properties allow data to be synchronized on a [SyncEntity](./sync-entity) and stored for subsequent use. For example, storage properties can be used to update a scoreboard or synchronize the position of an object.
+
+### Adding Storage Properties to a SyncEntity
+
+Storage properties need to be added to a SyncEntity before they have any effect. You can add a storage property to a SyncEntity at any time, but it is recommended to do it as early as possible.
+
+<CodeExamples
+  typescriptCode={addStoragePropertyCodeTs}
+  javascriptCode={addStoragePropertyCodeJs}
+  lineRange={{ typescript: '6-11', javascript: '4-9' }}
+/>
+
+Storage properties can also be added to a SyncEntity during construction as a StoragePropertySet. A StoragePropertySet constructor takes an array of StorageProperties as an argument, letting you add them all at once instead of one at a time.
+
+<CodeExamples
+  typescriptCode={storagePropertySetCodeTs}
+  javascriptCode={storagePropertySetCodeJs}
+  lineRange={{ typescript: '9-16', javascript: '7-14' }}
+/>
+
+### Manual Storage Properties
+
+Manual storage properties are handled by the developer and meant to be accessed through script. You will be responsible for changing the value and reacting to changes. Depending on the [StorageType](#storage-types), [smoothing](#smoothing-property-values) may be configurable.
+
+#### Manual Storage Types
+
+Manual storage properties are also available for all regular StorageTypes. These storage properties follow the format `StorageProperty.manual[StorageType]()`, and take the following parameters: key (string), initial value, and optional smoothing options (SnapshotBufferOptions).
+
+Smoothing is not available for some StorageTypes, like string, boolean, and integer.
+
+<CodeExamples
+  typescriptCode={manualStorageTypesCodeTs}
+  javascriptCode={manualStorageTypesCodeJs}
+  lineRange={{ typescript: '5-16', javascript: '3-14' }}
+/>
+
+#### Custom Manual Storage Property
+
+`StorageProperty.manual()` can be used to configure your own manual storage property, by passing in a property name (string), StorageType, initial value, and optional smoothing options (SnapshotBufferOptions).
+
+<CodeExamples
+  typescriptCode={customManualStorageCodeTs}
+  javascriptCode={customManualStorageCodeJs}
+  lineRange={{ typescript: '6-10', javascript: '4-8' }}
+/>
+
+### Setting Storage Property Values
+
+Manual storage properties can be updated by calling `StorageProperty.setPendingValue()`. In order to have the value sent to the network, the storage property must be modifiable, meaning the SyncEntity's store is [unowned or owned](./sync-entity#ownership) by the user who is setting it.
+
+:::info
+Storage property updates are sent to the server in the LateUpdate event.
+:::
+
+<CodeExamples
+  typescriptCode={setStoragePropertyCodeTs}
+  javascriptCode={setStoragePropertyCodeJs}
+  lineRange={{ typescript: '5-14', javascript: '3-8' }}
+/>
+
+In some rare situations, you might want to immediately set the current value of the property without waiting until end of frame, or going through the pending loop. You can do this by calling `StorageProperty.setValueImmediate()` and passing in its `SyncEntity.currentStore` and the new value. Only use this if you are confident that you have permission to change the store, for example after checking `SyncEntity.canIModifyStore()`.
+
+<CodeExamples
+  typescriptCode={setValueImmediateCodeTs}
+  javascriptCode={setValueImmediateCodeJs}
+  lineRange={{ typescript: '10-10', javascript: '8-8' }}
+/>
+
+### Getting Storage Property Values
+
+You can access the value of a storage property in three ways: `StorageProperty.currentValue`, `StorageProperty.pendingValue`, and `StorageProperty.currentOrPendingValue`.
+
+#### CurrentValue
+
+`StorageProperty.currentValue` is the value currently stored on the server and expected to be synced across the network. `StorageProperty.currentValue` is updated only after the value has been updated on the backend.
+
+#### PendingValue
+
+`StorageProperty.pendingValue` is the local value that will potentially be sent to the backend, but not necessarily. This can be useful if you want your own local value distinct from the network value. For example, you may want to simulate state on an object while you wait for an update from the owner. It is also useful if you want to access the locally changed value of a storage property in the time before it is sent to the server during LateUpdate.
+
+`StorageProperty.pendingValue` is only sent to the server if the SyncEntity can be modified (that is, the SyncEntity is unowned or owned by the local user).
+
+#### CurrentOrPendingValue
+
+`StorageProperty.currentOrPendingValue` can be either the currentValue or the pendingValue, depending on which was set most recently. This is useful if you just want to use whichever value was updated last and do not need to care about where it came from.
+
+When accessing a storage property value from a `SyncEntity.notifyOnReady()` callback, use `StorageProperty.currentOrPendingValue`. For the first user to join the session `StorageProperty.currentValue` may return `null` because the value has not yet been updated on the backend.
+
+### Reacting to Storage Property changes
+
+Storage properties have events that fire when their values change, depending on who made the change.
+
+#### OnAnyChange
+
+The `StorageProperty.onAnyChange` event occurs when any user has changed the `StorageProperty.currentValue` of the storage property.
+
+<CodeExamples
+  typescriptCode={onAnyChangeCodeTs}
+  javascriptCode={onAnyChangeCodeJs}
+  lineRange={{ typescript: '8-10', javascript: '6-8' }}
+/>
+
+#### OnLocalChange
+
+The `StorageProperty.onLocalChange` event occurs when the `StorageProperty.currentValue` has been changed by the local user.
+
+<CodeExamples
+  typescriptCode={onLocalChangeCodeTs}
+  javascriptCode={onLocalChangeCodeJs}
+  lineRange={{ typescript: '8-15', javascript: '6-13' }}
+/>
+
+#### OnRemoteChange
+
+The `StorageProperty.onRemoteChange` event occurs when the `StorageProperty.currentValue` has been changed by another user.
+
+<CodeExamples
+  typescriptCode={onRemoteChangeCodeTs}
+  javascriptCode={onRemoteChangeCodeJs}
+  lineRange={{ typescript: '8-15', javascript: '6-13' }}
+/>
+
+#### OnPendingValueChange
+
+Use the `StorageProperty.onPendingValueChange` event to be notified whenever the `StorageProperty.pendingValue` is changed. This is useful in cases where send rate limits are enabled on the property, and you would like to react to local changes before they are sent out to the network.
+
+<CodeExamples
+  typescriptCode={onPendingValueChangeCodeTs}
+  javascriptCode={onPendingValueChangeCodeJs}
+  lineRange={{ typescript: '8-12', javascript: '6-8' }}
+/>
+
+### Automatic Storage Properties
+
+Automatic storage properties can be used to automatically update component and asset properties, such as position, rotation, scale, text, and base color. Automatic storage properties are given `getter` and `setter` functions that automatically read and write to an external target. They are meant to be added to a SyncEntity and forgotten about.
+
+For example, a storage property for `localPosition` automatically reads from `Transform.getLocalPosition()` to check the current local value, and writes to `Transform.setLocalPosition()` when receiving a network value. You can add the storage property to the object's SyncEntity, and the local position is automatically kept synchronized.
+
+You can either use built-in automatic storage properties, or create your own.
+
+#### Automatic Transform, Position, Rotation, and Scale
+
+For transform-related automatic properties, you need to pass in the PropertyType:
+
+- `PropertyType.Local`: Synced relative to the scene object's parent's coordinate space.
+- `PropertyType.Location`: Synced relative to the co-located coordinate space.
+- `PropertyType.World`: Synced relative to Spectacles' world origin, which is not recommended for colocation.
+
+Here are examples of how to set up automatic storage properties for transform data:
+
+<CodeExamples
+  typescriptCode={automaticTransformCodeTs}
+  javascriptCode={automaticTransformCodeJs}
+  lineRange={{ typescript: '7-26', javascript: '5-25' }}
+/>
+
+#### Automatic Base Color
+
+`StorageProperty.forMeshVisualBaseColor()` automatically syncs the base color of a MaterialMeshVisual. The first parameter is the MaterialMeshVisual, and the second is an optional clone boolean. If clone is true, the material will be cloned and applied back to the visual, which is useful if the material is used in multiple places.
+
+<CodeExamples
+  typescriptCode={automaticBaseColorCodeTs}
+  javascriptCode={automaticBaseColorCodeJs}
+  lineRange={{ typescript: '9-12', javascript: '8-11' }}
+/>
+
+#### Automatic Material Property
+
+`StorageProperty.forMaterialProperty()` automatically syncs a Material property of your choice. It expects the following parameters: Material, key (string), and [StorageType](#storage-types).
+
+<CodeExamples
+  typescriptCode={automaticMaterialPropertyCodeTs}
+  javascriptCode={automaticMaterialPropertyCodeJs}
+  lineRange={{ typescript: '10-14', javascript: '9-13' }}
+/>
+
+#### Automatic Material Mesh Visual
+
+`StorageProperty.forMeshVisualProperty()` automatically syncs a MeshVisual property of your choice. It expects the following parameters: MaterialMeshVisual, property name (string), [StorageType](#storage-types), and an optional clone boolean. If clone is true, the MeshVisual's material will be cloned and applied back to the visual, which is useful if the material is used in multiple places.
+
+<CodeExamples
+  typescriptCode={automaticMeshVisualPropertyCodeTs}
+  javascriptCode={automaticMeshVisualPropertyCodeJs}
+  lineRange={{ typescript: '10-15', javascript: '9-14' }}
+/>
+
+#### Automatic Text
+
+`StorageProperty.forTextText()` automatically syncs the text on a TextComponent. It takes the TextComponent as a parameter.
+
+<CodeExamples
+  typescriptCode={automaticTextCodeTs}
+  javascriptCode={automaticTextCodeJs}
+  lineRange={{ typescript: '9-9', javascript: '8-8' }}
+/>
+
+#### Automatic Storage Types
+
+Automatic storage properties are available for all regular [StorageTypes](#storage-types). These storage properties follow the format `StorageProperty.auto[StorageType]()`, and take the following parameters: key (string), getter (function), setter (function), and optional smoothing options (SnapshotBufferOptions).
+
+<CodeExamples
+  typescriptCode={automaticStorageTypesCodeTs}
+  javascriptCode={automaticStorageTypesCodeJs}
+  lineRange={{ typescript: '6-19', javascript: '4-17' }}
+/>
+
+#### Custom Automatic Storage Property
+
+`StorageProperty.auto()` can be used to configure your own automatic storage property, by passing in a property name (string), [StorageType](#storage-types), and getter and setter functions, and optional smoothing options (SnapshotBufferOptions).
+
+<CodeExamples
+  typescriptCode={customAutomaticStorageCodeTs}
+  javascriptCode={customAutomaticStorageCodeJs}
+  lineRange={{ typescript: '7-21', javascript: '5-19' }}
+/>
+
+### Limiting Send Rate
+
+Set `StorageProperty.sendsPerSecondLimit` to a value greater than zero to limit how many times per second the property will send updates to the network.
+
+When using this feature, `StorageProperty.currentValue` will only be updated when the value is actually sent to the network. To get the most recent local version of a value, check `StorageProperty.currentOrPendingValue`.
+
+<CodeExamples
+  typescriptCode={limitSendRateCodeTs}
+  javascriptCode={limitSendRateCodeJs}
+  lineRange={{ typescript: '7-8', javascript: '5-6' }}
+/>
+
+### Smoothing Property Values
+
+For properties that change frequently, especially when the send rate is limited, it can be useful to smooth out received values. Otherwise, the result will appear choppy since values are only updated as they are received. When smoothing is enabled, intermediate values are approximated by interpolating between updates. Smoothing is not available for some [StorageTypes](#storage-types), like string, boolean, and integer.
+
+#### SnapshotBufferOptions
+
+Smoothing is configurable using the SnapshotBufferOptions class, which includes the properties below. All properties are optional.
+
+- `SnapshotBufferOptions.interpolationTarget`: Time delta in local seconds to target (default = -0.25)
+- `SnapshotBufferOptions.storageType`: Override the StorageType, if blank the StorageProperty's StorageType will be used
+- `SnapshotBufferOptions.lerpFunc`: Override the function used for interpolating values, if blank one will be chosen based on StorageType
+- `SnapshotBufferOptions.size`: Max number of snapshots stored (default = 20)
+
+<CodeExamples
+  typescriptCode={snapshotBufferOptionsCodeTs}
+  javascriptCode={snapshotBufferOptionsCodeJs}
+  lineRange={{ typescript: '6-8', javascript: '4-6' }}
+/>
+
+You can pass in SnapshotBufferOptions directly when creating the property:
+
+<CodeExamples
+  typescriptCode={smoothingInPropertyCodeTs}
+  javascriptCode={smoothingInPropertyCodeJs}
+  lineRange={{ typescript: '5-8', javascript: '3-6' }}
+/>
+
+You can pass in SnapshotBufferOptions as an optional third parameter when constructing a StorageProperty.
+
+<CodeExamples
+  typescriptCode={smoothingInConstructorCodeTs}
+  javascriptCode={smoothingInConstructorCodeJs}
+  lineRange={{ typescript: '8-12', javascript: '6-10' }}
+/>
+
+SnapshotBufferOptions can also be passed into automatic and manual StorageProperty constructors that support smoothing.
+
+<CodeExamples
+  typescriptCode={smoothingWithConstructorsCodeTs}
+  javascriptCode={smoothingWithConstructorsCodeJs}
+  lineRange={{ typescript: '9-15', javascript: '7-13' }}
+/>
+
+### Storage Types
+
+- `StorageTypes.bool`
+- `StorageTypes.float`
+- `StorageTypes.double`
+- `StorageTypes.int`
+- `StorageTypes.string`
+- `StorageTypes.vec2`
+- `StorageTypes.vec3`
+- `StorageTypes.vec4`
+- `StorageTypes.quat`
+- `StorageTypes.mat2`
+- `StorageTypes.mat3`
+- `StorageTypes.mat4`
+- `StorageTypes.boolArray`
+- `StorageTypes.floatArray`
+- `StorageTypes.doubleArray`
+- `StorageTypes.intArray`
+- `StorageTypes.stringArray`
+- `StorageTypes.vec2Array`
+- `StorageTypes.vec3Array`
+- `StorageTypes.vec4Array`
+- `StorageTypes.quatArray`
+- `StorageTypes.mat2Array`
+- `StorageTypes.mat3Array`
+- `StorageTypes.mat4Array`
+- `StorageTypes.packedTransform` (same as `StorageTypes.vec4Array`)
+
+### Payload and Rate Limits
+
+Storage Property updates are batched each frame and sent as a single message, which counts against the [payload and message rate limits](./payload-and-rate-limits).
+
+If limits are exceeded in Lens Studio, an error will print in the Logger and the session may disconnect.

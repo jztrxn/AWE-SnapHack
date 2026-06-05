@@ -1,0 +1,199 @@
+---
+description: 'Map real-world areas with the Custom Locations Lens and load them in Lens Studio to create persistent location-based AR experiences.'
+---
+
+import ReactPlayer from 'react-player';
+
+# Custom Locations
+
+## Overview
+
+Custom Locations is an easy to use way of mapping real life areas and creating AR experiences around those locations. It uses the Custom Locations Lens to first create Custom Location maps of real-world locations, and then loading these Custom Locations into Lens Studio to author AR content.
+
+The Custom Locations Lens can be used to map individual locations, to create groups of locations and to add additional localization viewpoints to a pre-existing location.
+
+:::note
+
+**Previous Versions**
+
+This Lens and its components are an evolution of the [Custom Location Creator Lens](/lens-studio/features/location-ar/custom-landmarker-scan) available on mobile.
+
+The `LocatedAtComponent` is still used, and the [Import Mesh to Lens Studio](/lens-studio/features/location-ar/custom-landmarker-scan#import-mesh-to-lens-studio) guide is still applicable.
+
+:::
+
+### What does each Custom Location contain?
+
+A finished Custom Location contains:
+
+- A colored mesh of the location scanned
+- A series of localization viewpoints
+
+The colored mesh will be visible within Lens Studio and can be used to help the developer move virtual objects to their correct location in the editor before deploying to device.
+The localization viewpoints are captures from which the resulting Lens -- the Lens you're developing at this custom location -- can localize against. When the user of your Lens is approximately in the same position as one of these viewpoints, the system will recognize its position in space and display your content appropriately.
+
+:::note
+
+**Viewpoints**
+
+The Custom Locations Lens will capture many viewpoints during a scan; however, it is limited by where you scan from. For the best results when scanning, move laterally around the location and capture angles you expect users to be viewing from.
+
+Yellow camera objects will spawn during a scan to indicate viewpoint locations and angles.
+
+If a scan is later determined to be insufficient, a new [Incremental Scan](#Incremental-Scans) can be created with additional viewpoints. However, this will create a new ID and the Lens will need to be updated.
+
+Example videos showing this progress are attached at the end of this document.
+
+:::
+
+:::warning
+
+Saved IDs in the Custom Location Creator Lens are only stored locally. Be aware that factory resetting your device may lead to these location IDs being forgotten. Additionally, published locations remain public and do not get erased by local removal.
+
+:::
+
+## Getting started
+
+### Prerequisites
+
+- Lens Studio 5.7 or later
+- Spectacles OS v5.060.0422 or later
+- \[Optional\] [Spectacles Interaction Kit](../../spectacles-frameworks//spectacles-interaction-kit/get-started.mdx)
+
+### Creating a Custom Location
+
+The Custom Locations Lens can be found on Spectacles under the "All Lenses" section. On launch, there will be a "Scan New" button at the bottom. When you are at the location you wish to scan, this button should be selected, followed by "Begin Scanning".
+
+<ReactPlayer
+  url="/tutorials/spectacles/customLocations/custom-locations-scanning.mp4"
+  playing={false}
+  muted={true}
+  width="100%"
+  height="100%"
+  controls
+/>
+
+For the best scan, the location should be observed from many different angles and with lots of lateral movement made during the scan.
+As the scan progresses the displayed mesh will update itself as Spectacles more accurately tracks the shape of what is present.
+
+Once collected tap on the "Finish Scan" button to complete.
+
+:::note
+
+**Finishing the scan**
+
+The "Finish Scan" button will appear as soon as the minimum requirements for a scan have been met, but it is recommended to continue for longer to get a sufficiently large number of viewpoints.
+:::
+
+You will be required to accept the legal disclaimer, which is copied below, before publishing your location.
+
+:::caution
+
+After you upload this Location to Snap, you will receive a unique reference ID.
+Anyone with access to this ID will be able to use this Location in Lens Studio to publish a Lens, so avoid uploading a Location that contains sensitive personal information.
+
+:::
+
+Upon publishing, you will be presented with the newly created scan ID as well as an opportunity to name the scan. The name is only for local purposes within the scanning Lens and, at this time, does not propagate to Lens Studio.
+
+### Import Mesh to Lens Studio
+
+After you have created a unique Location ID, you can import your mesh in Lens Studio.
+
+:::tip
+
+Please make sure you are connected to the internet before importing a Custom Location or opening a project with a Custom Location imported.
+
+:::
+
+1. Create new project in Lens Studio.
+2. Navigate to the `Scene Hierarchy` panel and select `World`->`Custom Location`.
+
+   ![](/img/lens-studio/5-location-ar/custom-landmarker-scan-18.png)
+
+3. Select the newly created asset in `Asset Browser` and enter your custom mesh ID.
+
+   ![](/img/lens-studio/5-location-ar/custom-landmarker-scan-19.png)
+
+After you input the ID, you'll see the location mesh and its tracking asset in Lens Studio.
+
+It is recommended that the scan mesh is not used as an asset in the output Lens, but rather just as a development tool for placing assets in the space. However, it is there and can be used however the developer sees fit.
+
+### Using your Location based Lens
+
+A Sample project is available in the [Spectacles-Sample](https://github.com/specs-devs/samples) github repository. In its README there is a step by step guide that creates an example Lens to demonstrate a potential use case.
+
+## Creating Location Groups
+
+Multiple Custom Locations can be tied together into a Custom Location Group. Follow the above steps until you have at least two locations that are relatively close to each other. Locations that are less than 20m from each other work best.
+
+1. Select "New Group"
+2. Check all of the locations that you wish to gather together
+3. Press New Group
+4. One by one, select each of the locations and:
+   1. Go to that location and await stabilization
+   2. Select the next location
+5. Once all locations are stabilized, the "Finalize" button will appear
+6. On pressing this the group will be published and the ID will be presented
+
+:::note
+
+During grouping, selecting an already stabilized location will result in it being remapped. This could be useful if you believe the located position is incorrect.
+
+:::
+
+### Importing Groups to Lens Studio
+
+Once a group has been published, it is ready to be imported into Lens Studio.
+
+1. Create an empty scene object
+2. On the object, click "Add Component"
+3. Select "Custom Location Group"
+4. On the new component, enter the ID into the "Group ID" field
+5. Press "Reload Group"
+6. Lens Studio will now generate Custom Location children for every member of the group
+
+<p align="center">
+  <img
+    src="/img/spectacles/custom-locations/custom-location-scene.png"
+    style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+  />
+</p>
+
+### Group Localization
+
+The scanning Lens will only allow groups of up to 5 to be created at this time.
+
+<p align="center">
+  <img
+    src="/img/spectacles/custom-locations/custom-location-group.png"
+    style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+  />
+</p>
+
+## Incremental Scans
+
+If an existing scan is deemed to not have enough viewpoints, an incremental scan can be created to add new viewpoints. The mesh will remain the same, and a new ID will be generated.
+
+1. Select `...` on an existing scan within your Lens
+2. Select `+` and confirm
+3. The user will be presented with the scanning prompt and must localize against the existing scan
+4. Once localized the "Finish Scan" button will appear
+5. Tap on this button to begin the incremental scan
+6. Now move around to the new localization points to gather new viewpoints
+7. Once completed, tap publish to receive the new ID
+8. In the Lens Studio project using the previous ID, replace the ID
+9. Publish the updated Lens with the updated localization scan
+
+:::note
+
+The new incremental scan will be created in the same coordinate frame as the original, so the placement of virtual objects will not need to be updated
+
+:::
+
+## Methods for Capturing Optimal Viewpoints
+
+- Make sure that your device is in constant motion.
+- Ideally, move in a steady “sweeping figure 8” motion for a few seconds, while moving around in the space you are scanning. This will significantly improve the quality of the mesh you are constructing.
+- Avoid remaining still in space and rotating your head around one spot.
+- Avoid extreme vertical viewing angles (pointing up and pointing down), and avoid fast camera motion.

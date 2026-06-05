@@ -1,0 +1,65 @@
+---
+sidebar_position: 15
+description: 'Access information about connected users including display names, user IDs, and connection IDs using the Sync Kit UserInfo system.'
+---
+
+import CodeExamples from '@site/src/components/CodeExample';
+
+import getSnapchatUserInfoTs from './code-examples/user-information/ts/get-snapchat-user-info.ts?raw';
+import getSnapchatUserInfoJs from './code-examples/user-information/js/get-snapchat-user-info.js?raw';
+
+# User Information
+
+You can identify users in a Connected Lens session in multiple ways through the UserInfo class: `UserInfo.userId`, `UserInfo.connectionId`, and `UserInfo.displayName`.
+
+UserInfo is available from a number of sources, including SessionController APIs, `SyncEntity.ownerInfo`, and `NetworkRoot.ownerInfo`. MessageInfo for Networked Events also includes userId and connectionId of the message sender.
+
+### UserId
+
+`UserInfo.userId` is tied to a user's Snapchat account. If two pairs of Spectacles are paired to the same user account, the userId for those devices in the session will be the same. The userId for a given user is different in different Lenses. `UserInfo.userId` is a string.
+
+### ConnectionId
+
+`UserInfo.connectionId` is tied to the device that has joined the session. `UserInfo.connectionId` is unique to each connected device, and unique to each time the device joins a session. Realtime Store ownership is tied to connectionId, not userId. `UserInfo.connectionId` is a string.
+
+### DisplayName
+
+`UserInfo.displayName` is the name a user chooses on their Snapchat account profile. It is consistent across devices, Lenses, and sessions. `UserInfo.displayName` is a string.
+
+### Snapchat UserInfo
+
+In addition to the above properties, you can also access additional properties from Snapchat UserInfo.
+
+:::tip
+Snapchat UserInfo can be used in Bitmoji surfaces such as [Bitmoji Module](../../../../lens-studio/features/bitmoji-avatar/bitmoji-3d#getting-the-bitmoji-through-script). This is useful for showing a user's Bitmoji in a Connected Lens session.
+:::
+
+:::note
+**Important:** In mocked singleplayer mode,`session.getSnapchatUser()` will return `null` since there is no Snapchat user information available.
+:::
+
+<CodeExamples
+  typescriptCode={getSnapchatUserInfoTs}
+  javascriptCode={getSnapchatUserInfoJs}
+  lineRange={{ typescript: '1-42', javascript: '1-45' }}
+/>
+
+### Example Scenario
+
+This is a straightforward example showing a situation where one user joins a Connected Lenses session on two devices at once, and another user joins on a single device. These example userIds, connectionIds, and displayNames are simplified for explanation.
+
+#### Lens #1
+
+|                   | userId | connectionId | displayName  |
+| :---------------- | :----: | :----------: | :----------: |
+| Spectacles User A | userA  |     123      | Spectacles A |
+| Spectacles User A | userA  |     456      | Spectacles A |
+| Spectacles User B | userB  |     789      | Spectacles B |
+
+#### Lens #2
+
+|                   | userId | connectionId | displayName  |
+| :---------------- | :----: | :----------: | :----------: |
+| Spectacles User A | userA  |     987      | Spectacles A |
+| Spectacles User A | userA  |     654      | Spectacles A |
+| Spectacles User B | userB  |     321      | Spectacles B |

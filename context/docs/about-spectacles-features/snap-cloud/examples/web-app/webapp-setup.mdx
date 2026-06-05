@@ -1,0 +1,99 @@
+---
+sidebar_position: 3
+sidebar_label: Web App Setup Guide
+description: 'Set up and run the companion web application for the WKD demo that displays the pledge count from Snap Cloud in real time.'
+---
+
+# WKD Web App Setup Guide
+
+:::note
+
+This web app requires a working Snap Cloud backend.
+You must first create your own Snap Cloud project and configure the required tables, functions, and permissions.
+
+Please refer to the [WKD Snap Cloud Setup Guide](./snapcloud-setup.mdx) before continuing.
+Once your database is ready, return here to connect the web app to it.
+
+:::
+
+You can download the zip file from [here](https://storage.googleapis.com/snapchat-lens-assets/f1a09194-f02d-43ed-92b8-62e843179ff0/lensStudio/Spectacles/LensWebExample/kindness-counter.zip).
+
+## What's Included in the Web App ZIP
+
+### index.html
+
+- Defines the structure of the page.
+- Displays the live global pledge count.
+- Loads the CSS and JavaScript files.
+- No frameworks; pure HTML.
+
+### styles.css
+
+- Contains all layout and styling rules.
+- Handles the sky background, balloon visuals, fonts, and responsive behavior.
+- You can adjust colors, spacing, and animation timing here.
+
+### app.js
+
+The main application logic:
+
+- Connects to Snap Cloud - Supabase and retrieves the total number of pledges.
+- Updates the UI in real time whenever the database changes.
+- Calls the RPC function `get_kindness_total_all()`.
+
+### config.js
+
+Stores your Snap Cloud Project URL and anon public key. This ensures credentials stay separate from core app logic.
+
+Open `config.js` and replace the placeholders with your real values:
+
+```js
+export const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+export const SUPABASE_ANON_KEY = 'YOUR_PUBLIC_ANON_KEY';
+```
+
+To find these values:
+
+1. Go to Snap Cloud Dashboard.
+2. Open Project Settings → API.
+3. Copy: **Project URL** and **anon public key**.
+4. Paste them into `config.js`.
+
+(Refer to the [WKD Snap Cloud Setup Guide](./snapcloud-setup.mdx) if you need help.)
+
+## Running the Web App Locally
+
+You can use any static file server, but here are two simple options depending on what you already have installed:
+
+### Option 1: Using Python (usually preinstalled)
+
+1. Open a terminal in the web app folder:
+
+```bash
+cd path/to/webapp
+```
+
+2. Start a local server:
+
+```bash
+python3 -m http.server 8000
+```
+
+3. Open your browser and visit:
+
+```
+http://localhost:8000
+```
+
+### Option 2: Using Node.js
+
+If you have Node installed, you can use the serve package:
+
+```bash
+npm install -g serve
+serve .
+```
+
+Then open the link printed in the terminal.
+
+Once the server is running and your Snap Cloud project keys are added to `config.js`, the app will automatically display the live total number of pledges.

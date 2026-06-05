@@ -1,0 +1,90 @@
+---
+sidebar_position: 6
+description: "Display hand visual effects like pinch glow and occluder in Spectacles Lenses using the Interaction Kit's HandVisual component."
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Hand Visualization
+
+Spectacles Interaction Kit modifies the user’s hand visualization with effects to enhance AR interactions. For example, the **Pinch Glow** effect brightens when the user pinches, and the **Hand Occluder** hides AR objects behind the center of the hand’s palm. Use the **HandVisual** component to toggle active visualizations.
+
+<video
+  src="/img/spectacles/misc/hand-visuals.webm"
+  style={{ maxWidth: '600px', width: '100%', borderRadius: '8px' }}
+  autoPlay
+  loop
+  muted
+  playsInline
+></video>
+
+You can also create custom effects using the **ObjectTracking3D** API. By setting attachment points on specific hand keypoints, custom objects and effects can be configured to follow these keypoints in real-time.
+
+## Relevant Components
+
+**HandVisual** processes information from **HandInputData** to overlay visuals on the hand. Its main functions are to provide a glow on the fingertips when pinching and to occlude **SceneObjects** behind the hand, adding a sense of realism.
+
+Lens Studio’s **ObjectTracking3D** allows you to set attachment points onto a hand’s keypoint. This is useful for creating custom visual effects that follow targeted hand keypoints on each frame.
+
+### Code Example
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+@component
+export class ExampleHandVisualizationScript extends BaseScriptComponent {
+  @input()
+  visualSceneObject: SceneObject;
+
+  @input()
+  rightHand: HandTracking3DAsset;
+
+  private objectTracking3DComponent: ObjectTracking3D;
+
+  onAwake() {
+    this.objectTracking3DComponent = this.sceneObject.createComponent(
+      'Component.ObjectTracking3D'
+    );
+    this.objectTracking3DComponent.trackingAsset = this.rightHand;
+    this.objectTracking3DComponent.addAttachmentPoint(
+      'index-3',
+      this.visualSceneObject
+    );
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+// @input SceneObject visualSceneObject
+// @input Component.HandTracking3DAsset rightHand
+
+const SIK = require('SpectaclesInteractionKit.lspkg/SIK').SIK;
+
+function onAwake() {
+  // Wait for other components to initialize by deferring to OnStartEvent.
+  script.createEvent('OnStartEvent').bind(() => {
+    onStart();
+  });
+}
+
+function onStart() {
+  const objectTracking3DComponent = script.sceneObject.createComponent(
+    'Component.ObjectTracking3D'
+  );
+  objectTracking3DComponent.trackingAsset = script.rightHand;
+  objectTracking3DComponent.addAttachmentPoint(
+    'index-3',
+    script.visualSceneObject
+  );
+}
+
+onAwake();
+```
+
+</TabItem>
+</Tabs>

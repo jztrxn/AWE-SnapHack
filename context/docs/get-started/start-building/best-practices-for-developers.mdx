@@ -1,0 +1,961 @@
+---
+sidebar_position: 6
+description: 'Developer guidelines for Spectacles covering sample projects, project structure, AI context engineering, Git workflows, and resources.'
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import Player from '@site/src/components/Player';
+import CollapsibleSection from '@site/src/components/CollapsibleSection';
+import ResourceLinks from '@site/src/components/ResourceLinks';
+
+# Best Practices for Developers
+
+<img
+  src="/img/spectacles/misc/hackathon-cover-image.png"
+  style={{ maxWidth: '900px', width: '100%', borderRadius: '8px' }}
+/>
+
+Get the best out of your developer journey with Spectacles by following these guidelines and recommendations.
+
+## Start with Sample Projects
+
+We highly encourage starting your Spectacles development journey with our sample projects. These projects showcase the capabilities of our APIs and the platform in general, providing you with practical examples and best practices.
+
+### Accessing Sample Projects
+
+Sample projects can be consumed in two ways:
+
+#### **Lens Studio Home Page**
+
+Access samples directly from the Lens Studio interface to quickly get started with templates and examples.
+
+#### **GitHub Repository**
+
+Visit our [specs-devs GitHub organization](https://github.com/specs-devs) for comprehensive access to all our development resources.
+
+### Repository Structure
+
+Our [specs-devs GitHub organization](https://github.com/specs-devs) includes three main categories of resources:
+
+<CollapsibleSection title="Samples" defaultOpen={false}>
+  <p>
+    Full project examples that showcase the capabilities of specific APIs and
+    platform features. These are production-ready demonstrations that you can
+    learn from and build upon.
+  </p>
+  <ResourceLinks
+    categories={[
+      {
+        links: [
+          {
+            title: 'Browse All Samples',
+            description: 'Explore our complete collection of sample projects',
+            url: '/spectacles/about-spectacles-features/samples',
+          },
+          {
+            title: 'Samples on GitHub',
+            description: 'View the source code repository',
+            url: 'https://github.com/specs-devs/samples',
+          },
+        ],
+      },
+    ]}
+  />
+</CollapsibleSection>
+
+<CollapsibleSection title="Packages" defaultOpen={false}>
+  <p>
+    The "unpacked" version of packages that are typically imported from the Asset Library.
+  </p>
+
+:::warning Keep Packages Packed
+**We strongly recommend keeping packages packed and always up to date.** Once unpacked, you can no longer take advantage of pulling updates from the library. Only unpack packages when you absolutely need to modify their internal components.
+:::
+
+  <p>
+    If you must modify a package component:
+  </p>
+  <ul>
+    <li>Duplicate the component (don't modify the original)</li>
+    <li>Add a "Modified" suffix to the filename (e.g., <code>Interactable_Modified.ts</code>)</li>
+    <li>Update imports to reference the modified version</li>
+    <li>Mark the package folder as "Modified"</li>
+  </ul>
+  <ResourceLinks
+    categories={[
+      {
+        links: [
+          {
+            title: 'Asset Library',
+            description: 'Browse packages available in the Asset Library',
+            url: '/spectacles/about-spectacles-features/asset-library',
+          },
+          {
+            title: 'Packages on GitHub',
+            description: 'View the source code repository',
+            url: 'https://github.com/specs-devs/packages',
+          },
+        ],
+      },
+    ]}
+  />
+</CollapsibleSection>
+
+<CollapsibleSection title="Context" defaultOpen={false}>
+  <p>
+    The <strong>context repository</strong> is a filtered, lightweight collection of resources specifically curated for AI context engineering. When located in the same workspace as your project (in tools like Cursor), these resources will be easily indexed by AI coding assistants.
+  </p>
+  <p>
+    Take advantage of AI IDE indexing and reference these files when asking questions to your AI assistant.
+  </p>
+
+<h4>About Rules</h4>
+<p>
+  <strong>Rules</strong> are "system prompts" you can set in your own IDE to
+  guide AI behavior. For example, in Cursor you'd need to create a folder{' '}
+  <code>.cursor</code> and inside it a <code>rules</code> folder containing{' '}
+  <code>.md</code> files.
+</p>
+<p>
+  We have example rule files in our context repository that you can use to
+  optimize your AI assistant for Spectacles development.
+</p>
+
+  <ResourceLinks
+    categories={[
+      {
+        links: [
+          {
+            title: 'Context Repository on GitHub',
+            description:
+              'Filtered collection of resources for AI context engineering',
+            url: 'https://github.com/specs-devs/context',
+          },
+          {
+            title: 'Developer Mode Context Engineering',
+            description:
+              'Learn how to leverage AI tools with Spectacles development',
+            url: '/lens-studio/features/lens-studio-ai/developer-mode-context-engineering',
+          },
+        ],
+      },
+    ]}
+  />
+</CollapsibleSection>
+
+---
+
+## Project Structure Best Practices
+
+These are guidelines to help maintain clean, organized, and maintainable projects.
+
+<CollapsibleSection title="Directory Organization" defaultOpen={false}>
+
+Keep your contributions organized within a **`Project/`** folder in your Assets directory:
+
+```
+Assets/
+├── Project/                    # Your main contribution folder
+│   ├── Scripts/               # TypeScript/JavaScript source files
+│   ├── Materials/             # Custom materials
+│   ├── Shaders/               # Custom shader code
+│   ├── Textures/              # Texture files
+│   ├── Images/                # Image assets
+│   ├── Prefabs/               # Reusable scene objects
+│   ├── Animations/            # Animation files
+│   ├── Sound/                 # Audio files
+│   └── Data/                  # JSON configs, data files
+├── Render/                    # Rendering-related components
+│   ├── CameraTexture/
+│   ├── EnvironmentMaps/
+│   └── [camera layer configs]
+└── Examples/                  # Standout examples (optional)
+```
+
+### Special Folders
+
+**Render Folder:**
+
+- Keep all render components together (Camera textures, Environment maps, etc.)
+- Place anything dealing with camera layers and rendering here
+- Keeps rendering concerns separate from game logic
+
+**Examples Folder:**
+
+- Used when you want users to discover something right away
+- Ideal for standout examples that showcase key features
+
+**Imported Assets:**
+
+- For complex imports (e.g., Sketchfab models with many dependencies)
+- Keep them in their own folder with all related files
+- Acceptable to have these live independently if they contain animations, textures, and other bundled content
+
+</CollapsibleSection>
+
+<CollapsibleSection title="Language-Specific Organization">
+
+### Dual Language Projects (TypeScript + JavaScript)
+
+If your codebase exists in both JS and TS, **we recommend using the file suffix approach** for clarity:
+
+```
+Scripts/
+├── MyComponentTS.ts           # TypeScript version
+├── MyComponentJS.js           # JavaScript version
+├── HelperTS.ts                # TypeScript helper
+└── HelperJS.js                # JavaScript helper
+```
+
+This naming convention makes it immediately clear which language version you're working with and prevents confusion when both implementations coexist in the same directory.
+
+</CollapsibleSection>
+
+<CollapsibleSection title="Code Standards">
+
+### Comments and Documentation
+
+**Single-Line Comments:**
+
+```typescript
+// Keep comments as one-liners for consistency
+// If you need more explanation, use multiple single-line comments
+```
+
+**Class Documentation:**
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```typescript
+/**
+ * PlayerController
+ *
+ * Manages player movement and interaction with the game world.
+ * Connected to: GameManager, InputHandler, PhysicsSystem
+ *
+ * Lifecycle: Initializes in onAwake, starts tracking in onStart
+ */
+@component
+export class PlayerController extends BaseScriptComponent {
+  // Class implementation
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+/**
+ * PlayerController
+ *
+ * Manages player movement and interaction with the game world.
+ * Connected to: GameManager, InputHandler, PhysicsSystem
+ *
+ * Lifecycle: Initializes in onAwake, starts tracking in onStart
+ */
+function onAwake() {
+  // Initialization logic
+}
+
+function onStart() {
+  // Start logic
+}
+
+onAwake();
+```
+
+</TabItem>
+</Tabs>
+
+### Variable Hints
+
+Add type hints and descriptive names:
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```typescript
+// ✅ Good - Clear intent and type
+private movementSpeed: number = 5.0
+private targetPosition: vec3 = vec3.zero()
+private isInteracting: boolean = false
+
+// ❌ Bad - Unclear purpose
+private speed = 5.0
+private pos = vec3.zero()
+private flag = false
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+// ✅ Good - Clear intent (use descriptive names)
+/** @type {number} */
+var movementSpeed = 5.0;
+/** @type {vec3} */
+var targetPosition = vec3.zero();
+/** @type {boolean} */
+var isInteracting = false;
+
+// ❌ Bad - Unclear purpose
+var speed = 5.0;
+var pos = vec3.zero();
+var flag = false;
+```
+
+</TabItem>
+</Tabs>
+
+### Lifecycle Methods
+
+Always include lifecycle methods, even if empty:
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```typescript
+@component
+export class MyComponent extends BaseScriptComponent {
+  onAwake() {
+    if (this.enableLogs) {
+      print('[MyComponent] onAwake called');
+    }
+    // Initialization logic
+
+    this.createEvent('OnStartEvent').bind(() => {
+      if (this.enableLogs) {
+        print('[MyComponent] OnStartEvent triggered');
+      }
+      // Start logic
+    });
+
+    this.createEvent('UpdateEvent').bind(() => {
+      // Update logic (can be empty with log)
+    });
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+// @input bool enableLogs {"default": true}
+
+function onAwake() {
+  if (script.enableLogs) {
+    print('[MyComponent] onAwake called');
+  }
+  // Initialization logic
+
+  script.createEvent('OnStartEvent').bind(function () {
+    if (script.enableLogs) {
+      print('[MyComponent] OnStartEvent triggered');
+    }
+    // Start logic
+  });
+
+  script.createEvent('UpdateEvent').bind(function () {
+    // Update logic (can be empty with log)
+  });
+}
+
+onAwake();
+```
+
+</TabItem>
+</Tabs>
+
+### Error Handling and Logging
+
+**Allow undefined and handle errors gracefully:**
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```typescript
+@input
+private targetObject: SceneObject | undefined
+
+onAwake() {
+    if (!this.targetObject) {
+        print("[ERROR] MyComponent: targetObject is not assigned!")
+        return
+    }
+    // Proceed with logic
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+// @input SceneObject targetObject
+
+function onAwake() {
+  if (!script.targetObject) {
+    print('[ERROR] MyComponent: targetObject is not assigned!');
+    return;
+  }
+  // Proceed with logic
+}
+
+onAwake();
+```
+
+</TabItem>
+</Tabs>
+
+**Implement logging controls:**
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```typescript
+@component
+export class MyComponent extends BaseScriptComponent {
+  @input
+  private enableLogs: boolean = true;
+
+  @input
+  private verboseLogs: boolean = false;
+
+  private log(message: string, verbose: boolean = false) {
+    if (!this.enableLogs) return;
+    if (verbose && !this.verboseLogs) return;
+    print(`[MyComponent] ${message}`);
+  }
+
+  onAwake() {
+    this.log('Component initialized');
+    this.log('Detailed initialization info...', true); // Verbose log
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+// @input bool enableLogs {"default": true}
+// @input bool verboseLogs {"default": false}
+
+function log(message, verbose) {
+  if (!script.enableLogs) return;
+  if (verbose && !script.verboseLogs) return;
+  print('[MyComponent] ' + message);
+}
+
+function onAwake() {
+  log('Component initialized');
+  log('Detailed initialization info...', true); // Verbose log
+}
+
+onAwake();
+```
+
+</TabItem>
+</Tabs>
+
+### Code Quality
+
+**Avoid `var` keyword:**
+
+```typescript
+// ✅ Good
+const maxHealth = 100;
+let currentHealth = 100;
+
+// ❌ Avoid
+var maxHealth = 100;
+```
+
+**Use code formatters:**
+
+- Use tools like **Prettier** for consistent formatting
+- Maintains even spacing and syntax
+- Makes collaboration easier
+
+</CollapsibleSection>
+
+<CollapsibleSection title="User Experience Enhancements">
+
+### In-Lens Education
+
+**Add Text Guidelines:**
+
+- Include UI text to educate users on how to use the lens
+- Explain gestures, interactions, and features
+- Make instructions clear and concise
+
+**3D Hand Hints:**
+
+- Use **Spectacles3DHandHints** package for visual gesture guidance
+- Show users which hand gestures are required
+- Display hints for specific interaction patterns
+- Essential for lenses with custom gesture requirements
+
+</CollapsibleSection>
+
+<CollapsibleSection title="Documentation Files">
+
+### README.md
+
+Include in your project README:
+
+```markdown
+# Project Name
+
+Brief description of what your lens does.
+
+## Features
+
+- Feature 1
+- Feature 2
+
+## How to Use
+
+Step-by-step instructions with screenshots/GIFs.
+
+## Technical Details
+
+- Framework dependencies
+- API requirements
+- Performance considerations
+
+## Demo
+
+<video src="./path/to/demo.webm" autoPlay loop muted playsInline aria-label="Demo GIF"></video>
+
+## Credits
+
+List any third-party assets or code used.
+```
+
+Add animated GIFs and technical explanations to make your README engaging and informative.
+
+### .gitignore
+
+Standard Lens Studio `.gitignore`:
+
+```gitignore
+# Lens Studio
+.temp/
+Workspaces/
+Cache/
+Packages/
+*.lsc
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+```
+
+### .gitattributes
+
+For proper line ending handling:
+
+```gitattributes
+* text=auto
+*.ts text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+```
+
+### LICENSE
+
+**Always credit sources:**
+
+```
+This project includes assets from:
+- [Asset Name] by [Author] - [License Type]
+- [Model Name] from Sketchfab by [Creator]
+```
+
+</CollapsibleSection>
+
+<CollapsibleSection title="Framework and Component Usage">
+
+### Use Modern Components
+
+**Prefer new UIKit components:**
+
+- Use SpectaclesUIKit for UI elements
+- Leverage SpectaclesInteractionKit (SIK) for interactions
+- Utilize framework best practices
+
+**Component Selection:**
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```typescript
+// ✅ Good - Use framework components
+import { PinchButton } from 'SpectaclesUIKit.lspkg/Components/UI/PinchButton/PinchButton';
+import { Interactable } from 'SpectaclesInteractionKit.lspkg/Components/Interaction/Interactable/Interactable';
+
+// ⚠️ Only if necessary - custom implementations
+import { CustomButton } from './CustomButton_Modified';
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+// ✅ Good - Use framework components
+var PinchButton =
+  require('SpectaclesUIKit.lspkg/Components/UI/PinchButton/PinchButton').PinchButton;
+var Interactable =
+  require('SpectaclesInteractionKit.lspkg/Components/Interaction/Interactable/Interactable').Interactable;
+
+// ⚠️ Only if necessary - custom implementations
+var CustomButton = require('./CustomButton_Modified').CustomButton;
+```
+
+</TabItem>
+</Tabs>
+
+</CollapsibleSection>
+
+<CollapsibleSection title="Quick Reference Checklist">
+
+### Starting a New Project
+
+- [ ] Create `Assets/Project/` folder structure
+- [ ] Set up `Render/` folder for rendering components
+- [ ] Add README.md with project overview
+- [ ] Include .gitignore and .gitattributes (add credential files!)
+- [ ] Set up logging system with on/off toggle
+- [ ] If working in a team, designate a Scene Master
+
+### Writing Components
+
+- [ ] Add class-level documentation comment
+- [ ] Include all lifecycle methods (even if empty)
+- [ ] Implement logging with enable/disable flag
+- [ ] Handle undefined inputs with error messages
+- [ ] Use const/let instead of var
+- [ ] Add type hints to variables
+
+### Using Packages
+
+- [ ] Keep packages packed unless modification is required
+- [ ] If modifying, duplicate and add "\_Modified" suffix
+- [ ] Update imports in modified components
+
+### Security & Git
+
+- [ ] Never commit credentials, tokens, or API keys
+- [ ] Add sensitive files to .gitignore
+- [ ] Remove credentials from Inspector before committing
+- [ ] Use `git add <file>` instead of `git add .`
+- [ ] Review changes with `git status` and `git diff`
+
+### Before Publishing
+
+- [ ] Add UI text guidelines for users
+- [ ] Include 3D hand hints if using custom gestures
+- [ ] Create animated GIF for README
+- [ ] Document technical requirements
+- [ ] Credit all third-party assets in LICENSE
+- [ ] Run code formatter (Prettier)
+- [ ] Verify no credentials are in the repository
+- [ ] Test all features and interactions
+
+</CollapsibleSection>
+
+---
+
+## Sensitive File Management
+
+Protecting sensitive information in your projects is critical. **Never commit tokens, API keys, passwords, or other credentials to Git repositories.**
+
+<CollapsibleSection title="Best Practices for Credentials" defaultOpen={false}>
+
+### What to Protect
+
+- API tokens and keys
+- Service account credentials
+- Database passwords
+- OAuth secrets
+- Private encryption keys
+
+### Snap Cloud Credentials
+
+When working with Snap Cloud, you'll need to import a project that contains your credentials. **These files must NOT be pushed to Git.**
+
+```gitignore
+# Add to your .gitignore
+SnapCloudProject/
+**/credentials.json
+**/supabase-config.json
+```
+
+### Remote Service Gateway
+
+When using the Remote Service Gateway, **do not commit scenes where credentials are visible in the Inspector.**
+
+**Before committing:**
+
+1. Temporarily remove credentials from Inspector fields
+2. Commit your changes
+3. Re-add credentials locally for testing
+
+**Alternative approach:**
+
+- Store credentials in a separate, gitignored configuration file
+- Load them at runtime instead of hardcoding in the scene
+
+</CollapsibleSection>
+
+<CollapsibleSection title="General Security Tips">
+
+### Keep Communication Private
+
+Since there is no built-in cloud secret management system, keep communication about sensitive resources very private:
+
+- Share credentials only through secure channels (encrypted messages, password managers)
+- Never share credentials in public forums, Discord, or GitHub issues
+- Rotate credentials immediately if they're accidentally exposed
+
+### Environment-Specific Files
+
+Create separate files for development and production:
+
+```
+Assets/
+├── Config/
+│   ├── development.json       # Local dev credentials (gitignored)
+│   ├── production.json        # Prod credentials (gitignored)
+│   └── config.template.json   # Template without actual values (committed)
+```
+
+</CollapsibleSection>
+
+---
+
+## Collaborations on Git
+
+Git collaboration for Lens Studio projects requires special consideration due to how scenes are managed.
+
+<CollapsibleSection title="Scene Management Strategy" defaultOpen={false}>
+
+### Scene Master Approach
+
+**Rule of thumb:** Scene management in Lens Studio differs from Unity. Until improvements are made in this area, follow these guidelines:
+
+**Designate a Scene Master:**
+
+- One team member should be responsible for final scene changes
+- Other team members work on prefabs and assets
+- Scene Master integrates prefabs into the main scene
+
+**Why this approach?**
+
+- Scene files can have complex merge conflicts
+- Multiple people editing the same scene leads to lost work
+- Scene hierarchy changes are difficult to merge automatically
+
+### Workflow Example
+
+```
+Team Member A → Works on UI prefabs
+Team Member B → Works on game logic scripts
+Team Member C → Works on visual assets
+Scene Master  → Integrates all prefabs into main scene
+```
+
+</CollapsibleSection>
+
+<CollapsibleSection title="Prefab-Driven Development">
+
+### Leverage Prefabs
+
+Keep your work modular and reusable:
+
+```
+Assets/
+├── Project/
+│   ├── Prefabs/
+│   │   ├── UI/              # UI components by Team Member A
+│   │   ├── Gameplay/        # Game objects by Team Member B
+│   │   └── Effects/         # VFX by Team Member C
+│   └── Scripts/             # Scripts by all team members
+```
+
+### Benefits
+
+- Team members can work independently on prefabs
+- Prefabs are easier to merge than scene files
+- Changes are isolated and testable
+- Scene Master can easily integrate prefabs without conflicts
+
+</CollapsibleSection>
+
+<CollapsibleSection title="Smart Git Practices">
+
+### Avoid `git add .` (Add All)
+
+**Don't do this:**
+
+```bash
+git add .
+git commit -m "Updated stuff"
+```
+
+**Do this instead:**
+
+```bash
+# Review what changed
+git status
+
+# Add specific files you edited
+git add Assets/Project/Scripts/PlayerController.ts
+git add Assets/Project/Prefabs/UI/MainMenu.prefab
+
+# Verify what's staged
+git diff --staged
+
+# Commit with a clear message
+git commit -m "Add player movement controls to PlayerController"
+```
+
+### Why Selective Commits Matter
+
+- Prevents accidentally committing credentials
+- Avoids committing temporary files or test assets
+- Keeps commit history clean and reviewable
+- Easier to revert specific changes if needed
+
+### Clean Directory Organization
+
+Separate work clearly across team members:
+
+```
+Assets/
+├── Project/
+│   ├── TeamMemberA/         # Alice's workspace
+│   ├── TeamMemberB/         # Bob's workspace
+│   ├── Shared/              # Shared resources
+│   └── Integration/         # Scene Master's integration work
+```
+
+This structure minimizes conflicts and makes it clear who owns what.
+
+</CollapsibleSection>
+
+---
+
+## Recommended Video Resources
+
+Essential video tutorials for Spectacles development:
+
+<div
+  style={{
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '1rem',
+    marginBottom: '2rem',
+  }}
+>
+  <div>
+    <Player url="https://www.youtube.com/watch?v=XBpajjmrfwE" />
+  </div>
+  <div
+    style={{
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '0.5rem',
+      fontSize: '0.9rem',
+    }}
+  >
+    <div
+      style={{
+        padding: '0.5rem',
+        border: '1px solid var(--ifm-color-emphasis-300)',
+        borderRadius: '4px',
+      }}
+    >
+      <strong>1. Introduction to Lens Studio</strong>
+      <br />
+      Get started with Lens Studio basics and interface overview
+    </div>
+    <div
+      style={{
+        padding: '0.5rem',
+        border: '1px solid var(--ifm-color-emphasis-300)',
+        borderRadius: '4px',
+      }}
+    >
+      <strong>2. Building Your First Lens</strong>
+      <br />
+      <a href="https://www.youtube.com/watch?v=SV06iQYM0q0" target="_blank">
+        Watch tutorial →
+      </a>
+    </div>
+    <div
+      style={{
+        padding: '0.5rem',
+        border: '1px solid var(--ifm-color-emphasis-300)',
+        borderRadius: '4px',
+      }}
+    >
+      <strong>3. Connected Lenses</strong>
+      <br />
+      <a href="https://www.youtube.com/watch?v=P6hRHEDapCA" target="_blank">
+        Watch tutorial →
+      </a>
+    </div>
+    <div
+      style={{
+        padding: '0.5rem',
+        border: '1px solid var(--ifm-color-emphasis-300)',
+        borderRadius: '4px',
+      }}
+    >
+      <strong>4. UIKit Walkthrough</strong>
+      <br />
+      <a href="https://www.youtube.com/watch?v=GkV6FRgibk8" target="_blank">
+        Watch tutorial →
+      </a>
+    </div>
+    <div
+      style={{
+        padding: '0.5rem',
+        border: '1px solid var(--ifm-color-emphasis-300)',
+        borderRadius: '4px',
+      }}
+    >
+      <strong>5. Snap ML</strong>
+      <br />
+      <a href="https://www.youtube.com/watch?v=hOQ68r_lKIQ" target="_blank">
+        Watch tutorial →
+      </a>
+    </div>
+    <div
+      style={{
+        padding: '0.5rem',
+        border: '1px solid var(--ifm-color-emphasis-300)',
+        borderRadius: '4px',
+      }}
+    >
+      <strong>6. Snap Cloud</strong>
+      <br />
+      <a href="https://www.youtube.com/watch?v=NI4kuZeFx0c" target="_blank">
+        Watch tutorial →
+      </a>
+    </div>
+  </div>
+</div>
+
+:::tip Explore More Videos
+Visit our [YouTube channel](https://www.youtube.com/@SnapAR) for more tutorials and updates.
+:::

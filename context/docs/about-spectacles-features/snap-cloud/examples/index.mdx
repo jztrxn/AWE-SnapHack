@@ -1,0 +1,44 @@
+---
+sidebar_position: 9
+sidebar_label: Examples
+description: 'Explore applied Snap Cloud examples for Spectacles Lenses: authentication, databases, storage, realtime, edge functions, media capture, and leaderboards.'
+---
+
+import ThemedImage from '@theme/ThemedImage';
+
+<ThemedImage
+  alt="Supabase Logo"
+  sources={{
+    light: '/img/spectacles/supabase/logo-small-light.svg',
+    dark: '/img/spectacles/supabase/logo-small-dark.svg',
+  }}
+  style={{
+    maxWidth: '1000px',
+    width: '20%',
+    borderRadius: '5px',
+    float: 'right',
+  }}
+/>
+
+# Snap Cloud Examples
+
+The **SnapCloud Examples** package is available directly in the Lens Studio Asset Library. It contains six fully working Lens projects that demonstrate every major Snap Cloud feature, each designed to run independently on Spectacles.
+
+To get started, search for **"SnapCloud Examples"** in the Asset Library, import the package into a new or existing Lens Studio project, and drag one of the example scenes into your Hierarchy. Each example scene is self-contained and requires only your Supabase Project asset to be connected.
+
+:::note Prerequisites
+
+All examples build on the [Getting Started](../getting-started.mdx) guide. Make sure you have the SupabaseClient asset and Supabase Plugin installed, and that you have created a Supabase Project asset from the plugin before running any of the examples below.
+
+:::
+
+---
+
+## Sections
+
+The examples are organized into four areas that match real Lens development workflows.
+
+- **[Basic Setup](./basic-setup.mdx)**: Authentication, databases, storage, realtime, and edge functions. Start here.
+- **[Media](./media.mdx)**: Image capture, video capture, and audio capture with upload to Supabase Storage.
+- **[Leaderboard](./leaderboard.mdx)**: Global score tracking with server-side RPC functions.
+- **[Lens & Web App](./web-app/index.mdx)**: A complete Lens + companion web app connected via Snap Cloud.

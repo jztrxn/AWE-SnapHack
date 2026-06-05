@@ -1,0 +1,93 @@
+---
+sidebar_position: 1
+description: 'Use the Backplate component to add background panels behind UI content in Spectacles with configurable size and style.'
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Backplate
+
+This is a component created to help situate content in AR space. If you have some text, an alert, or a dialog, but you don't want it to float without any context,
+
+<video
+  src="/img/spectacles/spectacles-ui-kit/backplate-docs-demo.webm"
+  style={{ borderRadius: '8px' }}
+  autoPlay
+  loop
+  muted
+  playsInline
+  style={{ maxWidth: '500px', width: '100%', borderRadius: '8px' }}
+/>
+
+## Component Breakdown
+
+<img
+  src="/img/spectacles/spectacles-ui-kit/backplate-panel.png"
+  style={{ maxWidth: '500px', width: '100%', borderRadius: '8px' }}
+/>
+<br />
+<br />
+
+|                                     |                                                                                                                                                                                                                                                                                                                                          |
+| :---------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Render Order`                      | Sets the renderOrder for the visuals of the element.                                                                                                                                                                                                                                                                                     |
+| `Size`                              | Sets the size of the element. X is width, and Y is height.                                                                                                                                                                                                                                                                               |
+| `Inactive`                          | Makes the element impossible to interact with. Think "grayed out".                                                                                                                                                                                                                                                                       |
+| `Play Audio`                        | Turns on the built-in audio cues for the element.                                                                                                                                                                                                                                                                                        |
+| `Add Callbacks`                     | Adds the editor hooks for the event callbacks to the element.                                                                                                                                                                                                                                                                            |
+| `On Value Changed Callbacks`        | A callback for when the element's value changes.                                                                                                                                                                                                                                                                                         |
+| `On Interaction Finished Callbacks` | A callback for when the element interaction and changes are all finished.                                                                                                                                                                                                                                                                |
+| `Enable Interaction Plane`          | Turns on an [Interaction Plane](https://developers.snap.com/lens-studio/api/lens-scripting/classes/Packages_SpectaclesInteractionKit_Components_Interaction_InteractionPlane_InteractionPlane.InteractionPlane.html]) for the element. An InteractionPlane defines a zone which triggers near field targeting logic for HandInteractors. |
+| `Interaction Plane Offset`          | A translation offset for the interaction plane trigger volume.                                                                                                                                                                                                                                                                           |
+| `Interaction Plane Padding`         | A padding to extend the interaction plane trigger volume beyond the size parameters of the element.                                                                                                                                                                                                                                      |
+| `Targeting Visual`                  | A dropdown selection for which targeting visual the interaction plane uses when it is activated. Options are `None`, `Cursor`, `Ray`.                                                                                                                                                                                                    |
+
+### Code Example
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+import { BackPlate } from 'SpectaclesUIKit.lspkg/Scripts/BackPlate';
+
+/**
+ * Example script for the BackPlate component.
+ * It creates a back plate and sets its size and style.
+ */
+
+@component
+export class ExampleBackPlateScript extends BaseScriptComponent {
+  onAwake() {
+    const backPlate = this.sceneObject.createComponent(BackPlate.getTypeName());
+    backPlate.size = new vec2(15, 20);
+    backPlate.style = 'dark';
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+// Import required modules
+const BackPlate = require('SpectaclesUIKit.lspkg/Scripts/BackPlate').BackPlate;
+
+/**
+ * Example script for the BackPlate component.
+ * It creates a back plate and sets its size and style.
+ */
+
+function onAwake() {
+  const backPlate = script.sceneObject.createComponent(BackPlate.getTypeName());
+  backPlate.size = new vec2(15, 20);
+  backPlate.style = 'dark';
+}
+
+// Start the script
+onAwake();
+```
+
+</TabItem>
+
+</Tabs>

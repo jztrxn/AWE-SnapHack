@@ -1,0 +1,116 @@
+---
+description: "Enable text input in Spectacles Lenses using the Spectacles app's keyboard or the AR keyboard in the Lens."
+---
+
+# Keyboard
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+## Overview
+
+The Keyboard enables users to input any alphanumeric character, including special characters. It supports use cases such as web browsing, entering usernames/passwords, and sending messages.
+
+#### Developer Control
+
+Developers have the ability to enable or disable the keyboard during a Lens session. The keyboard layout can be adjusted through the [Keyboard Type Configuration](https://developers.snap.com/lens-studio/api/lens-scripting/enums/Built-In.TextInputSystem.KeyboardType.html), which includes options for Text, URL, Numpad, and Phone.
+
+:::warning
+When using the Spectacles (2024) simulation in the Preview Panel, the keyboard will not appear. To test keyboard functionality, switch to simulation mode without the Spectacles 2024 render.
+
+[Learn more about simulation mode without Spectacles 2024 renders]
+
+:::
+
+## Prerequisites
+
+Lens Studio v5.7.0 or later
+
+Spectacles OS v5.060 or later
+
+## Mobile Spectacles App Keyboard
+
+<video
+  src="/img/spectacles/misc/keyboard-mobile.webm"
+  style={{ maxWidth: '300px', width: '100%', borderRadius: '8px' }}
+  autoPlay
+  loop
+  muted
+  playsInline
+></video>
+
+The mobile Spectacles App supports keyboard functionality via the user's mobile device.
+
+When the mobile keyboard is active, users can close it to revert to the AR Keyboard. A system notification will indicate "keyboard disconnected."
+
+## AR Keyboard
+
+<video
+  src="/img/spectacles/misc/keyboard-ar.webm"
+  style={{ maxWidth: '300px', width: '100%', borderRadius: '8px' }}
+  autoPlay
+  loop
+  muted
+  playsInline
+></video>
+
+The AR Keyboard is a digital overlay displayed within the Lens experience on the Spectacles device. When activated, it animates directly in front of the user.
+
+Users can switch to the mobile Spectacles app keyboard from the AR Keyboard. A system notification will confirm "keyboard connected."
+
+## Activation Scenarios
+
+#### Opening the Keyboard
+
+- If the Spectacles app is not connected, the AR Keyboard will animate directly in front of the user.
+
+- If the Spectacles app is connected but not open, the AR Keyboard will animate directly in front of the user, and a mobile notification will alert that the mobile keyboard is available.
+
+- If the Spectacles app is both connected and open, the mobile keyboard will be activated, accompanied by a system notification stating "keyboard connected."
+
+#### Closing the Keyboard
+
+Pressing the return key on either keyboard will deactivate the text input field and close the keyboard.
+
+## Example Usage
+
+<Tabs>
+<TabItem value="TypeScript">
+
+```ts
+require('LensStudio:TextInputModule');
+
+@component
+export class KeyboardExample extends BaseScriptComponent {
+  onAwake() {
+    this.createEvent('OnStartEvent').bind(() => {
+      let options = new TextInputSystem.KeyboardOptions();
+      options.enablePreview = true;
+      options.keyboardType = TextInputSystem.KeyboardType.Text;
+      options.returnKeyType = TextInputSystem.ReturnKeyType.Return;
+
+      global.textInputSystem.requestKeyboard(options);
+    });
+  }
+}
+```
+
+</TabItem>
+<TabItem value="JavaScript">
+
+```js
+require('LensStudio:TextInputModule');
+
+script.createEvent('OnStartEvent').bind(function () {
+  var options = new TextInputSystem.KeyboardOptions();
+  options.enablePreview = true;
+  options.keyboardType = TextInputSystem.KeyboardType.Text;
+  options.returnKeyType = TextInputSystem.ReturnKeyType.Return;
+  global.textInputSystem.requestKeyboard(options);
+});
+```
+
+</TabItem>
+</Tabs>
+
+[Learn more about simulation mode without Spectacles 2024 renders]: /spectacles/get-started/start-building/preview-panel#simulation-mode-without-spectacles-2024-renders
